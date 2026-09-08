@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery — Café Society Valletta</title>
+<meta name="description" content="Photo gallery — Café Society Valletta.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☕</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="page gallery">
+  <nav class="mini-nav" aria-label="Primary">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="events.html">Events</a>
+    <a href="lostsouls.html">Lost Souls Club</a>
+    <a href="shop.html">Society Collection</a>
+    <a href="board.html">Meet Me at Society</a>
+  </nav>
+
+  <div class="gallery-header">
+    <span class="logo">Café Society</span>
+    <h1>GALLERY</h1>
+  </div>
+
+  <div class="gallery-tabs">
+    <button type="button" data-filter="menu" data-active="true"><span class="tri"></span>The Menu</button>
+    <button type="button" data-filter="bar" data-active="false">The Bar</button>
+    <button type="button" data-filter="community" data-active="false">The Community</button>
+    <button type="button" data-filter="events" data-active="false">The Events</button>
+  </div>
+
+  <div class="gallery-grid" id="gallery-grid">
+    <img data-cat="menu"      src="assets/img/p-gallery-01.png" alt="">
+    <img data-cat="bar"       src="assets/img/p-gallery-02.png" alt="">
+    <img data-cat="community" src="assets/img/p-gallery-03.png" alt="">
+    <img data-cat="menu"      src="assets/img/p-gallery-04.png" alt="">
+    <img data-cat="bar"       src="assets/img/p-gallery-05.png" alt="">
+    <img data-cat="events"    src="assets/img/p-gallery-06.png" alt="">
+    <img data-cat="community" src="assets/img/p-gallery-07.png" alt="">
+    <img data-cat="bar"       src="assets/img/p-gallery-08.png" alt="">
+    <img data-cat="events"    src="assets/img/p-gallery-09.png" alt="">
+    <img data-cat="menu"      src="assets/img/p-gallery-10.png" alt="">
+    <img data-cat="community" src="assets/img/p-gallery-11.png" alt="">
+    <img data-cat="events"    src="assets/img/p-gallery-12.png" alt="">
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<script>
+  const tabs = document.querySelectorAll(".gallery-tabs button");
+  const imgs = Array.from(document.querySelectorAll("#gallery-grid img"));
+
+  tabs.forEach(btn => btn.addEventListener("click", () => {
+    tabs.forEach(b => b.dataset.active = "false");
+    btn.dataset.active = "true";
+    const f = btn.dataset.filter;
+    imgs.forEach(img => img.hidden = img.dataset.cat !== f);
+  }));
+
+  const lightbox = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lightbox-img");
+  imgs.forEach(img => img.addEventListener("click", () => {
+    lbImg.src = img.src;
+    lightbox.classList.add("open");
+  }));
+  document.getElementById("lightbox-close").addEventListener("click", () => lightbox.classList.remove("open"));
+  lightbox.addEventListener("click", (e) => { if (e.target === lightbox) lightbox.classList.remove("open"); });
+</script>
+</body>
+</html>

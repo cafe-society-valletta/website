@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Events — Café Society Valletta</title>
+<meta name="description" content="Upcoming and past events at Café Society Valletta.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☕</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="page events">
+  <nav class="mini-nav" aria-label="Primary">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="lostsouls.html">Lost Souls Club</a>
+    <a href="shop.html">Society Collection</a>
+    <a href="board.html">Meet Me at Society</a>
+  </nav>
+
+  <div class="events-header">
+    <span class="logo">Café Society</span>
+    <h1>events</h1>
+  </div>
+
+  <div class="events-tabs">
+    <button type="button" data-list="upcoming" data-active="true">upcoming events ↓</button>
+    <button type="button" data-list="past" data-active="false">past events ↑</button>
+  </div>
+
+  <div class="events-cards" id="list-upcoming">
+    <div class="event-card"><img src="assets/img/gallery-7.jpg" alt=""><span class="label">Lost Souls Club — every Sunday, 8pm</span></div>
+    <div class="event-card"><img src="assets/img/gallery-11.jpg" alt=""><span class="label">Vinyl Swap at Oyster Grotto — 17 March</span></div>
+    <div class="event-card"><img src="assets/img/gallery-14.jpg" alt=""><span class="label">Photo Safari — Hastings Garden, Sunday 9am</span></div>
+    <div class="event-card"><img src="assets/img/gallery-18.jpg" alt=""><span class="label">Drag Bingo Night — last Thursday, 8:30pm</span></div>
+  </div>
+
+  <div class="events-cards" id="list-past" hidden>
+    <div class="event-card"><img src="assets/img/gallery-8.jpg" alt=""><span class="label">STRETTA Frisbee Golf — grand opening, 12 January</span></div>
+    <div class="event-card"><img src="assets/img/gallery-13.jpg" alt=""><span class="label">Open Decks — Lost Souls Club, 10 January</span></div>
+    <div class="event-card"><img src="assets/img/gallery-16.jpg" alt=""><span class="label">New Year Cocktail Launch — 1 January</span></div>
+  </div>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll(".events-tabs button");
+  tabs.forEach(btn => btn.addEventListener("click", () => {
+    tabs.forEach(b => b.dataset.active = "false");
+    btn.dataset.active = "true";
+    document.getElementById("list-upcoming").hidden = btn.dataset.list !== "upcoming";
+    document.getElementById("list-past").hidden = btn.dataset.list !== "past";
+  }));
+</script>
+</body>
+</html>
