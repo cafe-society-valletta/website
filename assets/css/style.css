@@ -65,15 +65,16 @@ button{ font-family:inherit; }
 .char:nth-child(3){ --dy:-1.5px;  --rot:3deg; --nose:0.083; padding-left:14px; } /* her smoke trails left — optical spacing */
 .char:nth-child(4){ --dy:-3.5px; --rot:-1.12deg; --nose:0.083; }
 .char:nth-child(5){ --dy:-1px;  --rot:-3.38deg; --nose:0.127; }
-.char:nth-child(6){ --dy:-2.5px; --rot:1.88deg; --nose:0.093; padding-left:8px; }
-.char:nth-child(7){ --dy:-4px; --rot:-1.88deg; --nose:0.167; }
-.char:nth-child(8){ --dy:-1px;  --rot:2.62deg; --nose:0.083; }
-.char:nth-child(9){ --dy:-3px; --rot:-3deg; --nose:0.06; }
-.char:nth-child(10){ --dy:-1px; --rot:0.75deg; --nose:0.15; }
-.char:nth-child(11){ --dy:-3px; --rot:-1.5deg; --nose:0.083; }
-.char:nth-child(12){ --dy:-2px; --rot:2.62deg; --nose:0.093; padding-left:8px; }
-.char:nth-child(13){ --dy:-2px; --rot:-2.62deg; --nose:0.15; }
-.char:nth-child(14){ --dy:-4px; --rot:2.25deg; --nose:0.073; }
+.char:nth-child(6){ --dy:-1.5px; --rot:-1.5deg; --nose:0.005; }
+.char:nth-child(7){ --dy:-2.5px; --rot:1.88deg; --nose:0.093; }
+.char:nth-child(8){ --dy:-4px; --rot:-1.88deg; --nose:0.167; }
+.char:nth-child(9){ --dy:-1px;  --rot:2.62deg; --nose:0.083; }
+.char:nth-child(10){ --dy:-3px; --rot:-3deg; --nose:0.06; }
+.char:nth-child(11){ --dy:-1px; --rot:0.75deg; --nose:0.15; }
+.char:nth-child(12){ --dy:-3px; --rot:-1.5deg; --nose:0.083; }
+.char:nth-child(13){ --dy:-2px; --rot:2.62deg; --nose:0.093; padding-left:8px; }
+.char:nth-child(14){ --dy:-2px; --rot:-2.62deg; --nose:0.15; }
+.char:nth-child(15){ --dy:-4px; --rot:2.25deg; --nose:0.073; }
 @keyframes chars-parade{ from{ transform:translateX(-50%); } to{ transform:translateX(0); } }
 /* gait + phase per figure (delays are whole frames, so everyone stays on the beat) */
 .char:nth-child(1)  img{ animation-name:chars-deck;  animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -1); }
@@ -81,15 +82,16 @@ button{ font-family:inherit; }
 .char:nth-child(3)  img{ animation-name:chars-strut; animation-duration:calc(var(--beat) * 6); animation-delay:calc(var(--beat) * -5); }
 .char:nth-child(4)  img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:0s; }
 .char:nth-child(5)  img{ animation-name:chars-bop;   animation-duration:calc(var(--beat) * 3); animation-delay:calc(var(--beat) * -1); }
-.char:nth-child(6)  img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -2); }
-.char:nth-child(7)  img{ animation-name:chars-strut; animation-duration:calc(var(--beat) * 6); animation-delay:calc(var(--beat) * -3); }
-.char:nth-child(8)  img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -1); }
-.char:nth-child(9)  img{ animation-name:chars-bop;   animation-duration:calc(var(--beat) * 3); animation-delay:calc(var(--beat) * -2); }
-.char:nth-child(10) img{ animation-name:chars-deck;  animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -3); }
-.char:nth-child(11) img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -3); }
-.char:nth-child(12) img{ animation-name:chars-bop;   animation-duration:calc(var(--beat) * 3); animation-delay:0s; }
-.char:nth-child(13) img{ animation-name:chars-strut; animation-duration:calc(var(--beat) * 6); animation-delay:calc(var(--beat) * -1); }
-.char:nth-child(14) img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -1); }
+.char:nth-child(6)  img{ animation-name:chars-deck;  animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -2); }
+.char:nth-child(7)  img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -2); }
+.char:nth-child(8)  img{ animation-name:chars-strut; animation-duration:calc(var(--beat) * 6); animation-delay:calc(var(--beat) * -3); }
+.char:nth-child(9)  img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -1); }
+.char:nth-child(10)  img{ animation-name:chars-bop;   animation-duration:calc(var(--beat) * 3); animation-delay:calc(var(--beat) * -2); }
+.char:nth-child(11) img{ animation-name:chars-deck;  animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -3); }
+.char:nth-child(12) img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -3); }
+.char:nth-child(13) img{ animation-name:chars-bop;   animation-duration:calc(var(--beat) * 3); animation-delay:0s; }
+.char:nth-child(14) img{ animation-name:chars-strut; animation-duration:calc(var(--beat) * 6); animation-delay:calc(var(--beat) * -1); }
+.char:nth-child(15) img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -1); }
 @keyframes chars-parade{ from{ transform:translateX(-50%); } to{ transform:translateX(0); } }
 /* march — 4 frames: plant left (squash) · pass (lift) · plant right (squash) · pass (half lift) */
 @keyframes chars-march{
