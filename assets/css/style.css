@@ -124,7 +124,7 @@ button{ font-family:inherit; }
   75% { transform:translate(.5px, calc(var(--dy) * .5)) rotate(var(--rot)) scaleY(1); }
   100%{ transform:translate(0, 0.5px) rotate(0deg) scaleY(0.9925); }
 }
-.home-chars:hover .home-chars-track, .home-chars:hover .char img{ animation-play-state:paused; }
+/* hover-to-pause and frame sync are handled in assets/js/chars.js */
 @media (prefers-reduced-motion:reduce){ .home-chars-track, .char img{ animation:none; } }
 .home-nav{ display:flex; flex-direction:column; align-items:center; gap:22px; height:163px; padding:14px 24px 0; }
 .home-nav a, .home-nav span{ font-family:var(--font-display); font-size:12px; font-weight:700; letter-spacing:.15em; line-height:16px; text-transform:uppercase; color:var(--white); }
