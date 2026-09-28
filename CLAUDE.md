@@ -19,6 +19,8 @@ assets/css/style.css   Single stylesheet for all 7 pages. Mobile layout (<700px)
                         the Paper design exactly; tablet (≥700px) and desktop (≥1100px)
                         breakpoints extend the same system to wider viewports.
 assets/js/main.js      Shared modal open/close + toast helpers.
+assets/js/chars.js     Home "Characters" parade frame clock — keeps the line's step and every
+                        figure's pose change on the same 1.5 fps frame (one jump per frame).
 assets/js/board.js     Message board rendering, seed data, login/post (client-side only —
                         no backend; state is per-browser via localStorage).
 assets/img/            Photos. Files prefixed `p-` were pulled directly from the Paper
