@@ -57,23 +57,23 @@ button{ font-family:inherit; }
 .home-chars-set{ display:flex; align-items:flex-start; gap:var(--char-gap); margin:0; padding:0 var(--char-gap) 0 0; list-style:none; height:100%; }
 /* Figures hang from a shared "nose line": each is offset so the pointed tip of its nose sits on it.
    --nose = nose-tip height as a fraction of the image height. */
-.char{ flex-shrink:0; line-height:0; --dy:-2px; --rot:1deg; --nose:.08; --h:calc(120px * var(--s)); margin-top:calc(var(--nose-line) - var(--h) * var(--nose)); }
+.char{ flex-shrink:0; line-height:0; --dy:-2px; --rot:1.5deg; --nose:.08; --h:calc(120px * var(--s)); margin-top:calc(var(--nose-line) - var(--h) * var(--nose)); }
 .char-dj{ --h:calc(88px * var(--s)); margin-left:-5px; margin-right:-5px; } /* booths have empty air above the decks — tuck neighbours in slightly */
 .char img{ height:var(--h); width:auto; transform-origin:50% 100%; --beat:.6667s; animation:chars-march calc(var(--beat) * 4) steps(1,end) infinite; }
-.char:nth-child(1){ --dy:-1px;  --rot:0.75deg; --nose:0.01; }
-.char:nth-child(2){ --dy:-3px; --rot:-1.5deg; --nose:0.1; }
-.char:nth-child(3){ --dy:-1.5px;  --rot:2deg; --nose:0.083; padding-left:14px; } /* her smoke trails left — optical spacing */
-.char:nth-child(4){ --dy:-3.5px; --rot:-0.75deg; --nose:0.083; }
-.char:nth-child(5){ --dy:-1px;  --rot:-2.25deg; --nose:0.127; }
-.char:nth-child(6){ --dy:-2.5px; --rot:1.25deg; --nose:0.093; padding-left:8px; }
-.char:nth-child(7){ --dy:-4px; --rot:-1.25deg; --nose:0.167; }
-.char:nth-child(8){ --dy:-1px;  --rot:1.75deg; --nose:0.083; }
-.char:nth-child(9){ --dy:-3px; --rot:-2deg; --nose:0.06; }
-.char:nth-child(10){ --dy:-1px; --rot:0.5deg; --nose:0.15; }
-.char:nth-child(11){ --dy:-3px; --rot:-1deg; --nose:0.083; }
-.char:nth-child(12){ --dy:-2px; --rot:1.75deg; --nose:0.093; padding-left:8px; }
-.char:nth-child(13){ --dy:-2px; --rot:-1.75deg; --nose:0.15; }
-.char:nth-child(14){ --dy:-4px; --rot:1.5deg; --nose:0.073; }
+.char:nth-child(1){ --dy:-1px;  --rot:1.12deg; --nose:0.01; }
+.char:nth-child(2){ --dy:-3px; --rot:-2.25deg; --nose:0.1; }
+.char:nth-child(3){ --dy:-1.5px;  --rot:3deg; --nose:0.083; padding-left:14px; } /* her smoke trails left — optical spacing */
+.char:nth-child(4){ --dy:-3.5px; --rot:-1.12deg; --nose:0.083; }
+.char:nth-child(5){ --dy:-1px;  --rot:-3.38deg; --nose:0.127; }
+.char:nth-child(6){ --dy:-2.5px; --rot:1.88deg; --nose:0.093; padding-left:8px; }
+.char:nth-child(7){ --dy:-4px; --rot:-1.88deg; --nose:0.167; }
+.char:nth-child(8){ --dy:-1px;  --rot:2.62deg; --nose:0.083; }
+.char:nth-child(9){ --dy:-3px; --rot:-3deg; --nose:0.06; }
+.char:nth-child(10){ --dy:-1px; --rot:0.75deg; --nose:0.15; }
+.char:nth-child(11){ --dy:-3px; --rot:-1.5deg; --nose:0.083; }
+.char:nth-child(12){ --dy:-2px; --rot:2.62deg; --nose:0.093; padding-left:8px; }
+.char:nth-child(13){ --dy:-2px; --rot:-2.62deg; --nose:0.15; }
+.char:nth-child(14){ --dy:-4px; --rot:2.25deg; --nose:0.073; }
 @keyframes chars-parade{ from{ transform:translateX(-50%); } to{ transform:translateX(0); } }
 /* gait + phase per figure (delays are whole frames, so everyone stays on the beat) */
 .char:nth-child(1)  img{ animation-name:chars-deck;  animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -1); }
