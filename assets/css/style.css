@@ -41,18 +41,100 @@ button{ font-family:inherit; }
 /* =========================================================
    HOME  (artboard "®")
    ========================================================= */
-.home{ background:#000000; color:var(--white); display:flex; flex-direction:column; }
-.home-logo-row{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:56px 24px 0; text-align:center; }
-.home-logo{ font-family:var(--font-logo); font-size:40px; line-height:100%; }
-.home-address{ font-family:var(--font-display); font-size:15px; font-weight:700; letter-spacing:.04em; line-height:130%; text-transform:uppercase; }
-.home-nav{ display:flex; flex-direction:column; align-items:center; gap:22px; padding:36px 24px 0; }
-.home-nav a, .home-nav span{ font-family:var(--font-display); font-size:15px; font-weight:700; letter-spacing:.15em; line-height:18px; text-transform:uppercase; color:var(--white); }
-.home-sub{ display:flex; flex-direction:column; align-items:center; gap:26px; padding:34px 24px 64px; }
-.home-sub-item{ display:flex; flex-direction:column; align-items:center; gap:2px; }
-.home-sub-item .script{ font-family:var(--font-script); font-weight:600; line-height:100%; }
-.home-sub-item .caps{ font-family:var(--font-display); font-size:12px; font-weight:700; letter-spacing:.14em; line-height:16px; text-transform:uppercase; }
-.home-sub-lostsouls .script{ font-size:26px; }
-.home-sub-shop .script{ font-size:24px; }
+.home{ background:#000000; color:var(--white); display:flex; flex-direction:column; min-height:100vh; }
+.home-logo-row{ display:flex; flex-direction:column; align-items:center; gap:12px; height:170px; padding:43px 24px 0; }
+.home-logo{ margin:0; line-height:0; }
+.home-logo-row img{ object-fit:cover; }
+.home-logo img{ width:92px; height:33px; }
+.home-address{ width:122px; height:11px; }
+.home-tagline{ width:77px; height:26px; transform:rotate(.88deg); }
+/* Characters parade — stop-motion at 1.5 fps (one "frame" every ⅔ s). The line steps left→right on
+   every frame, and every figure changes pose on that same frame. Each figure runs one of four gaits
+   (march / strut / bop / deck) with its own gentle bounce (--dy) and lean (--rot), and starts a whole number
+   of frames into its cycle, so the crowd never hits the same pose at once but never drifts off the beat. */
+.home-chars{ height:163px; flex-shrink:0; overflow:hidden; position:relative; --char-gap:24px; --s:1; --nose-line:39px; }
+.home-chars-track{ display:flex; width:max-content; height:100%; animation:chars-parade 70s steps(105) infinite; }
+.home-chars-set{ display:flex; align-items:flex-start; gap:var(--char-gap); margin:0; padding:0 var(--char-gap) 0 0; list-style:none; height:100%; }
+/* Figures hang from a shared "nose line": each is offset so the pointed tip of its nose sits on it.
+   --nose = nose-tip height as a fraction of the image height. */
+.char{ flex-shrink:0; line-height:0; --dy:-2px; --rot:1deg; --nose:.08; --h:calc(120px * var(--s)); margin-top:calc(var(--nose-line) - var(--h) * var(--nose)); }
+.char-dj{ --h:calc(88px * var(--s)); margin-left:-5px; margin-right:-5px; } /* booths have empty air above the decks — tuck neighbours in slightly */
+.char img{ height:var(--h); width:auto; transform-origin:50% 100%; --beat:.6667s; animation:chars-march calc(var(--beat) * 4) steps(1,end) infinite; }
+.char:nth-child(1){ --dy:-1px;  --rot:0.75deg; --nose:0.01; }
+.char:nth-child(2){ --dy:-3px; --rot:-1.5deg; --nose:0.1; }
+.char:nth-child(3){ --dy:-1.5px;  --rot:2deg; --nose:0.083; padding-left:14px; } /* her smoke trails left — optical spacing */
+.char:nth-child(4){ --dy:-3.5px; --rot:-0.75deg; --nose:0.083; }
+.char:nth-child(5){ --dy:-1px;  --rot:-2.25deg; --nose:0.127; }
+.char:nth-child(6){ --dy:-2.5px; --rot:1.25deg; --nose:0.093; padding-left:8px; }
+.char:nth-child(7){ --dy:-4px; --rot:-1.25deg; --nose:0.167; }
+.char:nth-child(8){ --dy:-1px;  --rot:1.75deg; --nose:0.083; }
+.char:nth-child(9){ --dy:-3px; --rot:-2deg; --nose:0.06; }
+.char:nth-child(10){ --dy:-1px; --rot:0.5deg; --nose:0.15; }
+.char:nth-child(11){ --dy:-3px; --rot:-1deg; --nose:0.083; }
+.char:nth-child(12){ --dy:-2px; --rot:1.75deg; --nose:0.093; padding-left:8px; }
+.char:nth-child(13){ --dy:-2px; --rot:-1.75deg; --nose:0.15; }
+.char:nth-child(14){ --dy:-4px; --rot:1.5deg; --nose:0.073; }
+@keyframes chars-parade{ from{ transform:translateX(-50%); } to{ transform:translateX(0); } }
+/* gait + phase per figure (delays are whole frames, so everyone stays on the beat) */
+.char:nth-child(1)  img{ animation-name:chars-deck;  animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -1); }
+.char:nth-child(2)  img{ animation-name:chars-strut; animation-duration:calc(var(--beat) * 6); animation-delay:calc(var(--beat) * -2); }
+.char:nth-child(3)  img{ animation-name:chars-strut; animation-duration:calc(var(--beat) * 6); animation-delay:calc(var(--beat) * -5); }
+.char:nth-child(4)  img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:0s; }
+.char:nth-child(5)  img{ animation-name:chars-bop;   animation-duration:calc(var(--beat) * 3); animation-delay:calc(var(--beat) * -1); }
+.char:nth-child(6)  img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -2); }
+.char:nth-child(7)  img{ animation-name:chars-strut; animation-duration:calc(var(--beat) * 6); animation-delay:calc(var(--beat) * -3); }
+.char:nth-child(8)  img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -1); }
+.char:nth-child(9)  img{ animation-name:chars-bop;   animation-duration:calc(var(--beat) * 3); animation-delay:calc(var(--beat) * -2); }
+.char:nth-child(10) img{ animation-name:chars-deck;  animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -3); }
+.char:nth-child(11) img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -3); }
+.char:nth-child(12) img{ animation-name:chars-bop;   animation-duration:calc(var(--beat) * 3); animation-delay:0s; }
+.char:nth-child(13) img{ animation-name:chars-strut; animation-duration:calc(var(--beat) * 6); animation-delay:calc(var(--beat) * -1); }
+.char:nth-child(14) img{ animation-name:chars-march; animation-duration:calc(var(--beat) * 4); animation-delay:calc(var(--beat) * -1); }
+@keyframes chars-parade{ from{ transform:translateX(-50%); } to{ transform:translateX(0); } }
+/* march — 4 frames: plant left (squash) · pass (lift) · plant right (squash) · pass (half lift) */
+@keyframes chars-march{
+  0%  { transform:translate(-.5px, 0) rotate(calc(var(--rot) * -1)) scaleY(0.9925); }
+  25% { transform:translate(0, var(--dy)) rotate(calc(var(--rot) * -.2)) scaleY(1.005); }
+  50% { transform:translate(.5px, 0) rotate(var(--rot)) scaleY(0.9925); }
+  75% { transform:translate(0, calc(var(--dy) * .6)) rotate(calc(var(--rot) * .2)) scaleY(1.0025); }
+  100%{ transform:translate(-.5px, 0) rotate(calc(var(--rot) * -1)) scaleY(0.9925); }
+}
+/* strut — 6 frames: a hip-led swagger that rolls through the lean instead of snapping */
+@keyframes chars-strut{
+  0%      { transform:translate(0, 0) rotate(calc(var(--rot) * -1)) scaleY(0.995); }
+  16.667% { transform:translate(.5px, calc(var(--dy) * .5)) rotate(calc(var(--rot) * -.4)); }
+  33.333% { transform:translate(.5px, var(--dy)) rotate(calc(var(--rot) * .5)) scaleY(1.005); }
+  50%     { transform:translate(0, 0) rotate(var(--rot)) scaleY(0.995); }
+  66.667% { transform:translate(-.5px, calc(var(--dy) * .5)) rotate(calc(var(--rot) * .4)); }
+  83.333% { transform:translate(-.5px, var(--dy)) rotate(calc(var(--rot) * -.5)) scaleY(1.005); }
+  100%    { transform:translate(0, 0) rotate(calc(var(--rot) * -1)) scaleY(0.995); }
+}
+/* bop — 3 frames: dip · spring up · tilt and hold */
+@keyframes chars-bop{
+  0%      { transform:translate(0, 0.5px) rotate(0deg) scaleY(0.99); }
+  33.333% { transform:translate(0, var(--dy)) rotate(calc(var(--rot) * -.6)) scaleY(1.0075); }
+  66.667% { transform:translate(0, calc(var(--dy) * .3)) rotate(var(--rot)) scaleY(1); }
+  100%    { transform:translate(0, 0.5px) rotate(0deg) scaleY(0.99); }
+}
+/* deck — 4 frames for the DJs: nod down · up · nod down · lean into the mix */
+@keyframes chars-deck{
+  0%  { transform:translate(0, 0.5px) rotate(0deg) scaleY(0.9925); }
+  25% { transform:translate(0, var(--dy)) rotate(calc(var(--rot) * -.5)) scaleY(1.0025); }
+  50% { transform:translate(0, 0.5px) rotate(0deg) scaleY(0.9925); }
+  75% { transform:translate(.5px, calc(var(--dy) * .5)) rotate(var(--rot)) scaleY(1); }
+  100%{ transform:translate(0, 0.5px) rotate(0deg) scaleY(0.9925); }
+}
+.home-chars:hover .home-chars-track, .home-chars:hover .char img{ animation-play-state:paused; }
+@media (prefers-reduced-motion:reduce){ .home-chars-track, .char img{ animation:none; } }
+.home-nav{ display:flex; flex-direction:column; align-items:center; gap:22px; height:163px; padding:14px 24px 0; }
+.home-nav a, .home-nav span{ font-family:var(--font-display); font-size:12px; font-weight:700; letter-spacing:.15em; line-height:16px; text-transform:uppercase; color:var(--white); }
+.home-nav a:hover{ opacity:.7; }
+.home-sub{ display:flex; flex-direction:column; align-items:center; gap:25px; padding:10px 24px 64px; }
+.home-sub-item{ display:block; line-height:0; }
+.home-sub-item img{ object-fit:cover; }
+.home-sub-lostsouls img{ width:91px; height:26px; }
+.home-sub-shop img{ width:94px; height:23px; }
+.home-sub-item:hover{ opacity:.7; }
 .home-sub-board .title{ font-family:var(--font-display); font-size:19px; font-weight:700; letter-spacing:.02em; line-height:24px; text-transform:uppercase; }
 
 /* =========================================================
@@ -203,24 +285,30 @@ button{ font-family:inherit; }
 /* ---------- home ---------- */
 @media (min-width:700px){
   .page.home{ max-width:100%; }
-  .home-logo-row{ padding-top:76px; }
-  .home-logo{ font-size:56px; }
-  .home-address{ font-size:16px; }
-  .home-nav{ flex-direction:row; flex-wrap:wrap; justify-content:center; gap:40px; padding:52px 32px 0; }
-  .home-nav a, .home-nav span{ font-size:16px; }
-  .home-sub{ flex-direction:row; flex-wrap:wrap; justify-content:center; align-items:flex-start; gap:64px; padding:60px 32px 100px; }
+  .home-logo-row{ height:auto; padding-top:76px; gap:18px; }
+  .home-logo img{ width:184px; height:66px; }
+  .home-address{ width:220px; height:20px; }
+  .home-tagline{ width:130px; height:44px; }
+  .home-chars{ height:200px; margin:24px 0 48px; --char-gap:33px; --s:1.25; --nose-line:48px; }
+  .char-dj{ padding:0 10px; margin-left:0; margin-right:0; } /* wide DJ booths get a little extra air on bigger screens */
+  .home-nav{ height:auto; flex-direction:row; flex-wrap:wrap; justify-content:center; gap:40px; padding:0 32px; }
+  .home-nav a, .home-nav span{ font-size:15px; }
+  .home-sub{ flex-direction:row; flex-wrap:wrap; justify-content:center; align-items:center; gap:64px; padding:72px 32px 100px; }
+  .home-sub-lostsouls img{ width:160px; height:46px; }
+  .home-sub-shop img{ width:165px; height:40px; }
 }
 @media (min-width:1100px){
   .home-logo-row{ padding-top:96px; }
-  .home-logo{ font-size:76px; }
-  .home-address{ font-size:18px; }
-  .home-nav{ gap:56px; padding-top:64px; }
-  .home-nav a, .home-nav span{ font-size:19px; }
-  .home-sub{ gap:88px; padding:76px 32px 128px; }
-  .home-sub-lostsouls .script{ font-size:34px; }
-  .home-sub-shop .script{ font-size:32px; }
-  .home-sub-board .title{ font-size:25px; }
-  .home-sub-item .caps{ font-size:13px; }
+  .home-logo img{ width:240px; height:86px; }
+  .home-address{ width:280px; height:25px; }
+  .home-tagline{ width:160px; height:54px; }
+  .home-chars{ height:228px; --char-gap:37px; --s:1.4167; --nose-line:50px; }
+  .home-chars-track{ animation-duration:85s; animation-timing-function:steps(128); }
+  .home-nav{ gap:56px; }
+  .home-nav a, .home-nav span{ font-size:17px; }
+  .home-sub{ gap:88px; padding:88px 32px 128px; }
+  .home-sub-lostsouls img{ width:200px; height:57px; }
+  .home-sub-shop img{ width:206px; height:50px; }
 }
 
 /* ---------- about: editorial two-column at desktop ---------- */
