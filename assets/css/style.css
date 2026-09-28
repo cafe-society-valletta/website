@@ -58,7 +58,7 @@ button{ font-family:inherit; }
 /* Figures hang from a shared "nose line": each is offset so the pointed tip of its nose sits on it.
    --nose = nose-tip height as a fraction of the image height. */
 .char{ flex-shrink:0; line-height:0; --dy:-2px; --rot:1.5deg; --nose:.08; --h:calc(120px * var(--s)); margin-top:calc(var(--nose-line) - var(--h) * var(--nose)); }
-.char-dj{ --h:calc(88px * var(--s)); margin-left:-5px; margin-right:-5px; } /* booths have empty air above the decks — tuck neighbours in slightly */
+.char-dj{ --h:calc(70px * var(--s)); margin-left:-8px; margin-right:-8px; } /* booths have empty air above the decks — tuck neighbours in slightly */
 .char img{ height:var(--h); width:auto; transform-origin:50% 100%; --beat:.6667s; animation:chars-march calc(var(--beat) * 4) steps(1,end) infinite; }
 .char:nth-child(1){ --dy:-1px;  --rot:1.12deg; --nose:0.01; }
 .char:nth-child(2){ --dy:-3px; --rot:-2.25deg; --nose:0.1; }
