@@ -123,8 +123,8 @@ button{ font-family:inherit; }
 }
 /* hover-to-pause and frame sync are handled in assets/js/chars.js */
 @media (prefers-reduced-motion:reduce){ .home-chars-track, .char img{ animation:none; } }
-.home-nav{ display:flex; flex-direction:column; align-items:center; gap:22px; height:163px; padding:14px 24px 0; }
-.home-nav a, .home-nav span{ font-family:var(--font-display); font-size:12px; font-weight:700; letter-spacing:.15em; line-height:16px; text-transform:uppercase; color:var(--white); }
+.home-nav{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; height:163px; padding:14px 24px 0; }
+.home-nav a, .home-nav span{ font-family:var(--font-display); font-size:15px; font-weight:700; letter-spacing:-.02em; line-height:18px; text-transform:uppercase; color:var(--white); }
 .home-nav a:hover{ opacity:.7; }
 .home-sub{ display:flex; flex-direction:column; align-items:center; gap:25px; padding:10px 24px 64px; }
 .home-sub-item{ display:block; line-height:0; }
@@ -213,7 +213,7 @@ button{ font-family:inherit; }
 
 /* ---------- menu bar (pages 2–6) — always visible, sticky ---------- */
 .site-bar{ position:sticky; top:0; z-index:60; height:35px; display:flex; align-items:center; justify-content:space-between; padding:0 32px; transition:background-color .2s; color:var(--white); }
-.site-bar > a, .site-bar > span{ font-family:var(--font-display); font-size:9px; font-weight:700; letter-spacing:.1em; line-height:11px; text-transform:uppercase; white-space:nowrap; }
+.site-bar > a, .site-bar > span{ font-family:var(--font-display); font-size:9px; font-weight:700; letter-spacing:-.02em; line-height:11px; text-transform:uppercase; white-space:nowrap; }
 .site-bar .two{ line-height:9.5px; text-align:center; }
 .site-bar .logo{ line-height:0; flex-shrink:0; }
 .site-bar .logo-lsc img{ width:53px; height:15px; }
@@ -391,11 +391,11 @@ body.shop-body{ background:#12305C; }
 
   /* menu bar */
   .site-bar{ height:56px; padding:0 var(--gut); }
-  .site-bar > a, .site-bar > span{ font-size:13px; letter-spacing:.12em; line-height:16px; }
-  .site-bar .two{ line-height:16px; }
+  .site-bar > a, .site-bar > span{ font-size:15px; letter-spacing:-.02em; line-height:18px; }
+  .site-bar .two{ line-height:18px; }
   .site-bar .two br{ display:none; }
-  .site-bar .logo-lsc img{ width:85px; height:24px; }
-  .site-bar .logo-col img, .bar-collection .tab img{ width:92px; height:22px; }
+  .site-bar .logo-lsc img{ width:96px; height:27px; }
+  .site-bar .logo-col img, .bar-collection .tab img{ width:104px; height:25px; }
   .site-bar .tab, .bar-collection .tab{ padding:0 18px; border-radius:0 0 8px 8px; }
 
   /* footer */
@@ -482,4 +482,18 @@ body.shop-body{ background:#12305C; }
   .shop-cats{ width:var(--col); margin-inline:auto; padding:40px 0 72px; }
   .shop-cats li{ padding:24px 2px; font-size:24px; line-height:28px; }
   .shop-cats li svg{ width:27px; height:18px; }
+}
+
+/* HOME desktop (≥900px) — Paper D01: the whole menu on one centred line,
+   scaled up: About · Menu · Event Calendar · Photo Lab · LSC · Collection */
+@media (min-width:900px){
+  /* the row is ~1206px wide at full size; below that it scales down with the window */
+  .home-menu{ --u:calc((100vw - 128px) / 1206); display:flex; justify-content:center; align-items:center; gap:min(48px, calc(48 * var(--u))); padding:56px 64px 128px; }
+  .home-menu .home-nav{ flex-direction:row; flex-wrap:nowrap; height:auto; gap:min(48px, calc(48 * var(--u))); padding:0; }
+  .home-menu .home-nav a, .home-menu .home-nav span{ font-size:min(28px, calc(28 * var(--u))); line-height:1.15; letter-spacing:-.02em; white-space:nowrap; }
+  .home-menu .home-sub{ flex-wrap:nowrap; gap:min(48px, calc(48 * var(--u))); padding:0; }
+  .home-menu .home-sub-item img{ flex-shrink:0; }
+  .home-menu .home-sub-lostsouls img{ width:min(182px, calc(182 * var(--u))); height:auto; }
+  .home-menu .home-sub-shop img{ width:min(198px, calc(198 * var(--u))); height:auto; }
+  .home-chars{ margin-bottom:0; }
 }
