@@ -201,30 +201,25 @@ button{ font-family:inherit; }
 /* =========================================================
    PAGES 2–6 — rebuilt from the Paper redesign (Sept 2026)
 
-   Paper designs every page as a 402px phone screen. These pages keep that
-   exact column on every device: under 700px it fills the phone; on wider
-   screens the whole column is scaled up with `zoom` and centred, with the
-   page colour filling the sides.
+   Phone (<700px) = the Paper phone artboards. 700–899px: the same phone
+   column scaled up with `zoom`. ≥900px = the Paper desktop artboards: the
+   mobile layout, just wider — one centred 720px column. Menu bar, body and
+   footer ALWAYS share the same side edges (32px on phone; the 720 column on
+   desktop).
    ========================================================= */
 .page.v2{ overflow:clip; min-height:100vh; display:flex; flex-direction:column; }
 .page.v2 > .site-footer{ margin-top:auto; }
-@media (min-width:700px){ .page.v2{ zoom:1.45; min-height:calc(100vh / 1.45); } }
-@media (min-width:1100px){ .page.v2{ zoom:1.7; min-height:calc(100vh / 1.7); } }
+@media (min-width:700px) and (max-width:899.98px){ .page.v2{ zoom:1.45; min-height:calc(100vh / 1.45); } }
 
-/* ---------- menu bar (pages 2–6) ----------
-   Hidden by default: it sits just above the top edge and only the current
-   page's tab peeks down 8px. It slides in when the cursor reaches the top of
-   the window, on a pull-down / upward scroll on touch, or when the peeking tab
-   is tapped (assets/js/main.js). */
-.site-bar{ position:sticky; top:0; z-index:60; height:35px; margin-bottom:-35px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; transform:translateY(-35px); transition:transform .28s ease, background-color .2s; color:var(--white); }
-.site-bar.show, .site-bar:focus-within{ transform:none; }
-.site-bar > a, .site-bar > span{ font-family:var(--font-display); font-size:9px; font-weight:700; letter-spacing:.12em; line-height:11px; text-transform:uppercase; white-space:nowrap; }
+/* ---------- menu bar (pages 2–6) — always visible, sticky ---------- */
+.site-bar{ position:sticky; top:0; z-index:60; height:35px; display:flex; align-items:center; justify-content:space-between; padding:0 32px; transition:background-color .2s; color:var(--white); }
+.site-bar > a, .site-bar > span{ font-family:var(--font-display); font-size:9px; font-weight:700; letter-spacing:.1em; line-height:11px; text-transform:uppercase; white-space:nowrap; }
 .site-bar .two{ line-height:9.5px; text-align:center; }
 .site-bar .logo{ line-height:0; flex-shrink:0; }
 .site-bar .logo-lsc img{ width:53px; height:15px; }
 .site-bar .logo-col img{ width:58px; height:14px; }
 .site-bar a:hover{ opacity:.7; }
-.site-bar .tab{ align-self:flex-start; height:43px; padding:0 8px 8px; display:flex; align-items:center; justify-content:center; border-radius:0 0 6px 6px; background:var(--white); color:var(--black); }
+.site-bar .tab{ align-self:stretch; padding:0 8px; display:flex; align-items:center; justify-content:center; border-radius:0 0 6px 6px; background:var(--white); color:var(--black); }
 .site-bar .tab:hover{ opacity:1; }
 /* light bar (About) */
 .bar-light{ background:var(--white); color:var(--black); }
@@ -236,13 +231,14 @@ button{ font-family:inherit; }
 .bar-clear.scrolled{ background:rgba(10,10,10,.88); }
 .bar-collection.scrolled{ background:rgba(18,48,92,.92); }
 .bar-clear .tab.logo-lsc img{ filter:invert(1); }
-.bar-collection{ padding-right:0; }
-.bar-collection .tab{ padding:0 12px 8px; }
+.bar-collection .tab{ padding:0 6px; }
+.bar-collection .tab img{ width:50px; height:12px; }
 .bar-collection .tab img{ filter:brightness(0) invert(22%) sepia(80%) saturate(2400%) hue-rotate(199deg) brightness(83%) contrast(92%); }
 
 /* ---------- footer (every page) ---------- */
-.site-footer{ display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:4.5px; padding:12px 0 14px; position:relative; font-family:var(--font-display); font-size:5.5px; font-weight:400; letter-spacing:.02em; line-height:8px; text-transform:uppercase; color:#6E6E6E; }
-.site-footer a{ display:flex; align-items:center; gap:3px; }
+.site-footer{ display:flex; align-items:center; justify-content:space-between; gap:3px; padding:12px 32px 14px; position:relative; font-family:var(--font-display); font-size:5px; font-weight:400; letter-spacing:0; line-height:8px; text-transform:uppercase; color:#6E6E6E; }
+.site-footer a{ display:flex; align-items:center; gap:3px; white-space:nowrap; }
+.site-footer > span{ white-space:nowrap; }
 .site-footer a:hover{ opacity:.7; }
 .site-footer svg{ flex-shrink:0; }
 .site-footer .ig svg{ width:8px; height:8px; }
@@ -253,20 +249,19 @@ button{ font-family:inherit; }
 .footer-dark .sep{ background:#fff; }
 .footer-backed{ background:rgba(10,10,10,.7); }
 .home .site-footer{ margin-top:auto; }
-@media (min-width:700px){
-  .home .site-footer{ font-size:8px; line-height:12px; gap:7px; padding:20px 0 24px; }
+@media (min-width:700px) and (max-width:899.98px){
+  .home .site-footer{ justify-content:center; flex-wrap:wrap; padding-left:0; padding-right:0; font-size:8px; line-height:12px; gap:7px; padding:20px 0 24px; }
   .home .site-footer a{ gap:5px; }
   .home .site-footer .ig svg{ width:12px; height:12px; }
   .home .site-footer .mail svg{ width:13px; height:10px; }
   .home .site-footer .sep{ height:9px; }
 }
-@media (min-width:1100px){ .home .site-footer{ font-size:10px; line-height:14px; gap:9px; } }
 
 /* shared bits */
 .chev{ display:flex; justify-content:center; width:100%; padding:12px 0 4px; background:none; border:0; cursor:pointer; color:inherit; }
 .chev svg{ display:block; }
-.col{ padding-left:80px; padding-right:80px; }
-.copy p{ margin:0; font-family:var(--font-display); font-size:12px; line-height:100%; text-align:justify; }
+.col{ padding-left:32px; padding-right:32px; }
+.copy p{ margin:0; font-family:var(--font-display); font-size:12px; line-height:120%; text-align:justify; }
 
 /* =========================================================
    ABOUT  (artboards "02 About" + "02 About · on arrival")
@@ -275,14 +270,14 @@ body.about-body{ background:var(--white); }
 .about{ background:var(--white); color:var(--black); }
 .about-head{ display:flex; justify-content:center; height:172px; padding-top:20px; }
 .about-head img{ width:110px; height:143px; }
-.about-sections{ display:flex; flex-direction:column; padding-bottom:28px; }
+.about-sections{ display:flex; flex-direction:column; padding-bottom:40px; }
 .banner{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:100%; aspect-ratio:3/1; padding:0 6px; overflow:hidden; border:0; cursor:pointer; color:var(--white); background:#333 center/cover no-repeat; transition:opacity .35s; }
 .banner::before{ content:""; position:absolute; inset:0; background:rgba(10,10,10,.1); }
 .banner:hover::before{ background:rgba(10,10,10,.22); }
 .banner .t{ position:relative; font-family:var(--font-display); font-size:16px; font-weight:700; letter-spacing:-.02em; line-height:15px; text-align:center; text-shadow:0 1px 5px rgba(0,0,0,.7); }
 .banner .t-wide{ font-size:18px; letter-spacing:.26em; margin-right:-.26em; }
 .banner svg{ position:relative; }
-.about-sec{ padding:0 80px; }
+.about-sec{ padding:0 32px; }
 .about-sec + .about-sec{ margin-top:12px; }
 .about-sec:first-child{ padding-top:12px; }
 .sec-body{ display:none; flex-direction:column; align-items:center; gap:10px; padding-top:6px; animation:secIn .45s ease; }
@@ -292,7 +287,7 @@ body.about-body{ background:var(--white); }
 @keyframes secIn{ from{ opacity:0; } to{ opacity:1; } }
 .sec-1 .sec-body{ padding-bottom:40px; }
 .sec-2 .sec-body{ gap:13px; padding-bottom:40px; }
-.sec-body > p{ align-self:stretch; margin:0; font-family:var(--font-display); font-size:12px; font-weight:300; line-height:100%; text-align:justify; }
+.sec-body > p{ align-self:stretch; margin:0; font-family:var(--font-display); font-size:12px; font-weight:300; line-height:120%; text-align:justify; }
 .fig{ margin:0; width:100%; }
 .fig img{ width:100%; height:auto; }
 .fig figcaption{ padding:3.5px 0; font-family:var(--font-display); font-size:6px; font-weight:400; letter-spacing:-.03em; line-height:7px; color:#6E6E6E; }
@@ -311,7 +306,7 @@ body.events-body{ background:var(--black); }
 .ev-head{ position:relative; display:flex; flex-direction:column; align-items:center; padding:29px 0 6px; }
 .ev-head img{ width:106px; height:37px; }
 .ev-head h1{ margin:-1px 0 0; font-family:var(--font-display); font-size:34px; font-weight:300; letter-spacing:.02em; line-height:42px; }
-.cal{ position:relative; display:flex; flex-direction:column; gap:28px; padding:8px 20px 48px; }
+.cal{ position:relative; display:flex; flex-direction:column; gap:28px; padding:8px 32px 48px; }
 .month{ background:rgba(10,10,10,.78); border:1px solid rgba(255,255,255,.55); scroll-margin-top:16px; }
 .m-head{ display:flex; align-items:center; justify-content:space-between; padding:14px; border-bottom:1px solid rgba(255,255,255,.55); }
 .m-head h2{ margin:0; font-size:15px; font-weight:700; letter-spacing:.15em; line-height:18px; text-transform:uppercase; }
@@ -338,7 +333,7 @@ body.events-body{ background:var(--black); }
 .ev-panel .poster{ width:120px; height:150px; flex-shrink:0; background:var(--grey-placeholder) center/cover no-repeat; }
 .ev-panel .info{ display:flex; flex-direction:column; gap:8px; flex:1; min-width:0; }
 .ev-panel h3{ margin:0; font-size:19px; font-weight:700; letter-spacing:.02em; line-height:22px; text-transform:uppercase; }
-.ev-panel p{ margin:0; font-size:12px; line-height:150%; color:rgba(255,255,255,.8); }
+.ev-panel p{ margin:0; font-size:12px; line-height:120%; color:rgba(255,255,255,.8); }
 .ev-panel .more{ align-self:flex-start; padding-bottom:2px; border-bottom:1px solid #fff; font-size:11px; font-weight:700; letter-spacing:.14em; line-height:14px; text-transform:uppercase; }
 
 /* =========================================================
@@ -346,12 +341,12 @@ body.events-body{ background:var(--black); }
    ========================================================= */
 body.gallery-body{ background:var(--black); }
 .gallery{ background:var(--black); color:var(--white); }
-.lab-head{ display:flex; flex-direction:column; align-items:center; gap:1px; padding:37px 20px 36px; }
+.lab-head{ display:flex; flex-direction:column; align-items:center; gap:1px; padding:37px 32px 36px; }
 .lab-head img{ width:84px; height:30px; }
 .lab-head h1{ margin:0; font-family:var(--font-display); font-size:24px; font-weight:700; letter-spacing:.04em; line-height:30px; }
-.lab-intro{ width:212px; padding-top:10px; }
-.lab-intro p{ margin:0; font-size:10px; line-height:10px; text-align:justify; }
-.lab-intro p + p{ margin-top:10px; }
+.lab-intro{ width:100%; padding-top:10px; }
+.lab-intro p{ margin:0; font-size:10px; line-height:120%; text-align:justify; }
+.lab-intro p + p{ margin-top:1.2em; }
 .rolls{ display:flex; flex-direction:column; align-items:center; gap:25px; padding:10px 20px 56px; }
 .roll{ position:relative; width:208px; height:66px; background:url('../img/p-film-roll.png') 50%/100% 100% no-repeat; }
 .roll span{ position:absolute; left:41px; top:27px; width:135px; font-size:12px; font-weight:600; letter-spacing:.12em; line-height:9px; text-transform:uppercase; color:var(--black); }
@@ -366,8 +361,8 @@ body.lostsouls-body{ background:var(--black); }
 .ls-head .l1{ width:175px; height:198px; }
 .ls-head .l2{ width:254px; height:51px; }
 .ls-head .l3{ width:112px; height:25px; }
-.ls-copy{ position:relative; display:flex; flex-direction:column; align-items:center; gap:14px; padding:17px 80px 40px; }
-.ls-copy p{ align-self:stretch; margin:0; font-size:12px; line-height:100%; text-align:justify; }
+.ls-copy{ position:relative; display:flex; flex-direction:column; align-items:center; gap:14px; padding:17px 32px 40px; }
+.ls-copy p{ align-self:stretch; margin:0; font-size:12px; line-height:120%; text-align:justify; }
 .ls-ig{ display:flex; flex-direction:column; align-items:center; gap:6px; padding-top:6px; }
 .ls-ig svg{ filter:drop-shadow(0 1px 4px rgba(0,0,0,.85)); }
 .ls-ig span{ font-size:8px; font-weight:700; letter-spacing:.14em; line-height:10px; text-shadow:0 1px 4px rgba(0,0,0,.85); }
@@ -381,6 +376,110 @@ body.shop-body{ background:#12305C; }
 .shop-scrim{ position:absolute; inset:0; background:rgba(10,30,70,.25); pointer-events:none; }
 .shop-head{ position:relative; display:flex; align-items:center; justify-content:center; height:136px; margin:0; }
 .shop-head img{ width:197px; height:57px; }
-.shop-cats{ position:relative; margin:0; padding:8px 80px 56px; list-style:none; }
+.shop-cats{ position:relative; margin:0; padding:8px 32px 56px; list-style:none; }
 .shop-cats::before{ content:""; display:block; height:1px; background:#fff; }
 .shop-cats li{ display:flex; align-items:center; justify-content:space-between; padding:15px 2px; border-bottom:1px solid #fff; font-size:15px; font-weight:700; letter-spacing:.1em; line-height:18px; }
+
+/* =========================================================
+   DESKTOP (≥900px) — Paper artboards D02–D06 ("Desktop 1440")
+   The phone layout, just wider: every page is one centred column,
+   720px wide (or the window minus 40px each side, if narrower).
+   Menu bar items and footer sit on exactly the same edges.
+   ========================================================= */
+@media (min-width:900px){
+  .page.v2{ max-width:none; --gut:max(40px, calc((100% - 720px) / 2)); --col:min(720px, calc(100% - 80px)); }
+
+  /* menu bar */
+  .site-bar{ height:56px; padding:0 var(--gut); }
+  .site-bar > a, .site-bar > span{ font-size:13px; letter-spacing:.12em; line-height:16px; }
+  .site-bar .two{ line-height:16px; }
+  .site-bar .two br{ display:none; }
+  .site-bar .logo-lsc img{ width:85px; height:24px; }
+  .site-bar .logo-col img, .bar-collection .tab img{ width:92px; height:22px; }
+  .site-bar .tab, .bar-collection .tab{ padding:0 18px; border-radius:0 0 8px 8px; }
+
+  /* footer */
+  .site-footer, .home .site-footer{ justify-content:space-between; flex-wrap:nowrap; gap:10px; padding:20px var(--gut) 24px; font-size:10px; letter-spacing:.02em; line-height:14px; }
+  .site-footer a{ gap:6px; }
+  .site-footer .ig svg{ width:14px; height:14px; }
+  .site-footer .mail svg{ width:16px; height:12px; }
+  .site-footer .sep{ height:10px; }
+  .home .site-footer{ --gut:max(40px, calc((100% - 720px) / 2)); }
+
+  /* shared */
+  .chev{ padding:12px 0 4px; }
+  .chev svg{ width:22px; height:13px; }
+
+  /* ABOUT (D02) */
+  .about-head{ height:auto; padding:56px 0 40px; }
+  .about-head img{ width:200px; height:260px; }
+  .about-sections{ padding-bottom:72px; }
+  .about-sec{ width:var(--col); margin-inline:auto; padding:0; }
+  .about-sec:first-child{ padding-top:0; }
+  .about-sec + .about-sec{ margin-top:20px; }
+  .banner{ gap:10px; }
+  .banner .t{ font-size:28px; line-height:28px; }
+  .banner .t-wide{ font-size:32px; line-height:30px; }
+  .about-sec.open{ padding-top:24px; }
+  .sec-body, .sec-2 .sec-body{ gap:20px; padding-top:0; }
+  .sec-1 .sec-body, .sec-2 .sec-body{ padding-bottom:56px; }
+  .sec-body > .chev{ margin-top:12px; }
+  .sec-body > p{ font-size:17px; }
+  .fig figcaption{ padding:4px 0 0; font-size:10px; letter-spacing:-.01em; line-height:14px; }
+  .about-sec.sec-3.open{ width:min(800px, calc(100% - 80px)); padding:56px 0 40px; }
+  .gal-title{ height:44px; padding:0; font-size:40px; line-height:44px; }
+  .gal-grid{ gap:8px; }
+  .gal-grid span{ width:calc((100% - 16px) / 3); }
+
+  /* EVENT CALENDAR (D03) */
+  .events{ background:linear-gradient(rgba(10,10,10,.12), rgba(10,10,10,.12)), var(--black) url('../img/p-bg-events-desktop.jpg') 100% 50%/cover no-repeat; }
+  .events-scrim{ height:260px; background:linear-gradient(180deg, rgba(10,10,10,.6) 0%, rgba(10,10,10,.35) 55%, rgba(10,10,10,0) 100%); }
+  .ev-head{ gap:12px; padding:56px 0 0; }
+  .ev-head img{ width:150px; height:52px; }
+  .ev-head h1{ margin:0; font-size:60px; line-height:66px; }
+  .cal{ width:var(--col); margin-inline:auto; gap:32px; padding:32px 0 72px; }
+  .m-head{ padding:18px 20px; }
+  .m-head h2{ font-size:20px; line-height:24px; }
+  .m-head button{ font-size:18px; line-height:22px; }
+  .m-days span{ padding:9px 0; font-size:12px; line-height:14px; }
+  .day{ height:96px; padding:6px; }
+  .day .n{ font-size:14px; line-height:16px; }
+  .thumb{ width:60px; height:60px; }
+  .ev-panel{ gap:18px; padding:22px; }
+  .ev-panel .when{ font-size:12px; line-height:14px; }
+  .ev-panel .x svg{ width:16px; height:16px; }
+  .ev-panel .row{ gap:20px; }
+  .ev-panel .poster{ width:160px; height:200px; }
+  .ev-panel .info{ gap:10px; }
+  .ev-panel h3{ font-size:26px; line-height:30px; }
+  .ev-panel p{ font-size:15px; }
+  .ev-panel .more{ padding-bottom:3px; font-size:13px; line-height:16px; }
+
+  /* PHOTO LAB (D04) */
+  .lab-head{ gap:20px; padding:56px 0 0; width:var(--col); margin-inline:auto; }
+  .lab-head img{ width:168px; height:60px; }
+  .lab-head h1{ font-size:56px; line-height:60px; }
+  .lab-intro{ padding-top:0; }
+  .lab-intro p{ font-size:17px; }
+  .rolls{ gap:40px; padding:40px 0 72px; }
+  .roll{ width:291px; height:92px; }
+  .roll span{ left:57px; top:33px; width:190px; font-size:17px; line-height:15px; }
+
+  /* LOST SOULS CLUB (D05) */
+  .ls-head{ height:auto; gap:36px; padding-top:56px; }
+  .ls-head .l1{ width:350px; height:396px; }
+  .ls-head .l2{ width:508px; height:102px; }
+  .ls-head .l3{ width:224px; height:50px; }
+  .ls-copy{ width:var(--col); margin-inline:auto; gap:20px; padding:40px 0 72px; }
+  .ls-copy p{ font-size:17px; }
+  .ls-ig{ gap:10px; padding-top:16px; }
+  .ls-ig svg{ width:44px; height:44px; }
+  .ls-ig span{ font-size:12px; line-height:14px; }
+
+  /* SOCIETY COLLECTION (D06) */
+  .shop-head{ height:auto; padding-top:56px; }
+  .shop-head img{ width:460px; height:133px; }
+  .shop-cats{ width:var(--col); margin-inline:auto; padding:40px 0 72px; }
+  .shop-cats li{ padding:24px 2px; font-size:24px; line-height:28px; }
+  .shop-cats li svg{ width:27px; height:18px; }
+}
