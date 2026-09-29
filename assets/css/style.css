@@ -32,11 +32,6 @@ button{ font-family:inherit; }
 
 .page{ max-width:var(--maxw); margin:0 auto; overflow:hidden; position:relative; }
 
-/* ---------- shared mini nav (not part of the Paper mockups — added only so
-   the 6 inner screens, which show no nav at all, can link to one another) ---------- */
-.mini-nav{ display:flex; flex-wrap:wrap; gap:12px 16px; padding:16px 20px; }
-.mini-nav a{ font-family:var(--font-display); font-weight:700; font-size:10px; letter-spacing:.1em; text-transform:uppercase; opacity:.65; }
-.mini-nav a:hover{ opacity:1; }
 
 /* =========================================================
    HOME  (artboard "®")
@@ -139,109 +134,6 @@ button{ font-family:inherit; }
 .home-sub-item:hover{ opacity:.7; }
 .home-sub-board .title{ font-family:var(--font-display); font-size:19px; font-weight:700; letter-spacing:.02em; line-height:24px; text-transform:uppercase; }
 
-/* =========================================================
-   ABOUT  (artboard "02 About")
-   ========================================================= */
-.about{ background:var(--cream); color:var(--black); }
-.about-collage{ width:100%; height:130px; object-fit:cover; }
-.about-headline{ margin:0; padding:20px 20px 0; font-family:var(--font-display); font-size:56px; font-weight:700; letter-spacing:.02em; line-height:92%; text-transform:uppercase; }
-.about-body{ display:flex; flex-direction:column; gap:14px; padding:24px 20px 40px; }
-.about-body p{ margin:0; font-family:var(--font-display); font-size:14px; line-height:150%; text-align:justify; }
-
-/* =========================================================
-   EVENTS  (artboard "03 Events")
-   ========================================================= */
-.events{ background:var(--black); color:var(--white); }
-.events-header{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:28px 20px 0; }
-.events-header .logo{ font-family:var(--font-logo); font-size:26px; line-height:32px; }
-.events-header h1{ margin:0; font-family:var(--font-display); font-size:34px; font-weight:300; letter-spacing:.02em; line-height:42px; text-transform:lowercase; }
-.events-tabs{ display:flex; align-items:center; justify-content:space-between; padding:22px 20px 0; }
-.events-tabs button{ background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-display); font-size:15px; line-height:18px; color:var(--white); }
-.events-tabs button[data-active="false"]{ color:var(--grey-placeholder); }
-.events-cards{ display:flex; flex-direction:column; gap:4px; padding:20px 20px 40px; }
-.event-card{ position:relative; height:220px; width:100%; overflow:hidden; }
-.event-card img{ width:100%; height:100%; object-fit:cover; }
-.event-card .label{ position:absolute; left:0; right:0; bottom:0; padding:14px 12px; font-family:var(--font-display); font-size:12px; letter-spacing:.1em; line-height:16px; text-transform:uppercase; color:var(--white); background:linear-gradient(transparent, rgba(0,0,0,.8)); }
-.event-card[hidden]{ display:none; }
-
-/* =========================================================
-   GALLERY  (artboard "04 Gallery")
-   ========================================================= */
-.gallery{ background:var(--black); color:var(--white); }
-.gallery-header{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; padding:24px 20px 0; }
-.gallery-header .logo{ font-family:var(--font-logo); font-size:22px; line-height:28px; }
-.gallery-header h1{ margin:0; font-family:var(--font-display); font-size:24px; font-weight:700; letter-spacing:.04em; line-height:30px; text-transform:uppercase; }
-.gallery-tabs{ display:flex; align-items:center; flex-wrap:wrap; gap:16px; padding:16px 20px 20px; }
-.gallery-tabs button{ background:none; border:none; padding:0; cursor:pointer; display:flex; align-items:center; gap:5px; font-family:var(--font-display); font-size:12px; font-weight:700; letter-spacing:.06em; line-height:16px; text-transform:uppercase; color:var(--grey-placeholder); }
-.gallery-tabs button[data-active="true"]{ color:var(--white); }
-.gallery-tabs button .tri{ width:0; height:0; border-style:solid; border-width:4px 0 4px 6px; border-color:transparent transparent transparent var(--white); opacity:0; flex-shrink:0; }
-.gallery-tabs button[data-active="true"] .tri{ opacity:1; }
-.gallery-grid{ display:flex; flex-wrap:wrap; width:100%; }
-.gallery-grid img{ width:33.333%; height:134px; object-fit:cover; cursor:pointer; }
-.gallery-grid img[hidden]{ display:none; }
-
-.lightbox{ position:fixed; inset:0; background:rgba(0,0,0,.94); z-index:1000; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s; }
-.lightbox.open{ opacity:1; pointer-events:auto; }
-.lightbox img{ max-width:88vw; max-height:82vh; object-fit:contain; }
-.lightbox-close{ position:absolute; top:16px; right:20px; background:none; border:none; color:var(--white); font-size:28px; line-height:1; opacity:.7; cursor:pointer; }
-.lightbox-close:hover{ opacity:1; }
-
-/* =========================================================
-   LOST SOULS CLUB  (artboard "05 Lost Souls Club")
-   ========================================================= */
-.lostsouls{ background:var(--black); color:var(--white); position:relative; overflow:hidden; }
-.lostsouls-pattern{ position:absolute; inset:0; background-image:url('../img/p-lostsouls-pattern.png'); background-repeat:repeat; background-size:340px; opacity:.55; pointer-events:none; }
-.lostsouls-inner{ position:relative; }
-.ls-headline{ margin:0; padding:36px 20px 0; font-family:var(--font-gothic); font-size:34px; line-height:105%; }
-.ls-tagline{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding:26px 20px 0; }
-.ls-tagline .script{ font-family:var(--font-script); font-size:38px; font-weight:600; line-height:100%; }
-.ls-tagline .maltese{ font-family:var(--font-mono-terminal); font-size:16px; letter-spacing:.3em; line-height:20px; text-transform:uppercase; }
-.ls-tagline .sub{ font-family:var(--font-display); font-size:15px; font-weight:700; letter-spacing:.08em; line-height:18px; text-transform:uppercase; }
-.ls-body{ display:flex; flex-direction:column; gap:14px; padding:28px 20px 44px; }
-.ls-body p{ margin:0; font-family:var(--font-display); font-size:14px; line-height:150%; text-align:justify; }
-
-/* =========================================================
-   SOCIETY COLLECTION  (artboard "06 Society Collection")
-   ========================================================= */
-.shop{ background:var(--cream); color:var(--navy); }
-.shop-banner{ height:190px; }
-.shop-banner img{ width:100%; height:100%; object-fit:cover; }
-.shop-terroir{ display:flex; flex-direction:column; gap:10px; padding:26px 20px 0; }
-.shop-terroir .label{ font-family:var(--font-mono-body); font-size:18px; font-weight:700; letter-spacing:.2em; line-height:22px; text-transform:uppercase; }
-.shop-terroir p{ margin:0; font-family:var(--font-mono-body); font-size:12px; font-style:italic; line-height:160%; }
-.shop-body{ display:flex; flex-direction:column; gap:12px; padding:18px 20px 0; }
-.shop-body p{ margin:0; font-family:var(--font-mono-body); font-size:12px; font-style:italic; line-height:160%; text-transform:uppercase; }
-.shop-body p.bold{ font-weight:700; }
-.shop-partners{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:center; gap:8px; padding:24px 20px 0; }
-.shop-partners .find{ font-family:var(--font-mono-body); font-size:12px; font-weight:700; letter-spacing:.1em; line-height:16px; text-transform:uppercase; }
-.shop-partners .name{ font-family:var(--font-display); font-size:15px; font-weight:700; letter-spacing:.1em; line-height:18px; }
-.shop-partners .amp{ font-family:var(--font-mono-body); font-size:12px; font-weight:700; line-height:16px; }
-.shop-partners .script{ font-family:var(--font-script); font-size:19px; font-weight:600; line-height:24px; }
-.shop-title{ margin:0; text-align:center; padding:18px 20px 24px; font-family:var(--font-display); font-size:38px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
-.shop-grid{ display:flex; flex-wrap:wrap; gap:6px; padding:0 20px 40px; }
-.shop-grid img{ width:calc(50% - 3px); height:160px; object-fit:cover; }
-
-/* =========================================================
-   MEET ME AT SOCIETY  (artboard "07 Meet Me at Society")
-   ========================================================= */
-.board{ background:var(--maroon); color:var(--green-neon); font-family:var(--font-mono-terminal); }
-.board-sticker{ width:100%; height:66px; object-fit:cover; opacity:.9; }
-.board-terminal{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; justify-content:space-between; padding:16px 20px 0; }
-.board-terminal .line{ font-family:var(--font-mono-terminal); font-size:18px; line-height:22px; }
-.board-actions{ display:flex; flex-direction:column; gap:6px; }
-.board-actions button{ background:var(--green-neon); border:none; border-radius:14px; padding:4px 14px; font-family:var(--font-mono-terminal); font-size:15px; line-height:18px; color:var(--black); text-align:center; cursor:pointer; }
-.board-pixel-title{ display:flex; flex-direction:column; gap:6px; padding:22px 20px 0; font-family:var(--font-pixel); color:var(--green-neon); }
-.board-pixel-title .l1{ font-size:26px; line-height:130%; }
-.board-pixel-title .l2{ font-size:34px; line-height:130%; }
-.board-inbox-header{ padding:26px 20px 0; text-align:center; }
-.board-inbox-header .bar{ margin:0; font-family:var(--font-mono-terminal); font-size:14px; line-height:18px; white-space:nowrap; overflow-x:hidden; }
-.board-inbox-header .title{ margin:0; font-family:var(--font-mono-terminal); font-size:22px; letter-spacing:.3em; line-height:28px; }
-.board-messages{ padding:14px 20px 40px; }
-.board-msg{ border-bottom:1px solid rgba(57,255,106,.25); padding:10px 0; display:flex; flex-direction:column; gap:2px; }
-.board-msg.new-msg{ animation:flashRow 1.6s ease; }
-@keyframes flashRow{ 0%{ background:rgba(57,255,106,.25);} 100%{ background:transparent;} }
-.board-msg .meta{ display:flex; gap:10px; font-family:var(--font-mono-terminal); font-size:14px; line-height:18px; color:rgba(57,255,106,.65); }
-.board-msg .subject{ font-family:var(--font-mono-terminal); font-size:16px; line-height:20px; color:var(--green-neon); }
 
 /* ---------- modal (used by login / post-a-message) ---------- */
 .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:center; justify-content:center; z-index:999; opacity:0; pointer-events:none; transition:opacity .2s; padding:20px; }
@@ -265,6 +157,7 @@ button{ font-family:inherit; }
 .toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(16px); background:var(--white); color:var(--black); padding:.8em 1.2em; font-size:13px; font-weight:600; z-index:1100; opacity:0; pointer-events:none; transition:all .25s; }
 .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
+
 /* =========================================================
    RESPONSIVE — tablet (≥700px) and desktop (≥1100px)
 
@@ -274,15 +167,6 @@ button{ font-family:inherit; }
    is unchanged from the Paper mockups.
    ========================================================= */
 
-/* ---------- shared nav: stacked list → horizontal bar ---------- */
-@media (min-width:700px){
-  .mini-nav{ padding:22px 40px; gap:28px; border-bottom:1px solid rgba(128,128,128,.15); }
-  .mini-nav a{ font-size:11px; }
-}
-@media (min-width:1100px){
-  .mini-nav{ padding:26px 64px; gap:36px; }
-  .mini-nav a{ font-size:12px; }
-}
 
 /* ---------- home ---------- */
 @media (min-width:700px){
@@ -313,122 +197,190 @@ button{ font-family:inherit; }
   .home-sub-shop img{ width:206px; height:50px; }
 }
 
-/* ---------- about: editorial two-column at desktop ---------- */
-@media (min-width:700px){
-  .page.about{ max-width:100%; }
-  .about-collage{ height:220px; }
-  .about-headline{ padding:32px 40px 0; font-size:72px; }
-  .about-body{ padding:32px 40px 56px; max-width:760px; }
-  .about-body p{ font-size:15px; }
-}
-@media (min-width:1100px){
-  .about-collage{ height:300px; }
-  .about-headline{ padding:48px 64px 0; font-size:104px; }
-  .about-body{ display:block; columns:2; column-gap:56px; padding:48px 64px 80px; max-width:none; }
-  .about-body p{ margin-bottom:15px; break-inside:avoid; }
-}
 
-/* ---------- events: card grid at wider widths ---------- */
-@media (min-width:700px){
-  .page.events{ max-width:100%; }
-  .events-header{ padding:32px 40px 0; }
-  .events-header .logo{ font-size:32px; }
-  .events-header h1{ font-size:44px; }
-  .events-tabs{ padding:28px 40px 0; }
-  .events-tabs button{ font-size:17px; }
-  .events-cards{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; padding:28px 40px 56px; }
-  .event-card{ height:260px; }
-}
-@media (min-width:1100px){
-  .events-header{ padding:40px 64px 0; }
-  .events-header .logo{ font-size:38px; }
-  .events-header h1{ font-size:54px; }
-  .events-tabs{ padding:32px 64px 0; }
-  .events-cards{ grid-template-columns:repeat(3,1fr); gap:20px; padding:32px 64px 72px; }
-  .event-card{ height:300px; }
-  .event-card .label{ font-size:13px; padding:18px; }
-}
+/* =========================================================
+   PAGES 2–6 — rebuilt from the Paper redesign (Sept 2026)
 
-/* ---------- gallery: more columns as it widens ---------- */
-@media (min-width:700px){
-  .page.gallery{ max-width:100%; }
-  .gallery-header{ padding:32px 40px 0; }
-  .gallery-header .logo{ font-size:28px; }
-  .gallery-header h1{ font-size:32px; }
-  .gallery-tabs{ padding:20px 40px 24px; gap:22px; }
-  .gallery-tabs button{ font-size:13px; }
-  .gallery-grid img{ width:20%; height:170px; }
-}
-@media (min-width:1100px){
-  .gallery-header{ padding:44px 64px 0; }
-  .gallery-header .logo{ font-size:34px; }
-  .gallery-header h1{ font-size:40px; }
-  .gallery-tabs{ padding:24px 64px 28px; }
-  .gallery-grid img{ width:16.666%; height:200px; }
-}
+   Paper designs every page as a 402px phone screen. These pages keep that
+   exact column on every device: under 700px it fills the phone; on wider
+   screens the whole column is scaled up with `zoom` and centred, with the
+   page colour filling the sides.
+   ========================================================= */
+.page.v2{ overflow:clip; min-height:100vh; display:flex; flex-direction:column; }
+.page.v2 > .site-footer{ margin-top:auto; }
+@media (min-width:700px){ .page.v2{ zoom:1.45; min-height:calc(100vh / 1.45); } }
+@media (min-width:1100px){ .page.v2{ zoom:1.7; min-height:calc(100vh / 1.7); } }
 
-/* ---------- lost souls club ---------- */
-@media (min-width:700px){
-  .page.lostsouls{ max-width:100%; }
-  .ls-headline{ padding:52px 40px 0; font-size:48px; max-width:820px; }
-  .ls-tagline{ padding:32px 40px 0; }
-  .ls-tagline .script{ font-size:48px; }
-  .ls-tagline .maltese{ font-size:18px; }
-  .ls-tagline .sub{ font-size:16px; }
-  .ls-body{ padding:36px 40px 64px; max-width:760px; }
-  .ls-body p{ font-size:15px; }
-}
-@media (min-width:1100px){
-  .ls-headline{ padding:72px 64px 0; font-size:64px; max-width:1000px; }
-  .ls-tagline{ padding:40px 64px 0; }
-  .ls-tagline .script{ font-size:60px; }
-  .ls-body{ display:block; columns:2; column-gap:56px; padding:48px 64px 88px; max-width:none; }
-  .ls-body p{ margin-bottom:15px; break-inside:avoid; }
-}
+/* ---------- menu bar (pages 2–6) ----------
+   Hidden by default: it sits just above the top edge and only the current
+   page's tab peeks down 8px. It slides in when the cursor reaches the top of
+   the window, on a pull-down / upward scroll on touch, or when the peeking tab
+   is tapped (assets/js/main.js). */
+.site-bar{ position:sticky; top:0; z-index:60; height:35px; margin-bottom:-35px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; transform:translateY(-35px); transition:transform .28s ease, background-color .2s; color:var(--white); }
+.site-bar.show, .site-bar:focus-within{ transform:none; }
+.site-bar > a, .site-bar > span{ font-family:var(--font-display); font-size:9px; font-weight:700; letter-spacing:.12em; line-height:11px; text-transform:uppercase; white-space:nowrap; }
+.site-bar .two{ line-height:9.5px; text-align:center; }
+.site-bar .logo{ line-height:0; flex-shrink:0; }
+.site-bar .logo-lsc img{ width:53px; height:15px; }
+.site-bar .logo-col img{ width:58px; height:14px; }
+.site-bar a:hover{ opacity:.7; }
+.site-bar .tab{ align-self:flex-start; height:43px; padding:0 8px 8px; display:flex; align-items:center; justify-content:center; border-radius:0 0 6px 6px; background:var(--white); color:var(--black); }
+.site-bar .tab:hover{ opacity:1; }
+/* light bar (About) */
+.bar-light{ background:var(--white); color:var(--black); }
+.bar-light .logo img{ filter:invert(1); }
+.bar-light .tab{ background:var(--black); color:var(--white); }
+/* dark bar (Photo Lab) */
+.bar-dark{ background:var(--black); }
+/* transparent bars (Events, LSC, Collection) — they pick up a backing once the page has scrolled */
+.bar-clear.scrolled{ background:rgba(10,10,10,.88); }
+.bar-collection.scrolled{ background:rgba(18,48,92,.92); }
+.bar-clear .tab.logo-lsc img{ filter:invert(1); }
+.bar-collection{ padding-right:0; }
+.bar-collection .tab{ padding:0 12px 8px; }
+.bar-collection .tab img{ filter:brightness(0) invert(22%) sepia(80%) saturate(2400%) hue-rotate(199deg) brightness(83%) contrast(92%); }
 
-/* ---------- society collection (shop) ---------- */
+/* ---------- footer (every page) ---------- */
+.site-footer{ display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:4.5px; padding:12px 0 14px; position:relative; font-family:var(--font-display); font-size:5.5px; font-weight:400; letter-spacing:.02em; line-height:8px; text-transform:uppercase; color:#6E6E6E; }
+.site-footer a{ display:flex; align-items:center; gap:3px; }
+.site-footer a:hover{ opacity:.7; }
+.site-footer svg{ flex-shrink:0; }
+.site-footer .ig svg{ width:8px; height:8px; }
+.site-footer .mail svg{ width:9px; height:6.75px; }
+.site-footer .sep{ width:1px; height:6px; background:currentColor; opacity:.6; flex-shrink:0; }
+.footer-dark{ color:rgba(255,255,255,.9); text-shadow:0 1px 4px rgba(0,0,0,.85); }
+.footer-dark svg{ filter:drop-shadow(0 1px 3px rgba(0,0,0,.85)); }
+.footer-dark .sep{ background:#fff; }
+.footer-backed{ background:rgba(10,10,10,.7); }
+.home .site-footer{ margin-top:auto; }
 @media (min-width:700px){
-  .page.shop{ max-width:100%; }
-  .shop-banner{ height:280px; }
-  .shop-terroir{ padding:36px 40px 0; max-width:640px; }
-  .shop-body{ padding:20px 40px 0; max-width:640px; }
-  .shop-partners{ padding:32px 40px 0; }
-  .shop-title{ padding:24px 40px 32px; font-size:48px; }
-  .shop-grid{ gap:10px; padding:0 40px 56px; }
-  .shop-grid img{ width:calc(33.333% - 7px); height:200px; }
+  .home .site-footer{ font-size:8px; line-height:12px; gap:7px; padding:20px 0 24px; }
+  .home .site-footer a{ gap:5px; }
+  .home .site-footer .ig svg{ width:12px; height:12px; }
+  .home .site-footer .mail svg{ width:13px; height:10px; }
+  .home .site-footer .sep{ height:9px; }
 }
-@media (min-width:1100px){
-  .shop-banner{ height:360px; }
-  .shop-terroir{ padding:48px 64px 0; }
-  .shop-terroir .label{ font-size:22px; }
-  .shop-body{ padding:24px 64px 0; }
-  .shop-partners{ padding:40px 64px 0; }
-  .shop-title{ padding:32px 64px 40px; font-size:60px; }
-  .shop-grid{ gap:12px; padding:0 64px 72px; }
-  .shop-grid img{ width:calc(25% - 9px); height:220px; }
-}
+@media (min-width:1100px){ .home .site-footer{ font-size:10px; line-height:14px; gap:9px; } }
 
-/* ---------- meet me at society (board) ---------- */
-@media (min-width:700px){
-  .page.board{ max-width:100%; }
-  .board-terminal{ padding:22px 40px 0; }
-  .board-terminal .line{ font-size:22px; }
-  .board-actions{ flex-direction:row; }
-  .board-actions button{ font-size:16px; padding:6px 18px; }
-  .board-pixel-title{ padding:30px 40px 0; }
-  .board-pixel-title .l1{ font-size:32px; }
-  .board-pixel-title .l2{ font-size:42px; }
-  .board-inbox-header .title{ font-size:26px; }
-  .board-messages{ padding:20px 40px 56px; max-width:900px; margin:0 auto; }
-  .board-msg{ display:grid; grid-template-columns:110px 80px 170px 1fr; align-items:baseline; gap:0 20px; padding:12px 0; }
-  .board-msg .meta{ display:contents; }
-  .board-msg .subject{ font-size:17px; }
-}
-@media (min-width:1100px){
-  .board-terminal{ padding:26px 64px 0; }
-  .board-pixel-title{ padding:36px 64px 0; }
-  .board-pixel-title .l1{ font-size:38px; }
-  .board-pixel-title .l2{ font-size:50px; }
-  .board-messages{ padding:24px 64px 72px; max-width:1040px; }
-  .board-msg{ grid-template-columns:120px 90px 190px 1fr; }
-}
+/* shared bits */
+.chev{ display:flex; justify-content:center; width:100%; padding:12px 0 4px; background:none; border:0; cursor:pointer; color:inherit; }
+.chev svg{ display:block; }
+.col{ padding-left:80px; padding-right:80px; }
+.copy p{ margin:0; font-family:var(--font-display); font-size:12px; line-height:100%; text-align:justify; }
+
+/* =========================================================
+   ABOUT  (artboards "02 About" + "02 About · on arrival")
+   ========================================================= */
+body.about-body{ background:var(--white); }
+.about{ background:var(--white); color:var(--black); }
+.about-head{ display:flex; justify-content:center; height:172px; padding-top:20px; }
+.about-head img{ width:110px; height:143px; }
+.about-sections{ display:flex; flex-direction:column; padding-bottom:28px; }
+.banner{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:100%; aspect-ratio:3/1; padding:0 6px; overflow:hidden; border:0; cursor:pointer; color:var(--white); background:#333 center/cover no-repeat; transition:opacity .35s; }
+.banner::before{ content:""; position:absolute; inset:0; background:rgba(10,10,10,.1); }
+.banner:hover::before{ background:rgba(10,10,10,.22); }
+.banner .t{ position:relative; font-family:var(--font-display); font-size:16px; font-weight:700; letter-spacing:-.02em; line-height:15px; text-align:center; text-shadow:0 1px 5px rgba(0,0,0,.7); }
+.banner .t-wide{ font-size:18px; letter-spacing:.26em; margin-right:-.26em; }
+.banner svg{ position:relative; }
+.about-sec{ padding:0 80px; }
+.about-sec + .about-sec{ margin-top:12px; }
+.about-sec:first-child{ padding-top:12px; }
+.sec-body{ display:none; flex-direction:column; align-items:center; gap:10px; padding-top:6px; animation:secIn .45s ease; }
+.about-sec.open .sec-body{ display:flex; }
+.about-sec.open .banner{ display:none; }
+.about-sec.open{ margin-top:0; padding-top:0; }
+@keyframes secIn{ from{ opacity:0; } to{ opacity:1; } }
+.sec-1 .sec-body{ padding-bottom:40px; }
+.sec-2 .sec-body{ gap:13px; padding-bottom:40px; }
+.sec-body > p{ align-self:stretch; margin:0; font-family:var(--font-display); font-size:12px; font-weight:300; line-height:100%; text-align:justify; }
+.fig{ margin:0; width:100%; }
+.fig img{ width:100%; height:auto; }
+.fig figcaption{ padding:3.5px 0; font-family:var(--font-display); font-size:6px; font-weight:400; letter-spacing:-.03em; line-height:7px; color:#6E6E6E; }
+.fig-group{ display:flex; flex-direction:column; gap:4px; width:100%; }
+.about-sec.sec-3.open{ padding:44px 4px 0; }
+.gal-title{ display:flex; align-items:center; justify-content:center; height:44px; padding-bottom:2px; margin:0; font-family:var(--font-display); font-size:26px; font-weight:700; letter-spacing:.08em; line-height:15px; }
+.gal-grid{ display:flex; flex-wrap:wrap; gap:4px; width:100%; }
+.gal-grid span{ width:calc(33.3333% - 2.6667px); aspect-ratio:1; background:#D9D9D9; }
+
+/* =========================================================
+   EVENT CALENDAR  (artboard "03 Events")
+   ========================================================= */
+body.events-body{ background:var(--black); }
+.events{ background:var(--black) url('../img/p-bg-events-polaroids.jpg') 50% 0/cover no-repeat; color:var(--white); }
+.events-scrim{ position:absolute; top:0; left:0; right:0; height:190px; background:linear-gradient(180deg, rgba(10,10,10,.85) 0%, rgba(10,10,10,.7) 55%, rgba(10,10,10,0) 100%); pointer-events:none; }
+.ev-head{ position:relative; display:flex; flex-direction:column; align-items:center; padding:29px 0 6px; }
+.ev-head img{ width:106px; height:37px; }
+.ev-head h1{ margin:-1px 0 0; font-family:var(--font-display); font-size:34px; font-weight:300; letter-spacing:.02em; line-height:42px; }
+.cal{ position:relative; display:flex; flex-direction:column; gap:28px; padding:8px 20px 48px; }
+.month{ background:rgba(10,10,10,.78); border:1px solid rgba(255,255,255,.55); scroll-margin-top:16px; }
+.m-head{ display:flex; align-items:center; justify-content:space-between; padding:14px; border-bottom:1px solid rgba(255,255,255,.55); }
+.m-head h2{ margin:0; font-size:15px; font-weight:700; letter-spacing:.15em; line-height:18px; text-transform:uppercase; }
+.m-head button{ background:none; border:0; padding:0 2px; font-family:var(--font-display); font-size:14px; line-height:18px; color:rgba(255,255,255,.6); cursor:pointer; }
+.m-head button:disabled{ visibility:hidden; }
+.m-head button:hover{ color:#fff; }
+.m-days{ display:flex; border-bottom:1px solid rgba(255,255,255,.55); }
+.m-days span{ flex:1; padding:6px 0; text-align:center; font-size:10px; font-weight:700; letter-spacing:.12em; line-height:12px; color:rgba(255,255,255,.7); }
+.week{ display:flex; border-bottom:1px solid rgba(255,255,255,.3); }
+.week:last-of-type{ border-bottom:0; }
+.day{ flex:1 1 0; min-width:0; height:64px; display:flex; flex-direction:column; justify-content:space-between; padding:4px; border-right:1px solid rgba(255,255,255,.3); }
+.day:last-child{ border-right:0; }
+.day .n{ font-size:11px; font-weight:700; line-height:12px; }
+.day.out .n{ opacity:.3; }
+.day.today .n{ text-decoration:underline; text-underline-offset:2px; }
+.day.sel{ background:rgba(255,255,255,.12); }
+.thumb{ align-self:center; width:40px; height:40px; padding:0; border:1px solid rgba(255,255,255,.8); background:var(--grey-placeholder) center/cover no-repeat; cursor:pointer; }
+.day.sel .thumb{ border:2px solid #fff; }
+.ev-panel{ display:flex; flex-direction:column; gap:12px; padding:14px; background:rgba(10,10,10,.92); border-top:2px solid #fff; border-bottom:1px solid rgba(255,255,255,.3); }
+.ev-panel .top{ display:flex; align-items:center; justify-content:space-between; }
+.ev-panel .when{ font-size:10px; font-weight:700; letter-spacing:.14em; line-height:12px; text-transform:uppercase; color:rgba(255,255,255,.7); }
+.ev-panel .x{ background:none; border:0; padding:0; cursor:pointer; line-height:0; }
+.ev-panel .row{ display:flex; gap:14px; }
+.ev-panel .poster{ width:120px; height:150px; flex-shrink:0; background:var(--grey-placeholder) center/cover no-repeat; }
+.ev-panel .info{ display:flex; flex-direction:column; gap:8px; flex:1; min-width:0; }
+.ev-panel h3{ margin:0; font-size:19px; font-weight:700; letter-spacing:.02em; line-height:22px; text-transform:uppercase; }
+.ev-panel p{ margin:0; font-size:12px; line-height:150%; color:rgba(255,255,255,.8); }
+.ev-panel .more{ align-self:flex-start; padding-bottom:2px; border-bottom:1px solid #fff; font-size:11px; font-weight:700; letter-spacing:.14em; line-height:14px; text-transform:uppercase; }
+
+/* =========================================================
+   PHOTO LAB  (artboard "04 Gallery")
+   ========================================================= */
+body.gallery-body{ background:var(--black); }
+.gallery{ background:var(--black); color:var(--white); }
+.lab-head{ display:flex; flex-direction:column; align-items:center; gap:1px; padding:37px 20px 36px; }
+.lab-head img{ width:84px; height:30px; }
+.lab-head h1{ margin:0; font-family:var(--font-display); font-size:24px; font-weight:700; letter-spacing:.04em; line-height:30px; }
+.lab-intro{ width:212px; padding-top:10px; }
+.lab-intro p{ margin:0; font-size:10px; line-height:10px; text-align:justify; }
+.lab-intro p + p{ margin-top:10px; }
+.rolls{ display:flex; flex-direction:column; align-items:center; gap:25px; padding:10px 20px 56px; }
+.roll{ position:relative; width:208px; height:66px; background:url('../img/p-film-roll.png') 50%/100% 100% no-repeat; }
+.roll span{ position:absolute; left:41px; top:27px; width:135px; font-size:12px; font-weight:600; letter-spacing:.12em; line-height:9px; text-transform:uppercase; color:var(--black); }
+
+/* =========================================================
+   LOST SOULS CLUB  (artboard "05 Lost Souls Club")
+   ========================================================= */
+body.lostsouls-body{ background:var(--black); }
+.lostsouls{ background:var(--black); color:var(--white); }
+.ls-art{ position:absolute; inset:0; background:url('../img/p-bg-lostsouls.jpg') 50% 0/100% auto repeat-y; opacity:.92; pointer-events:none; }
+.ls-head{ position:relative; display:flex; flex-direction:column; align-items:center; gap:23px; padding-top:34px; height:361px; margin:0; }
+.ls-head .l1{ width:175px; height:198px; }
+.ls-head .l2{ width:254px; height:51px; }
+.ls-head .l3{ width:112px; height:25px; }
+.ls-copy{ position:relative; display:flex; flex-direction:column; align-items:center; gap:14px; padding:17px 80px 40px; }
+.ls-copy p{ align-self:stretch; margin:0; font-size:12px; line-height:100%; text-align:justify; }
+.ls-ig{ display:flex; flex-direction:column; align-items:center; gap:6px; padding-top:6px; }
+.ls-ig svg{ filter:drop-shadow(0 1px 4px rgba(0,0,0,.85)); }
+.ls-ig span{ font-size:8px; font-weight:700; letter-spacing:.14em; line-height:10px; text-shadow:0 1px 4px rgba(0,0,0,.85); }
+.ls-ig:hover{ opacity:.75; }
+
+/* =========================================================
+   SOCIETY COLLECTION  (artboard "06 Society Collection")
+   ========================================================= */
+body.shop-body{ background:#12305C; }
+.shop{ background:#1D4E89 url('../img/p-bg-collection.jpg') 50% 0/cover no-repeat; color:var(--white); }
+.shop-scrim{ position:absolute; inset:0; background:rgba(10,30,70,.25); pointer-events:none; }
+.shop-head{ position:relative; display:flex; align-items:center; justify-content:center; height:136px; margin:0; }
+.shop-head img{ width:197px; height:57px; }
+.shop-cats{ position:relative; margin:0; padding:8px 80px 56px; list-style:none; }
+.shop-cats::before{ content:""; display:block; height:1px; background:#fff; }
+.shop-cats li{ display:flex; align-items:center; justify-content:space-between; padding:15px 2px; border-bottom:1px solid #fff; font-size:15px; font-weight:700; letter-spacing:.1em; line-height:18px; }
