@@ -15,11 +15,12 @@ lostsouls.html    Lost Souls Club
 shop.html         The Society Collection (product category grid)
 board.html        Meet Me at Society (message board — login/post, localStorage only)
 
-assets/css/style.css   Single stylesheet for all 7 pages. Mobile layout (<700px) matches
-                        the Paper design exactly; tablet (≥700px) and desktop (≥1100px)
-                        breakpoints extend the same system to wider viewports.
-assets/js/main.js      Shared helpers + the pages 2–6 menu bar (hidden, current tab peeks; slides in
-                        on hover at the top / pull-down / scroll-up) + About section open/close.
+assets/css/style.css   Single stylesheet for all 7 pages. Pages 2–6: phone (<700px) = Paper phone
+                        artboards; 700–899px = phone column zoomed; ≥900px = Paper "Desktop 1440"
+                        artboards (same layout, one centred 720px column). Rule: menu bar, body and
+                        footer always share the same side edges (32px phone / the 720 column desktop).
+assets/js/main.js      Shared helpers + the pages 2–6 menu bar (always visible; transparent bars get a
+                        backing on scroll) + About section open/close.
 assets/js/events.js    Event Calendar — month grids generated in JS; add events to EVENTS / WEEKLY.
 assets/js/chars.js     Home "Characters" parade frame clock — keeps the line's step and every
                         figure's pose change on the same 1.5 fps frame (one jump per frame).
