@@ -19,9 +19,19 @@ assets/css/style.css   Single stylesheet for all 7 pages. Pages 2–6: phone (<7
                         artboards; 700–899px = phone column zoomed; ≥900px = Paper "Desktop 1440"
                         artboards (same layout, one centred 720px column). Rule: menu bar, body and
                         footer always share the same side edges (32px phone / the 720 column desktop).
+assets/fonts/          Site font "CS Neutra" (free stand-in for Neutraface Text): Josefin Sans for weights
+                        under 350 (thin/light), Jost from Book up. Self-hosted WOFF2, SIL OFL licences included.
 assets/js/main.js      Shared helpers + the pages 2–6 menu bar (always visible; transparent bars get a
-                        backing on scroll) + About section open/close.
-assets/js/events.js    Event Calendar — month grids generated in JS; add events to EVENTS / WEEKLY.
+                        backing on scroll) + About section open/close + About gallery viewer (tile zooms out into a
+                        3/5-wide grid of prints; photos go in window.GALLERY_PHOTOS["NAME"] = [urls]).
+assets/js/events.js    Events Calendar — month grids generated in JS. Events load LIVE from the "Events"
+                        Google Calendar via netlify/functions/events.js; EVENTS is a fallback snapshot, WEEKLY
+                        holds the standing Sunday Lost Souls Club.
+netlify/functions/events.js  Netlify Function (zero-dependency, no build step): fetches the calendar's PUBLIC iCal
+                        feed, returns upcoming events as JSON. Needs the calendar shared publicly with full
+                        details. No API key. Event description parsing: Instagram/SoundCloud/Spotify/YouTube/Bandcamp/RA/TikTok
+                        URLs → artist icon links ("Name: <url>" groups them by artist); image URL → poster; any other URL →
+                        "More info" (short text on its line, e.g. "Tickets:", becomes the label); the rest → description.
 assets/js/chars.js     Home "Characters" parade frame clock — keeps the line's step and every
                         figure's pose change on the same 1.5 fps frame (one jump per frame).
 assets/js/board.js     Message board rendering, seed data, login/post (client-side only —
