@@ -87,18 +87,23 @@
 
 /* =========================================================
    About → Galleries: gallery viewer (see style.css "gallery viewer").
-   Frames are placeholders until each gallery's photos are added — put
-   image URLs in GALLERY_PHOTOS["THE DRINKS"] = [...] to fill them.
+   Photos come from window.GALLERY_SETS (assets/js/gallery-photos.js); a gallery
+   with no photos yet shows grey placeholder frames.
    ========================================================= */
 (function(){
   "use strict";
-  const tiles = document.querySelectorAll(".gal-grid .gal");
+  const tiles = document.querySelectorAll(".gal-grid .gal, .rolls .roll[data-gallery]");   // About galleries + Photo Lab rolls
   if (!tiles.length) return;
-  const GALLERY_PHOTOS = window.GALLERY_PHOTOS || {};
+  const SETS = window.GALLERY_SETS || {};
+  const IMG = "assets/img/gallery/";
+  function photosFor(name){
+    const g = SETS[name]; if (!g) return [];
+    return Array.from({ length: g.count }, (_, i) => `${IMG}${g.dir}/${g.dir}-${String(i + 1).padStart(2, "0")}-t.jpg`);
+  }
   const PLACEHOLDERS = 15;                     // fills 5 rows on phone (3-wide) / 3 rows on desktop (5-wide)
   const still = window.matchMedia("(prefers-reduced-motion: reduce)");
   const EASE = "cubic-bezier(.2,.8,.2,1)";
-  const page = document.querySelector(".page.about");
+  const page = document.querySelector(".page");
   let view, grid, openTile = null, anims = [];
 
   function seeded(str){
@@ -109,32 +114,60 @@
   function build(){
     view = document.createElement("div");
     view.className = "gal-view"; view.setAttribute("role", "dialog"); view.setAttribute("aria-modal", "true");
-    view.innerHTML = '<div class="gv-wrap"><div class="gv-head"><span class="kicker">Gallery</span><h2></h2>' +
+    view.innerHTML = '<div class="gv-wrap"><div class="gv-head"><span class="kicker">Gallery</span><h2></h2><span class="gv-date"></span>' +
       '<button class="x" type="button" aria-label="Close gallery"><svg width="16" height="16" viewBox="0 0 14 14"><path d="M1 1 L13 13 M13 1 L1 13" fill="none" stroke="#FFFFFF" stroke-width="1.6"/></svg></button></div>' +
       '<div class="gv-grid"></div></div>';
     document.body.appendChild(view);
     grid = view.querySelector(".gv-grid");
     view.querySelector(".x").addEventListener("click", close);
     view.addEventListener("click", e => { if (e.target === view || e.target.classList.contains("gv-wrap")) close(); });
-    document.addEventListener("keydown", e => { if (e.key === "Escape" && openTile) close(); });
+    document.addEventListener("keydown", e => {
+      if (photo.open){
+        if (e.key === "Escape") closePhoto();
+        else if (e.key === "ArrowRight") stepPhoto(1);
+        else if (e.key === "ArrowLeft") stepPhoto(-1);
+        return;
+      }
+      if (e.key === "Escape" && openTile) close();
+    });
+    grid.addEventListener("click", e => {
+      const f = e.target.closest(".gv-frame.has-photo");
+      if (f && !view.classList.contains("flying")) openPhoto([...grid.children].indexOf(f));
+    });
+    grid.addEventListener("keydown", e => {
+      const f = e.target.closest(".gv-frame.has-photo");
+      if (f && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); openPhoto([...grid.children].indexOf(f)); }
+    });
   }
   // transform that puts a frame exactly over the thumbnail it came out of
+  // a tiny print sitting on a point (Photo Lab: the roll's canister)
+  function fromPoint(el, x, y, s){
+    const r = el.getBoundingClientRect();
+    return `translate(${x - (r.left + r.width / 2)}px, ${y - (r.top + r.height / 2)}px) scale(${s})`;
+  }
   function fromThumb(el, T){
     const r = el.getBoundingClientRect(), s = T.width / r.width;
     return `translate(${T.left + T.width / 2 - (r.left + r.width / 2)}px, ${T.top + T.height / 2 - (r.top + r.height / 2)}px) scale(${s})`;
   }
   function open(tile){
     if (!view) build();
-    const name = tile.querySelector("h3").getAttribute("aria-label");
-    const photos = GALLERY_PHOTOS[name] || [];
+    const name = tile.dataset.gallery || tile.querySelector("h3").getAttribute("aria-label");
+    const photos = photosFor(name);
+    curSet = SETS[name] || null;
+    current = photos;
     const n = photos.length || PLACEHOLDERS, r = seeded(name);
-    view.querySelector("h2").textContent = name;
+    view.querySelector("h2").textContent = tile.dataset.title || name;
+    view.querySelector(".kicker").textContent = tile.dataset.kicker || "Gallery";
+    const credit = tile.dataset.credit ? `Photos by ${tile.dataset.credit}` : "";
+    const line = [tile.dataset.date, credit].filter(Boolean).join("  ·  ");
+    const dt = view.querySelector(".gv-date"); dt.textContent = line; dt.hidden = !line;
+    curCredit = tile.dataset.credit || "";
     grid.innerHTML = "";
     for (let i = 0; i < n; i++){
       const f = document.createElement("div");
-      f.className = "gv-frame edge-" + "abc"[Math.floor(r() * 3)];
+      f.className = "gv-frame";                                  // straight edges
       f.style.setProperty("--r", ((r() * 2 - 1) * 1.6).toFixed(2) + "deg");   // prints sit very slightly askew
-      if (photos[i]){ f.style.background = `#D2D2D2 url('${photos[i]}') center/cover no-repeat`; }
+      if (photos[i]){ f.classList.add("has-photo"); f.style.backgroundImage = `url('${photos[i]}')`; f.setAttribute("role", "button"); f.tabIndex = 0; f.setAttribute("aria-label", `Photo ${i + 1} of ${photos.length}`); }
       grid.appendChild(f);
     }
     openTile = tile;
@@ -150,9 +183,19 @@
     // tossed out like a handful of prints: each frame leaves the thumbnail at a random moment, spinning,
     // overshoots to a random scattered spot, then drops into its place in the grid
     const order = frames.map((_, i) => i).sort(() => r() - .5);
+    const isRoll = tile.classList.contains("roll");
+    const CX = T.left + T.width * .11, CY = T.top + T.height / 2;       // film canister on the roll icon
     anims = frames.map((f, i) => {
       const rest = getComputedStyle(f).transform, end = rest === "none" ? "none" : rest;
       const spin = (r() * 2 - 1) * 28, ox = (r() * 2 - 1) * 70, oy = (r() * 2 - 1) * 70;
+      if (isRoll){
+        // Photo Lab: prints start tiny at the canister and grow as they scatter out — quicker than the About toss
+        return f.animate([
+          { transform: fromPoint(f, CX, CY, .05) + ` rotate(${spin}deg)`, offset: 0 },
+          { transform: `translate(${ox}px, ${oy}px) rotate(${-spin * .35}deg) scale(.82)`, offset: .58 },
+          { transform: end, offset: 1 }
+        ], { duration: 380 + r() * 120, delay: order.indexOf(i) * Math.min(12, 900 / frames.length), easing: "cubic-bezier(.3,.7,.3,1)", fill: "backwards" });
+      }
       return f.animate([
         { transform: fromThumb(f, T) + ` rotate(${spin}deg)`, offset: 0 },
         { transform: `translate(${ox}px, ${oy}px) rotate(${-spin * .35}deg) scale(1.04)`, offset: .62 },
@@ -165,6 +208,7 @@
   }
   function close(){
     if (!openTile) return;
+    if (photo.open) closePhoto(true);
     const tile = openTile; openTile = null;
     anims.forEach(a => a.cancel()); anims = [];
     const done = () => {
@@ -181,13 +225,128 @@
     frames.forEach(f => { if (!vis.includes(f)) f.style.visibility = "hidden"; });
     const last = vis.map((f, i) => f.animate([
       { transform: getComputedStyle(f).transform },
-      { transform: fromThumb(f, T) + ` rotate(${(Math.random() * 2 - 1) * 24}deg)` }
+      { transform: (tile.classList.contains("roll") ? fromPoint(f, T.left + T.width * .11, T.top + T.height / 2, .05) : fromThumb(f, T)) + ` rotate(${(Math.random() * 2 - 1) * 24}deg)` }
     ], { duration: 320 + Math.random() * 120, delay: Math.random() * 120, easing: "cubic-bezier(.5,0,.75,.4)", fill: "forwards" }));
     (last.length ? last[last.length - 1] && Promise.all(last.map(a => a.finished)) : Promise.resolve()).then(done, done);
+  }
+  /* ---- single photo: zooms out of its print to full size, slightly askew (like the event posters) ---- */
+  let current = [], curSet = null, curCredit = "";
+  const photo = { open:false, i:0, el:null, card:null, img:null, count:null };
+  const full = u => u.replace(/-t\.jpg$/, ".jpg");
+  function buildPhoto(){
+    const el = document.createElement("div");
+    el.className = "gv-photo"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+    el.innerHTML = '<div class="gp-card"><img alt=""></div>' +
+      '<button class="gp-x" type="button" aria-label="Close photo"><svg width="16" height="16" viewBox="0 0 14 14"><path d="M1 1 L13 13 M13 1 L1 13" fill="none" stroke="#FFFFFF" stroke-width="1.6"/></svg></button>' +
+      '<button class="gp-prev" type="button" aria-label="Previous photo"><svg width="14" height="24" viewBox="0 0 14 24"><path d="M12 2 L2 12 L12 22" fill="none" stroke="#FFFFFF" stroke-width="1.6"/></svg></button>' +
+      '<button class="gp-next" type="button" aria-label="Next photo"><svg width="14" height="24" viewBox="0 0 14 24"><path d="M2 2 L12 12 L2 22" fill="none" stroke="#FFFFFF" stroke-width="1.6"/></svg></button>' +
+      '<span class="gp-count"></span><span class="gp-credit" hidden></span>' +
+      '<a class="gp-dl" download hidden><svg width="12" height="14" viewBox="0 0 12 14"><path d="M6 1 V10 M2 6 L6 10 L10 6 M1 13 H11" fill="none" stroke="#FFFFFF" stroke-width="1.5"/></svg><span>Download full res</span></a>';
+    document.body.appendChild(el);
+    Object.assign(photo, { el, card: el.querySelector(".gp-card"), img: el.querySelector("img"), count: el.querySelector(".gp-count"), credit: el.querySelector(".gp-credit"), dl: el.querySelector(".gp-dl") });
+    photo.dl.addEventListener("click", e => e.stopPropagation());
+    el.querySelector(".gp-x").addEventListener("click", () => closePhoto());
+    el.querySelector(".gp-prev").addEventListener("click", e => { e.stopPropagation(); stepPhoto(-1); });
+    el.querySelector(".gp-next").addEventListener("click", e => { e.stopPropagation(); stepPhoto(1); });
+    el.addEventListener("click", e => { if (e.target === el) closePhoto(); });
+    let x0 = null, y0 = 0;                                   // swipe on phones
+    el.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive:true });
+    el.addEventListener("touchend", e => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) stepPhoto(dx < 0 ? 1 : -1);
+    });
+  }
+  // where the photo rests: as big as fits, keeping its shape
+  function restBox(w, h){
+    const phone = innerWidth < 900;
+    const maxW = innerWidth - (phone ? 32 : 200), maxH = innerHeight - (phone ? 150 : 150);
+    const k = Math.min(maxW / w, maxH / h);
+    const W = Math.round(w * k), H = Math.round(h * k);
+    return { left: (innerWidth - W) / 2, top: (innerHeight - H) / 2 - (phone ? 10 : 0), width: W, height: H };
+  }
+  const tilt = () => { const r = Math.random(); return (Math.random() < .5 ? -1 : 1) * (1.2 + r * 2.6); };   // 1.2–3.8°, askew like the posters
+  function size(src){ return new Promise(res => { const im = new Image(); im.onload = () => res([im.naturalWidth, im.naturalHeight]); im.onerror = () => res([4, 3]); im.src = src; }); }
+  function setCount(){
+    photo.count.textContent = `${photo.i + 1} / ${current.length}`;
+    photo.credit.textContent = curCredit ? `Photo: ${curCredit}` : ""; photo.credit.hidden = !curCredit;
+    // full-resolution download (Photo Lab rolls): originals live at GALLERY_SETS[name].dl + <dir>-NN.jpg
+    const g = curSet, n = String(photo.i + 1).padStart(2, "0");
+    if (g && g.dl){ photo.dl.href = `${g.dl}${g.dir}-${n}.jpg`; photo.dl.setAttribute("download", `cafe-society-${g.dir}-${n}.jpg`); photo.dl.hidden = false; }
+    else { photo.dl.hidden = true; photo.dl.removeAttribute("href"); }
+  }
+  function hiRes(i){                                          // thumb first (already loaded), full photo swaps in
+    const t = current[i], f = full(t);
+    photo.img.src = t;
+    const im = new Image(); im.onload = () => { if (photo.i === i && photo.open) photo.img.src = f; }; im.src = f;
+  }
+  async function openPhoto(i){
+    if (photo.open || !current[i]) return;
+    if (!photo.el) buildPhoto();
+    const frame = grid.children[i];
+    const [w, h] = await size(current[i]);
+    photo.open = true; photo.i = i; setCount(); hiRes(i);
+    const R = restBox(w, h), F = frame.getBoundingClientRect(), rot = tilt();
+    const fr = parseFloat(frame.style.getPropertyValue("--r")) || 0;
+    Object.assign(photo.card.style, { left: R.left + "px", top: R.top + "px", width: R.width + "px", height: R.height + "px", transform: `rotate(${rot}deg)` });
+    photo.el.classList.add("open", "flying"); view.classList.add("photo-dim");
+    frame.style.visibility = "hidden";
+    if (!still.matches){
+      await photo.card.animate([
+        { left: F.left + "px", top: F.top + "px", width: F.width + "px", height: F.height + "px", transform: `rotate(${fr}deg)` },
+        { left: R.left + "px", top: R.top + "px", width: R.width + "px", height: R.height + "px", transform: `rotate(${rot}deg)` }
+      ], { duration: 460, easing: EASE }).finished.catch(() => {});
+    }
+    photo.el.classList.remove("flying");
+    photo.el.querySelector(".gp-x").focus({ preventScroll:true });
+  }
+  async function stepPhoto(d){
+    if (!photo.open || current.length < 2) return;
+    const i = (photo.i + d + current.length) % current.length;
+    grid.children[photo.i].style.visibility = "";
+    grid.children[i].style.visibility = "hidden";
+    const [w, h] = await size(current[i]);
+    photo.i = i; setCount();
+    const R = restBox(w, h), rot = tilt(), card = photo.card;
+    if (!still.matches) await card.animate([{ transform: card.style.transform, opacity: 1 }, { transform: `translateX(${-d * 60}px) ${card.style.transform}`, opacity: 0 }], { duration: 140, easing: "ease-in" }).finished.catch(() => {});
+    hiRes(i);
+    Object.assign(card.style, { left: R.left + "px", top: R.top + "px", width: R.width + "px", height: R.height + "px", transform: `rotate(${rot}deg)` });
+    if (!still.matches) card.animate([{ transform: `translateX(${d * 60}px) rotate(${rot - d * 6}deg) scale(1.04)`, opacity: 0 }, { transform: `rotate(${rot}deg)`, opacity: 1 }], { duration: 280, easing: EASE });
+  }
+  function closePhoto(instant){
+    if (!photo.open) return;
+    photo.open = false;
+    const frame = grid.children[photo.i];
+    const done = () => { photo.el.classList.remove("open", "flying"); if (frame) frame.style.visibility = ""; };
+    view.classList.remove("photo-dim");
+    if (instant || still.matches || !frame){ done(); return; }
+    photo.el.classList.add("flying");
+    const F = frame.getBoundingClientRect(), c = photo.card.style;
+    const fr = parseFloat(frame.style.getPropertyValue("--r")) || 0;
+    photo.card.animate([
+      { left: c.left, top: c.top, width: c.width, height: c.height, transform: c.transform },
+      { left: F.left + "px", top: F.top + "px", width: F.width + "px", height: F.height + "px", transform: `rotate(${fr}deg)` }
+    ], { duration: 360, easing: EASE, fill: "forwards" }).finished.then(a => { done(); a && a.cancel && a.cancel(); photo.card.getAnimations().forEach(x => x.cancel()); }, done);
+    frame.focus({ preventScroll:true });
   }
   tiles.forEach(t => {
     t.setAttribute("role", "button"); t.tabIndex = 0;
     t.addEventListener("click", () => open(t));
     t.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); open(t); } });
+  });
+})();
+
+/* About → Galleries: cover tiles — the photo Chef picked (GALLERY_SETS[name].cover); none yet = grey tile */
+(function(){
+  "use strict";
+  const SETS = window.GALLERY_SETS || {};
+  document.querySelectorAll(".gal-grid .gal").forEach(tile => {
+    const g = SETS[tile.querySelector("h3").getAttribute("aria-label")];
+    if (!g || !g.cover) return;
+    const box = tile.querySelector(".gal-img");
+    const big = box.clientWidth * (window.devicePixelRatio || 1) > 560;
+    const file = g.coverCrop ? `${g.dir}-cover.jpg`                      // hand-cropped square (e.g. zoomed in on the drink)
+      : `${g.dir}-${String(g.cover).padStart(2, "0")}${big ? "" : "-t"}.jpg`;
+    box.style.backgroundImage = `url('assets/img/gallery/${g.dir}/${file}')`;
   });
 })();
