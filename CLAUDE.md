@@ -10,7 +10,8 @@ Static, 7-page HTML site. No build step, no package manager, no framework.
 index.html       Home
 about.html        About
 events.html       Events (upcoming/past toggle)
-gallery.html      Photo gallery (filter + lightbox)
+gallery.html      Photo Lab — film rolls; a roll with data-gallery opens the same gallery viewer, and its photos get a
+                  'Download full res' button (GALLERY_SETS[name].dl = base URL of the originals, hosted off-repo)
 lostsouls.html    Lost Souls Club
 shop.html         The Society Collection (product category grid)
 board.html        Meet Me at Society (message board — login/post, localStorage only)
@@ -23,7 +24,7 @@ assets/fonts/          Site font "CS Neutra" (free stand-in for Neutraface Text)
                         under 350 (thin/light), Jost from Book up. Self-hosted WOFF2, SIL OFL licences included.
 assets/js/main.js      Shared helpers + the pages 2–6 menu bar (always visible; transparent bars get a
                         backing on scroll) + About section open/close + About gallery viewer (tile zooms out into a
-                        3/5-wide grid of prints; photos go in window.GALLERY_PHOTOS["NAME"] = [urls]).
+                        3-wide phone / 5-wide desktop grid of prints). Photo sets + chosen covers live in assets/js/gallery-photos.js (window.GALLERY_SETS; coverCrop = hand-cropped <dir>-cover.jpg).
 assets/js/events.js    Events Calendar — month grids generated in JS. Events load LIVE from the "Events"
                         Google Calendar via netlify/functions/events.js; EVENTS is a fallback snapshot, WEEKLY
                         holds the standing Sunday Lost Souls Club.
