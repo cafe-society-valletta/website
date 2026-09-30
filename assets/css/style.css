@@ -3,6 +3,14 @@
    (file "Jazzy feather") — 7 screens, mobile-locked layout.
    ========================================================= */
 
+/* Site font "CS Neutra" — free stand-in for Neutraface Text (Chef, 2026-09-30):
+   Josefin Sans for the thin/light weights (under 350), Jost for everything from Book up.
+   Self-hosted (SIL Open Font License). */
+@font-face{ font-family:'CS Neutra'; src:url('../fonts/josefin-sans-latin-wght-normal.woff2') format('woff2'); font-weight:100 349; font-display:swap; unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face{ font-family:'CS Neutra'; src:url('../fonts/josefin-sans-latin-ext-wght-normal.woff2') format('woff2'); font-weight:100 349; font-display:swap; unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face{ font-family:'CS Neutra'; src:url('../fonts/jost-latin-wght-normal.woff2') format('woff2'); font-weight:350 900; font-display:swap; unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face{ font-family:'CS Neutra'; src:url('../fonts/jost-latin-ext-wght-normal.woff2') format('woff2'); font-weight:350 900; font-display:swap; unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+
 :root{
   --black:#0A0A0A;
   --white:#FFFFFF;
@@ -13,7 +21,7 @@
   --grey-placeholder:#8C8C8C;
 
   --font-logo:'Permanent Marker', cursive;
-  --font-display:'Space Grotesk', sans-serif;
+  --font-display:'CS Neutra', 'Jost', sans-serif;
   --font-script:'Caveat', cursive;
   --font-gothic:'Eater', system-ui;
   --font-mono-body:'Courier Prime', monospace;
@@ -47,14 +55,20 @@ button{ font-family:inherit; }
    every frame, and every figure changes pose on that same frame. Each figure runs one of four gaits
    (march / strut / bop / deck) with its own gentle bounce (--dy) and lean (--rot), and starts a whole number
    of frames into its cycle, so the crowd never hits the same pose at once but never drifts off the beat. */
-.home-chars{ height:163px; flex-shrink:0; overflow:hidden; position:relative; --char-gap:24px; --s:1; --nose-line:39px; }
+.home-chars{ height:163px; flex-shrink:0; overflow:hidden; position:relative; --char-gap:24px; --s:1; --nose-line:39px; --beat:.6667s; }
+/* South Park rock — every frame each figure tips from its feet to the other side, like a cut-out
+   being walked along. Neighbours start on opposite feet. Synced to the frame clock in chars.js. */
+.char{ transform-origin:50% 100%; --rock:2.45deg; animation:chars-rock calc(var(--beat) * 2) steps(1,end) infinite; }
+.char:nth-child(even){ animation-delay:calc(var(--beat) * -1); }
+.char-dj{ --rock:1.05deg; }
+@keyframes chars-rock{ 0%{ transform:rotate(calc(var(--rock) * -1)); } 50%{ transform:rotate(var(--rock)); } 100%{ transform:rotate(calc(var(--rock) * -1)); } }
 .home-chars-track{ display:flex; width:max-content; height:100%; animation:chars-parade 70s steps(105) infinite; }
 .home-chars-set{ display:flex; align-items:flex-start; gap:var(--char-gap); margin:0; padding:0 var(--char-gap) 0 0; list-style:none; height:100%; }
 /* Figures hang from a shared "nose line": each is offset so the pointed tip of its nose sits on it.
    --nose = nose-tip height as a fraction of the image height. */
 .char{ flex-shrink:0; line-height:0; --dy:-2px; --rot:1.5deg; --nose:.08; --h:calc(120px * var(--s)); margin-top:calc(var(--nose-line) - var(--h) * var(--nose)); }
 .char-dj{ --h:calc(70px * var(--s)); margin-left:-8px; margin-right:-8px; } /* booths have empty air above the decks — tuck neighbours in slightly */
-.char img{ height:var(--h); width:auto; transform-origin:50% 100%; --beat:.6667s; animation:chars-march calc(var(--beat) * 4) steps(1,end) infinite; }
+.char img{ height:var(--h); width:auto; transform-origin:50% 100%; --lean:calc(var(--rot) * .3); animation:chars-march calc(var(--beat) * 4) steps(1,end) infinite; }
 .char:nth-child(1){ --dy:-1px;  --rot:1.12deg; --nose:0.01; }
 .char:nth-child(2){ --dy:-3px; --rot:-2.25deg; --nose:0.1; }
 .char:nth-child(3){ --dy:-1.5px;  --rot:3deg; --nose:0.083; padding-left:14px; } /* her smoke trails left — optical spacing */
@@ -90,39 +104,39 @@ button{ font-family:inherit; }
 @keyframes chars-parade{ from{ transform:translateX(-50%); } to{ transform:translateX(0); } }
 /* march — 4 frames: plant left (squash) · pass (lift) · plant right (squash) · pass (half lift) */
 @keyframes chars-march{
-  0%  { transform:translate(-.5px, 0) rotate(calc(var(--rot) * -1)) scaleY(0.9925); }
-  25% { transform:translate(0, var(--dy)) rotate(calc(var(--rot) * -.2)) scaleY(1.005); }
-  50% { transform:translate(.5px, 0) rotate(var(--rot)) scaleY(0.9925); }
-  75% { transform:translate(0, calc(var(--dy) * .6)) rotate(calc(var(--rot) * .2)) scaleY(1.0025); }
-  100%{ transform:translate(-.5px, 0) rotate(calc(var(--rot) * -1)) scaleY(0.9925); }
+  0%  { transform:translate(-.5px, 0) rotate(calc(var(--lean) * -1)) scaleY(0.9925); }
+  25% { transform:translate(0, var(--dy)) rotate(calc(var(--lean) * -.2)) scaleY(1.005); }
+  50% { transform:translate(.5px, 0) rotate(var(--lean)) scaleY(0.9925); }
+  75% { transform:translate(0, calc(var(--dy) * .6)) rotate(calc(var(--lean) * .2)) scaleY(1.0025); }
+  100%{ transform:translate(-.5px, 0) rotate(calc(var(--lean) * -1)) scaleY(0.9925); }
 }
 /* strut — 6 frames: a hip-led swagger that rolls through the lean instead of snapping */
 @keyframes chars-strut{
-  0%      { transform:translate(0, 0) rotate(calc(var(--rot) * -1)) scaleY(0.995); }
-  16.667% { transform:translate(.5px, calc(var(--dy) * .5)) rotate(calc(var(--rot) * -.4)); }
-  33.333% { transform:translate(.5px, var(--dy)) rotate(calc(var(--rot) * .5)) scaleY(1.005); }
-  50%     { transform:translate(0, 0) rotate(var(--rot)) scaleY(0.995); }
-  66.667% { transform:translate(-.5px, calc(var(--dy) * .5)) rotate(calc(var(--rot) * .4)); }
-  83.333% { transform:translate(-.5px, var(--dy)) rotate(calc(var(--rot) * -.5)) scaleY(1.005); }
-  100%    { transform:translate(0, 0) rotate(calc(var(--rot) * -1)) scaleY(0.995); }
+  0%      { transform:translate(0, 0) rotate(calc(var(--lean) * -1)) scaleY(0.995); }
+  16.667% { transform:translate(.5px, calc(var(--dy) * .5)) rotate(calc(var(--lean) * -.4)); }
+  33.333% { transform:translate(.5px, var(--dy)) rotate(calc(var(--lean) * .5)) scaleY(1.005); }
+  50%     { transform:translate(0, 0) rotate(var(--lean)) scaleY(0.995); }
+  66.667% { transform:translate(-.5px, calc(var(--dy) * .5)) rotate(calc(var(--lean) * .4)); }
+  83.333% { transform:translate(-.5px, var(--dy)) rotate(calc(var(--lean) * -.5)) scaleY(1.005); }
+  100%    { transform:translate(0, 0) rotate(calc(var(--lean) * -1)) scaleY(0.995); }
 }
 /* bop — 3 frames: dip · spring up · tilt and hold */
 @keyframes chars-bop{
   0%      { transform:translate(0, 0.5px) rotate(0deg) scaleY(0.99); }
-  33.333% { transform:translate(0, var(--dy)) rotate(calc(var(--rot) * -.6)) scaleY(1.0075); }
-  66.667% { transform:translate(0, calc(var(--dy) * .3)) rotate(var(--rot)) scaleY(1); }
+  33.333% { transform:translate(0, var(--dy)) rotate(calc(var(--lean) * -.6)) scaleY(1.0075); }
+  66.667% { transform:translate(0, calc(var(--dy) * .3)) rotate(var(--lean)) scaleY(1); }
   100%    { transform:translate(0, 0.5px) rotate(0deg) scaleY(0.99); }
 }
 /* deck — 4 frames for the DJs: nod down · up · nod down · lean into the mix */
 @keyframes chars-deck{
   0%  { transform:translate(0, 0.5px) rotate(0deg) scaleY(0.9925); }
-  25% { transform:translate(0, var(--dy)) rotate(calc(var(--rot) * -.5)) scaleY(1.0025); }
+  25% { transform:translate(0, var(--dy)) rotate(calc(var(--lean) * -.5)) scaleY(1.0025); }
   50% { transform:translate(0, 0.5px) rotate(0deg) scaleY(0.9925); }
-  75% { transform:translate(.5px, calc(var(--dy) * .5)) rotate(var(--rot)) scaleY(1); }
+  75% { transform:translate(.5px, calc(var(--dy) * .5)) rotate(var(--lean)) scaleY(1); }
   100%{ transform:translate(0, 0.5px) rotate(0deg) scaleY(0.9925); }
 }
 /* hover-to-pause and frame sync are handled in assets/js/chars.js */
-@media (prefers-reduced-motion:reduce){ .home-chars-track, .char img{ animation:none; } }
+@media (prefers-reduced-motion:reduce){ .home-chars-track, .char, .char img{ animation:none; } }
 .home-nav{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; height:163px; padding:14px 24px 0; }
 .home-nav a, .home-nav span{ font-family:var(--font-display); font-size:15px; font-weight:700; letter-spacing:-.02em; line-height:18px; text-transform:uppercase; color:var(--white); }
 .home-nav a:hover{ opacity:.7; }
@@ -233,7 +247,9 @@ button{ font-family:inherit; }
 .bar-clear .tab.logo-lsc img{ filter:invert(1); }
 .bar-collection .tab{ padding:0 6px; }
 .bar-collection .tab img{ width:50px; height:12px; }
-.bar-collection .tab img{ filter:brightness(0) invert(22%) sepia(80%) saturate(2400%) hue-rotate(199deg) brightness(83%) contrast(92%); }
+/* active Collection tab = white tab with the logo knocked out, so the background shows through (Paper 1EX-0 / 1EZ-0) */
+.bar-collection .tab{ background:transparent url('../img/p-tab-collection-mobile.png') 50% 0/100% 100% no-repeat !important; }
+.bar-collection .tab img{ opacity:0; }
 
 /* ---------- footer (every page) ---------- */
 .site-footer{ display:flex; align-items:center; justify-content:space-between; gap:3px; padding:12px 32px 14px; position:relative; font-family:var(--font-display); font-size:5px; font-weight:400; letter-spacing:0; line-height:8px; text-transform:uppercase; color:#6E6E6E; }
@@ -295,7 +311,14 @@ body.about-body{ background:var(--white); }
 .about-sec.sec-3.open{ padding:44px 4px 0; }
 .gal-title{ display:flex; align-items:center; justify-content:center; height:44px; padding-bottom:2px; margin:0; font-family:var(--font-display); font-size:26px; font-weight:700; letter-spacing:.08em; line-height:15px; }
 .gal-grid{ display:flex; flex-wrap:wrap; gap:4px; width:100%; }
-.gal-grid span{ width:calc(33.3333% - 2.6667px); aspect-ratio:1; background:#D9D9D9; }
+/* each gallery: a square thumbnail with its name small and centred over it; line breaks chosen per name in the markup */
+.gal-grid .gal{ position:relative; width:calc(33.3333% - 2.6667px); aspect-ratio:1; overflow:hidden; }
+.gal-grid .gal-img{ position:absolute; inset:0; background:#D9D9D9 center/cover no-repeat; }
+.gal-grid .gal-img::after{ content:""; position:absolute; inset:0; background:rgba(10,10,10,.34); }
+.gal-grid .gal h3{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; margin:0; padding:12%; }
+.gal-grid .gal h3 b{ display:flex; flex-direction:column; align-items:center; font-family:var(--font-display); font-size:14px; font-weight:800;
+  letter-spacing:-.01em; line-height:1.1; text-align:center; text-transform:uppercase; color:#fff; text-shadow:0 1px 8px rgba(0,0,0,.35); }
+.gal-grid .gal h3 b span{ display:block; white-space:nowrap; }
 
 /* =========================================================
    EVENT CALENDAR  (artboard "03 Events")
@@ -313,6 +336,8 @@ body.events-body{ background:var(--black); }
 .m-head button{ background:none; border:0; padding:0 2px; font-family:var(--font-display); font-size:14px; line-height:18px; color:rgba(255,255,255,.6); cursor:pointer; }
 .m-head button:disabled{ visibility:hidden; }
 .m-head button:hover{ color:#fff; }
+/* phone: no month arrows — the months simply stack and scroll */
+@media (max-width:899.98px){ .m-head{ justify-content:center; } .m-head button{ display:none; } }
 .m-days{ display:flex; border-bottom:1px solid rgba(255,255,255,.55); }
 .m-days span{ flex:1; padding:6px 0; text-align:center; font-size:10px; font-weight:700; letter-spacing:.12em; line-height:12px; color:rgba(255,255,255,.7); }
 .week{ display:flex; border-bottom:1px solid rgba(255,255,255,.3); }
@@ -334,7 +359,92 @@ body.events-body{ background:var(--black); }
 .ev-panel .info{ display:flex; flex-direction:column; gap:8px; flex:1; min-width:0; }
 .ev-panel h3{ margin:0; font-size:19px; font-weight:700; letter-spacing:.02em; line-height:22px; text-transform:uppercase; }
 .ev-panel p{ margin:0; font-size:12px; line-height:120%; color:rgba(255,255,255,.8); }
+/* Event detail (poster + details + artist links) — shared by phone overlay and desktop side panel */
+/* the card is a paper poster: rough-edged (clip-path below), slapped on askew — each event gets its own
+   rotation / offset / edge from a hash of its title+date (events.js sets --rot --dx --dy --frot) */
+.ev-detail .slap{ position:relative; width:var(--pw); --rot:0deg; --dx:0px; --dy:0px; --frot:6deg;
+  transform:translate(var(--dx),var(--dy)) rotate(var(--rot)); transform-origin:50% 40%;
+  filter:drop-shadow(0 10px 20px rgba(0,0,0,.55)) drop-shadow(0 1px 2px rgba(0,0,0,.5));
+  will-change:transform; }
+/* opening = the calendar thumbnail zooms out into the full poster (FLIP in events.js, Web Animations);
+   the calendar slides / sinks into the background, dimmed and blurred */
+.ev-detail .details, .ev-detail .x{ transition:opacity .12s ease-out; }
+.ev-layout.flying .ev-detail .details, .ev-layout.flying .ev-detail .x{ opacity:0; }
+.day .thumb.away{ visibility:hidden; }
+.ev-layout.snap, .ev-layout.snap *, body.ev-snap .ev-head{ transition:none !important; }
+.ev-layout .cal, .ev-head{ transition:filter .45s ease, transform .5s cubic-bezier(.2,.8,.2,1), opacity .45s ease; }
+.ev-layout.dim .cal, body.ev-dim .ev-head{ filter:brightness(.72) blur(1.5px); }
+.ev-detail .inner{ position:relative; width:100%; background:#0D0D0D; }
+/* masking tape across each corner, pressed on as the poster lands (angles/offsets per event, set in events.js) */
+.ev-detail .tape{ position:absolute; z-index:2; width:var(--tw,88px); height:var(--th,24px); pointer-events:none;
+  --ta:-40deg; --tx:0px; --ty:0px;
+  transform:translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--ta));
+  background:linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,0) 45%, rgba(0,0,0,.06)), rgba(222,214,192,.8);
+  clip-path:polygon(3.5% 0.0%, 3.5% 14.3%, 0% 28.6%, 1% 42.9%, 2% 57.1%, 0% 71.4%, 2% 85.7%, 0% 100.0%, 96.5% 100.0%, 99% 85.7%, 98% 71.4%, 99% 57.1%, 100% 42.9%, 98% 28.6%, 100% 14.3%, 98% 0.0%); opacity:0; }
+.ev-detail .tape.tl{ left:0; top:0; } .ev-detail .tape.tr{ left:100%; top:0; }
+.ev-detail .tape.bl{ left:0; top:100%; } .ev-detail .tape.br{ left:100%; top:100%; }
+.ev-detail .taped .tape{ animation:ev-tape .15s cubic-bezier(.3,.7,.3,1) forwards; animation-delay:var(--td,0ms); }
+@keyframes ev-tape{
+  from{ opacity:0; transform:translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--ta)) scale(1.3); }
+  to  { opacity:1; transform:translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--ta)) scale(1); } }
+@media (max-width:899.98px){ .ev-detail .tape{ --tw:70px; --th:20px; } }
+/* close button lives on the details strip (the tape covers the poster's corners) */
+/* details + links: a separate, straight, centred block under the poster (not part of the paper effects);
+   grows downward for longer descriptions */
+.ev-detail .details{ position:relative; width:var(--pw); margin-top:26px; align-items:center; text-align:center;
+  padding:16px 40px 18px; background:rgba(10,10,10,.66); }
+.ev-detail .details .x{ top:8px; right:8px; background:transparent; }
+.ev-detail .socials{ align-items:center; align-self:stretch; }
+.ev-detail .socials .grp{ align-items:center; }
+.ev-detail .socials .links{ justify-content:center; }
+
+.ev-detail .poster{ display:block; width:100%; aspect-ratio:990/1400; object-fit:cover; background:#0A0A0A; }
+.ev-detail .poster.logo{ object-fit:contain; padding:0 18%; }
+.ev-detail .x{ position:absolute; top:10px; right:10px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:50%; background:rgba(10,10,10,.7); cursor:pointer; }
+.ev-detail .details{ display:flex; flex-direction:column; gap:6px; padding:14px 18px 16px; }
+.ev-detail .when{ display:flex; flex-direction:column; align-items:center; gap:3px; font-weight:700; text-transform:uppercase; }
+.ev-detail .when .date{ font-size:15px; letter-spacing:.12em; line-height:18px; color:#fff; }
+.ev-detail .when .time{ font-size:13px; letter-spacing:.1em; line-height:16px; color:rgba(255,255,255,.72); }
+.ev-detail .loc{ display:inline-flex; align-items:center; justify-content:center; gap:5px; font-size:11px; font-weight:500; letter-spacing:.04em; line-height:14px; color:rgba(255,255,255,.75); text-decoration:none; }
+.ev-detail .loc svg{ flex-shrink:0; }
+.ev-detail .kicker{ align-self:stretch; padding-bottom:8px; margin-bottom:2px; border-bottom:1px solid rgba(255,255,255,.22);
+  font-size:12px; font-weight:800; letter-spacing:.2em; line-height:14px; text-transform:uppercase; color:rgba(255,255,255,.9); }
+.ev-detail .loc:hover span{ text-decoration:underline; text-underline-offset:3px; }
+.ev-detail h3{ margin:0; font-size:19px; font-weight:700; letter-spacing:.02em; line-height:22px; text-transform:uppercase; }
+.ev-detail p{ margin:0; font-size:12px; line-height:120%; color:rgba(255,255,255,.8); white-space:pre-line; }
+/* torn/rough paper edge for event posters — 3 variants, px-based so the roughness stays ~2px at any size */
+.ev-detail .inner.edge-a, .gv-frame.edge-a{ clip-path:polygon(0.0% 0.8px, 2.94% 0.4px, 5.88% 0.5px, 8.82% 0px, 11.76% 0.3px, 14.71% 2.0px, 17.65% 2.2px, 20.59% 2.1px, 23.53% 1.8px, 26.47% 1.2px, 29.41% 0.9px, 32.35% 0.7px, 35.29% 1.4px, 38.24% 1.2px, 41.18% 1.6px, 44.12% 2.0px, 47.06% 1.7px, 50.0% 1.5px, 52.94% 1.7px, 55.88% 0.1px, 58.82% 1.0px, 61.76% 0.5px, 64.71% 0.7px, 67.65% 1.0px, 70.59% 1.8px, 73.53% 2.1px, 76.47% 2.2px, 79.41% 1.4px, 82.35% 1.1px, 85.29% 0.9px, 88.24% 0.6px, 91.18% 1.2px, 94.12% 0.9px, 97.06% 2.2px, calc(100% - 0.5px) 0.0%, calc(100% - 0.5px) 2.08%, calc(100% - 0px) 4.17%, calc(100% - 2.3px) 6.25%, calc(100% - 2.3px) 8.33%, calc(100% - 1.5px) 10.42%, calc(100% - 2.3px) 12.5%, calc(100% - 1.9px) 14.58%, calc(100% - 1.4px) 16.67%, calc(100% - 2.7px) 18.75%, calc(100% - 0.2px) 20.83%, calc(100% - 0.5px) 22.92%, calc(100% - 0px) 25.0%, calc(100% - 0.4px) 27.08%, calc(100% - 1.8px) 29.17%, calc(100% - 1.6px) 31.25%, calc(100% - 2.1px) 33.33%, calc(100% - 1.7px) 35.42%, calc(100% - 1.8px) 37.5%, calc(100% - 0.5px) 39.58%, calc(100% - 0px) 41.67%, calc(100% - 1.0px) 43.75%, calc(100% - 2.2px) 45.83%, calc(100% - 1.1px) 47.92%, calc(100% - 1.0px) 50.0%, calc(100% - 2.0px) 52.08%, calc(100% - 1.8px) 54.17%, calc(100% - 1.4px) 56.25%, calc(100% - 0.9px) 58.33%, calc(100% - 0px) 60.42%, calc(100% - 0.6px) 62.5%, calc(100% - 0.3px) 64.58%, calc(100% - 1.4px) 66.67%, calc(100% - 1.5px) 68.75%, calc(100% - 1.7px) 70.83%, calc(100% - 1.3px) 72.92%, calc(100% - 2.9px) 75.0%, calc(100% - 0.7px) 77.08%, calc(100% - 0px) 79.17%, calc(100% - 0.8px) 81.25%, calc(100% - 0.3px) 83.33%, calc(100% - 1.6px) 85.42%, calc(100% - 1.4px) 87.5%, calc(100% - 2.3px) 89.58%, calc(100% - 2.1px) 91.67%, calc(100% - 0.9px) 93.75%, calc(100% - 1.1px) 95.83%, calc(100% - 0px) 97.92%, 100.0% calc(100% - 1.2px), 97.06% calc(100% - 1.1px), 94.12% calc(100% - 0px), 91.18% calc(100% - 0.8px), 88.24% calc(100% - 1.1px), 85.29% calc(100% - 0.7px), 82.35% calc(100% - 2.1px), 79.41% calc(100% - 1.6px), 76.47% calc(100% - 1.5px), 73.53% calc(100% - 1.8px), 70.59% calc(100% - 0px), 67.65% calc(100% - 0.9px), 64.71% calc(100% - 0.2px), 61.76% calc(100% - 1.3px), 58.82% calc(100% - 1.6px), 55.88% calc(100% - 1.9px), 52.94% calc(100% - 1.5px), 50.0% calc(100% - 1.2px), 47.06% calc(100% - 1.3px), 44.12% calc(100% - 2.5px), 41.18% calc(100% - 0.9px), 38.24% calc(100% - 1.0px), 35.29% calc(100% - 1.3px), 32.35% calc(100% - 0.5px), 29.41% calc(100% - 1.2px), 26.47% calc(100% - 2.1px), 23.53% calc(100% - 1.5px), 20.59% calc(100% - 1.3px), 17.65% calc(100% - 0.2px), 14.71% calc(100% - 0.2px), 11.76% calc(100% - 0.1px), 8.82% calc(100% - 0.8px), 5.88% calc(100% - 0.8px), 2.94% calc(100% - 2.3px), 3.0px 100.0%, 0.8px 97.92%, 0px 95.83%, 0px 93.75%, 0.6px 91.67%, 3.0px 89.58%, 1.0px 87.5%, 1.3px 85.42%, 2.3px 83.33%, 0.5px 81.25%, 0.3px 79.17%, 0.1px 77.08%, 0.4px 75.0%, 0.2px 72.92%, 0.7px 70.83%, 2.0px 68.75%, 1.2px 66.67%, 1.4px 64.58%, 1.6px 62.5%, 1.1px 60.42%, 0.2px 58.33%, 0.3px 56.25%, 0.6px 54.17%, 1.2px 52.08%, 1.8px 50.0%, 1.2px 47.92%, 1.5px 45.83%, 1.8px 43.75%, 1.2px 41.67%, 0px 39.58%, 0px 37.5%, 1.0px 35.42%, 1.7px 33.33%, 2.1px 31.25%, 1.3px 29.17%, 0.9px 27.08%, 2.9px 25.0%, 0px 22.92%, 0.8px 20.83%, 0px 18.75%, 0.2px 16.67%, 1.5px 14.58%, 2.4px 12.5%, 3.7px 10.42%, 2.0px 8.33%, 1.4px 6.25%, 0.9px 4.17%, 0px 2.08%); }
+.ev-detail .inner.edge-b, .gv-frame.edge-b{ clip-path:polygon(0.0% 0.2px, 2.94% 1.1px, 5.88% 0.9px, 8.82% 1.0px, 11.76% 2.0px, 14.71% 1.2px, 17.65% 0.8px, 20.59% 2.6px, 23.53% 1.2px, 26.47% 0.5px, 29.41% 1.3px, 32.35% 2.4px, 35.29% 1.0px, 38.24% 1.1px, 41.18% 1.7px, 44.12% 1.5px, 47.06% 0.9px, 50.0% 0.4px, 52.94% 1.0px, 55.88% 1.0px, 58.82% 0.7px, 61.76% 1.2px, 64.71% 2.2px, 67.65% 2.3px, 70.59% 2.1px, 73.53% 0.1px, 76.47% 1.0px, 79.41% 1.0px, 82.35% 0px, 85.29% 1.4px, 88.24% 0.9px, 91.18% 2.5px, 94.12% 1.2px, 97.06% 2.2px, calc(100% - 0.7px) 0.0%, calc(100% - 0.5px) 2.08%, calc(100% - 0.5px) 4.17%, calc(100% - 0.9px) 6.25%, calc(100% - 1.2px) 8.33%, calc(100% - 1.4px) 10.42%, calc(100% - 2.1px) 12.5%, calc(100% - 0.6px) 14.58%, calc(100% - 0px) 16.67%, calc(100% - 0.8px) 18.75%, calc(100% - 0px) 20.83%, calc(100% - 0.5px) 22.92%, calc(100% - 1.9px) 25.0%, calc(100% - 1.5px) 27.08%, calc(100% - 1.2px) 29.17%, calc(100% - 1.0px) 31.25%, calc(100% - 0.7px) 33.33%, calc(100% - 1.1px) 35.42%, calc(100% - 0.4px) 37.5%, calc(100% - 0px) 39.58%, calc(100% - 1.6px) 41.67%, calc(100% - 1.1px) 43.75%, calc(100% - 2.2px) 45.83%, calc(100% - 1.3px) 47.92%, calc(100% - 2.0px) 50.0%, calc(100% - 0.8px) 52.08%, calc(100% - 0px) 54.17%, calc(100% - 0px) 56.25%, calc(100% - 0.1px) 58.33%, calc(100% - 1.1px) 60.42%, calc(100% - 1.0px) 62.5%, calc(100% - 1.2px) 64.58%, calc(100% - 1.9px) 66.67%, calc(100% - 1.6px) 68.75%, calc(100% - 1.5px) 70.83%, calc(100% - 0px) 72.92%, calc(100% - 0.2px) 75.0%, calc(100% - 0px) 77.08%, calc(100% - 1.1px) 79.17%, calc(100% - 1.3px) 81.25%, calc(100% - 2.5px) 83.33%, calc(100% - 2.1px) 85.42%, calc(100% - 2.3px) 87.5%, calc(100% - 0.1px) 89.58%, calc(100% - 0.7px) 91.67%, calc(100% - 0px) 93.75%, calc(100% - 0.5px) 95.83%, calc(100% - 0.7px) 97.92%, 100.0% calc(100% - 0px), 97.06% calc(100% - 0.8px), 94.12% calc(100% - 1.3px), 91.18% calc(100% - 1.9px), 88.24% calc(100% - 1.6px), 85.29% calc(100% - 2.4px), 82.35% calc(100% - 1.3px), 79.41% calc(100% - 1.4px), 76.47% calc(100% - 0.6px), 73.53% calc(100% - 0.4px), 70.59% calc(100% - 0px), 67.65% calc(100% - 1.7px), 64.71% calc(100% - 1.8px), 61.76% calc(100% - 2.2px), 58.82% calc(100% - 1.7px), 55.88% calc(100% - 0.8px), 52.94% calc(100% - 0.2px), 50.0% calc(100% - 0.4px), 47.06% calc(100% - 0.5px), 44.12% calc(100% - 0.6px), 41.18% calc(100% - 2.0px), 38.24% calc(100% - 1.2px), 35.29% calc(100% - 1.4px), 32.35% calc(100% - 2.4px), 29.41% calc(100% - 1.3px), 26.47% calc(100% - 0.6px), 23.53% calc(100% - 0px), 20.59% calc(100% - 0.7px), 17.65% calc(100% - 1.0px), 14.71% calc(100% - 1.1px), 11.76% calc(100% - 0.9px), 8.82% calc(100% - 2.3px), 5.88% calc(100% - 2.1px), 2.94% calc(100% - 1.1px), 0.2px 100.0%, 0px 97.92%, 1.1px 95.83%, 1.2px 93.75%, 2.5px 91.67%, 2.6px 89.58%, 3.4px 87.5%, 1.2px 85.42%, 0.1px 83.33%, 0px 81.25%, 1.8px 79.17%, 1.4px 77.08%, 2.3px 75.0%, 2.0px 72.92%, 2.0px 70.83%, 1.9px 68.75%, 1.2px 66.67%, 0.4px 64.58%, 0px 62.5%, 0.8px 60.42%, 0.6px 58.33%, 1.8px 56.25%, 2.0px 54.17%, 1.6px 52.08%, 2.0px 50.0%, 1.5px 47.92%, 0px 45.83%, 0.4px 43.75%, 0.3px 41.67%, 1.5px 39.58%, 2.2px 37.5%, 2.0px 35.42%, 2.1px 33.33%, 1.6px 31.25%, 0.4px 29.17%, 1.1px 27.08%, 0.3px 25.0%, 0.2px 22.92%, 1.5px 20.83%, 0.9px 18.75%, 1.9px 16.67%, 3.2px 14.58%, 1.9px 12.5%, 1.3px 10.42%, 0.1px 8.33%, 0px 6.25%, 0.5px 4.17%, 1.5px 2.08%); }
+.ev-detail .inner.edge-c, .gv-frame.edge-c{ clip-path:polygon(0.0% 1.0px, 2.94% 0.8px, 5.88% 0.7px, 8.82% 1.1px, 11.76% 1.1px, 14.71% 1.4px, 17.65% 1.0px, 20.59% 1.7px, 23.53% 0.8px, 26.47% 1.6px, 29.41% 0.7px, 32.35% 0.8px, 35.29% 1.7px, 38.24% 1.9px, 41.18% 1.9px, 44.12% 1.5px, 47.06% 1.3px, 50.0% 0.9px, 52.94% 0.6px, 55.88% 0px, 58.82% 1.0px, 61.76% 0.5px, 64.71% 0.9px, 67.65% 1.9px, 70.59% 1.5px, 73.53% 1.0px, 76.47% 1.2px, 79.41% 0px, 82.35% 0.7px, 85.29% 1.0px, 88.24% 1.1px, 91.18% 1.7px, 94.12% 1.3px, 97.06% 1.1px, calc(100% - 0px) 0.0%, calc(100% - 0.5px) 2.08%, calc(100% - 1.0px) 4.17%, calc(100% - 1.1px) 6.25%, calc(100% - 1.9px) 8.33%, calc(100% - 2.5px) 10.42%, calc(100% - 1.3px) 12.5%, calc(100% - 1.3px) 14.58%, calc(100% - 1.4px) 16.67%, calc(100% - 0px) 18.75%, calc(100% - 0.3px) 20.83%, calc(100% - 0.6px) 22.92%, calc(100% - 0.7px) 25.0%, calc(100% - 2.2px) 27.08%, calc(100% - 1.6px) 29.17%, calc(100% - 2.2px) 31.25%, calc(100% - 1.6px) 33.33%, calc(100% - 1.1px) 35.42%, calc(100% - 0.6px) 37.5%, calc(100% - 0px) 39.58%, calc(100% - 0.9px) 41.67%, calc(100% - 1.1px) 43.75%, calc(100% - 1.0px) 45.83%, calc(100% - 1.6px) 47.92%, calc(100% - 2.2px) 50.0%, calc(100% - 2.0px) 52.08%, calc(100% - 0.9px) 54.17%, calc(100% - 0px) 56.25%, calc(100% - 0.2px) 58.33%, calc(100% - 2.3px) 60.42%, calc(100% - 0.9px) 62.5%, calc(100% - 1.0px) 64.58%, calc(100% - 1.4px) 66.67%, calc(100% - 1.2px) 68.75%, calc(100% - 1.2px) 70.83%, calc(100% - 1.1px) 72.92%, calc(100% - 0.6px) 75.0%, calc(100% - 0.4px) 77.08%, calc(100% - 0.3px) 79.17%, calc(100% - 0.5px) 81.25%, calc(100% - 2.1px) 83.33%, calc(100% - 2.3px) 85.42%, calc(100% - 1.9px) 87.5%, calc(100% - 1.0px) 89.58%, calc(100% - 0.4px) 91.67%, calc(100% - 0.1px) 93.75%, calc(100% - 0.1px) 95.83%, calc(100% - 0.5px) 97.92%, 100.0% calc(100% - 0px), 97.06% calc(100% - 0px), 94.12% calc(100% - 0.2px), 91.18% calc(100% - 1.0px), 88.24% calc(100% - 1.5px), 85.29% calc(100% - 1.9px), 82.35% calc(100% - 2.3px), 79.41% calc(100% - 1.9px), 76.47% calc(100% - 1.5px), 73.53% calc(100% - 0px), 70.59% calc(100% - 0px), 67.65% calc(100% - 0px), 64.71% calc(100% - 0.4px), 61.76% calc(100% - 1.4px), 58.82% calc(100% - 1.5px), 55.88% calc(100% - 2.4px), 52.94% calc(100% - 0.8px), 50.0% calc(100% - 1.4px), 47.06% calc(100% - 0px), 44.12% calc(100% - 0px), 41.18% calc(100% - 0.5px), 38.24% calc(100% - 1.2px), 35.29% calc(100% - 2.0px), 32.35% calc(100% - 2.0px), 29.41% calc(100% - 1.2px), 26.47% calc(100% - 1.9px), 23.53% calc(100% - 0.7px), 20.59% calc(100% - 0.5px), 17.65% calc(100% - 0.8px), 14.71% calc(100% - 0.3px), 11.76% calc(100% - 1.4px), 8.82% calc(100% - 1.3px), 5.88% calc(100% - 2.6px), 2.94% calc(100% - 1.2px), 0.8px 100.0%, 0px 97.92%, 0.9px 95.83%, 1.1px 93.75%, 2.8px 91.67%, 1.6px 89.58%, 2.2px 87.5%, 1.2px 85.42%, 0.5px 83.33%, 0.3px 81.25%, 0.7px 79.17%, 1.2px 77.08%, 1.2px 75.0%, 1.7px 72.92%, 2.6px 70.83%, 1.6px 68.75%, 1.8px 66.67%, 2.0px 64.58%, 0px 62.5%, 1.0px 60.42%, 0.8px 58.33%, 0.7px 56.25%, 1.7px 54.17%, 2.0px 52.08%, 1.8px 50.0%, 0.7px 47.92%, 0.2px 45.83%, 0.1px 43.75%, 0.6px 41.67%, 0.6px 39.58%, 0.8px 37.5%, 1.2px 35.42%, 1.8px 33.33%, 2.2px 31.25%, 3.4px 29.17%, 1.2px 27.08%, 0.9px 25.0%, 0.6px 22.92%, 0.8px 20.83%, 1.7px 18.75%, 1.0px 16.67%, 1.2px 14.58%, 2.2px 12.5%, 2.0px 10.42%, 0.8px 8.33%, 0.4px 6.25%, 0.5px 4.17%, 0.1px 2.08%); }
+.ev-detail .more{ align-self:center; margin-top:2px; padding-bottom:2px; border-bottom:1px solid #fff; font-size:11px; font-weight:700; letter-spacing:.14em; line-height:14px; text-transform:uppercase; }
+/* Phone (<900px): tapping an event opens the same card over the calendar, which dims + blurs behind it */
+@media (max-width:899.98px){
+  .ev-detail{ display:flex; flex-direction:column; position:fixed; inset:0; z-index:120; align-items:center; justify-content:flex-start; padding:48px 32px 32px;
+    background:rgba(10,10,10,0); visibility:hidden; transition:background-color .3s ease, visibility 0s linear .3s; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; }
+  .ev-layout.open .ev-detail{ visibility:visible; transition:background-color .3s ease; }
+  .ev-layout.dim .ev-detail{ background:rgba(10,10,10,.28); }
+  .ev-detail{ --pw:min(100%, 420px, calc((100dvh - 72px - 150px) / 1.414)); }
+  .ev-detail .slap{ margin-top:auto; flex-shrink:0; }
+  .ev-detail .details{ margin-bottom:auto; flex-shrink:0; }
+  .ev-detail .details{ width:100%; max-width:var(--pw); padding:14px 36px 16px; }
+  .ev-layout.dim .cal, body.ev-dim .ev-head{ transform:scale(.96); }
+  body.ev-open{ overflow:hidden; }
+}
+@media (min-width:700px) and (max-width:899.98px){
+  /* this range is zoomed 1.45×, so size the card in un-zoomed viewport units */
+  .ev-detail{ --pw:min(100%, 420px, calc((100dvh / 1.45 - 72px - 150px) / 1.414)); padding-top:40px; }
+  .ev-panel{ display:none !important; }
+}
 .ev-panel .more{ align-self:flex-start; padding-bottom:2px; border-bottom:1px solid #fff; font-size:11px; font-weight:700; letter-spacing:.14em; line-height:14px; text-transform:uppercase; }
+/* artist links (icons + handles), grouped by artist when the description names them */
+.socials{ display:flex; flex-direction:column; gap:8px; padding-top:9px; border-top:1px solid rgba(255,255,255,.22); }
+.socials .grp{ display:flex; flex-direction:column; gap:5px; }
+.socials .artist{ font-size:9px; font-weight:700; letter-spacing:.16em; line-height:11px; text-transform:uppercase; color:rgba(255,255,255,.55); }
+.socials .links{ display:flex; flex-wrap:wrap; gap:6px 14px; }
+.socials .soc{ display:inline-flex; align-items:center; gap:6px; color:rgba(255,255,255,.85); font-size:11px; font-weight:500; letter-spacing:.03em; line-height:16px; text-decoration:none; transition:color .2s; }
+.socials .soc svg{ flex-shrink:0; }
+.socials .soc:hover, .socials .soc:focus-visible{ color:#fff; }
+.socials .soc:hover span{ text-decoration:underline; text-underline-offset:3px; }
 
 /* =========================================================
    PHOTO LAB  (artboard "04 Gallery")
@@ -372,7 +482,7 @@ body.lostsouls-body{ background:var(--black); }
    SOCIETY COLLECTION  (artboard "06 Society Collection")
    ========================================================= */
 body.shop-body{ background:#12305C; }
-.shop{ background:#1D4E89 url('../img/p-bg-collection.jpg') 50% 0/cover no-repeat; color:var(--white); }
+.shop{ background:#1D4E89 url('../img/p-bg-collection-mobile.jpg') 50% 0/cover no-repeat; color:var(--white); }
 .shop-scrim{ position:absolute; inset:0; background:rgba(10,30,70,.25); pointer-events:none; }
 .shop-head{ position:relative; display:flex; align-items:center; justify-content:center; height:136px; margin:0; }
 .shop-head img{ width:197px; height:57px; }
@@ -429,7 +539,8 @@ body.shop-body{ background:#12305C; }
   .about-sec.sec-3.open{ width:min(800px, calc(100% - 80px)); padding:56px 0 40px; }
   .gal-title{ height:44px; padding:0; font-size:40px; line-height:44px; }
   .gal-grid{ gap:8px; }
-  .gal-grid span{ width:calc((100% - 16px) / 3); }
+  .gal-grid .gal{ width:calc((100% - 16px) / 3); }
+  .gal-grid .gal h3 b{ font-size:24px; }
 
   /* EVENT CALENDAR (D03) */
   .events{ background:linear-gradient(rgba(10,10,10,.12), rgba(10,10,10,.12)), var(--black) url('../img/p-bg-events-desktop.jpg') 100% 50%/cover no-repeat; }
@@ -477,6 +588,8 @@ body.shop-body{ background:#12305C; }
   .ls-ig span{ font-size:12px; line-height:14px; }
 
   /* SOCIETY COLLECTION (D06) */
+  .shop{ background-image:url('../img/p-bg-collection-desktop.jpg'); }
+  .bar-collection .tab{ background-image:url('../img/p-tab-collection-desktop.png') !important; }
   .shop-head{ height:auto; padding-top:56px; }
   .shop-head img{ width:460px; height:133px; }
   .shop-cats{ width:var(--col); margin-inline:auto; padding:40px 0 72px; }
@@ -496,4 +609,58 @@ body.shop-body{ background:#12305C; }
   .home-menu .home-sub-lostsouls img{ width:min(182px, calc(182 * var(--u))); height:auto; }
   .home-menu .home-sub-shop img{ width:min(198px, calc(198 * var(--u))); height:auto; }
   .home-chars{ margin-bottom:0; }
+}
+
+/* EVENT CALENDAR desktop (≥900px) — Paper D03 "default" + "event open" (Chef, 2026-09-30):
+   title and calendar centred; clicking an event slides the calendar left and opens a
+   poster panel beside it. Posters are always A-size portrait (1 : 1.414), so the panel is
+   the poster's width with the details sitting directly underneath. */
+@media (min-width:900px){
+  .ev-layout{ --pw:min(420px, 30vw, calc((100vh - 250px) / 1.414)); display:flex; justify-content:center; align-items:flex-start; padding:32px 40px 72px; }
+  .ev-layout .cal{ flex:0 1 720px; min-width:0; width:auto; margin:0; padding:0; }
+  .ev-detail{ display:block; flex:0 0 auto; width:0; margin-left:0; opacity:0; visibility:hidden; overflow:visible; position:sticky; top:88px; transition:width .45s ease, margin-left .45s ease, opacity .2s ease, visibility 0s linear .2s; }
+  .ev-layout.open .ev-detail{ width:var(--pw); margin-left:40px; opacity:1; visibility:visible; transition:width .45s ease, margin-left .45s ease, opacity .1s ease; }
+  /* desktop: details + links float to the LEFT of the poster, over the dimmed/blurred calendar,
+     vertically centred on the poster (long descriptions grow up and down) */
+  .ev-detail .details{ position:absolute; z-index:3; top:50%; right:calc(100% + 30px); transform:translateY(-50%);
+    width:min(236px, 22vw); margin:0; justify-content:center;
+    gap:10px; padding:26px 22px 24px; background:rgba(8,8,8,.86); border:1px solid rgba(255,255,255,.42);
+    box-shadow:0 14px 40px rgba(0,0,0,.55); }
+  .ev-detail .details .x{ top:10px; right:10px; }
+  .ev-detail .details .socials{ margin-top:2px; padding-top:10px; }
+  .ev-detail .details .when{ margin-bottom:2px; }
+  .ev-layout .ev-panel{ display:none; }
+}
+
+/* =========================================================
+   About → Galleries: gallery viewer. Clicking a gallery tile zooms its
+   frames out of the thumbnail into a 3-wide (phone) / 5-wide (desktop)
+   grid of rough-edged prints with clear gaps, over the About page faded,
+   darkened and blurred — same language as the event posters.
+   ========================================================= */
+.gal-grid .gal{ cursor:pointer; }
+.gal-grid .gal:focus-visible{ outline:2px solid #fff; outline-offset:-4px; }
+.gal-grid .gal.away{ visibility:hidden; }
+body.gv-open{ overflow:hidden; }
+.page.about{ transition:filter .45s ease; }
+body.gv-dim .page.about{ filter:brightness(.42) blur(2px); }
+.gal-view{ position:fixed; inset:0; z-index:130; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain;
+  background:rgba(10,10,10,0); transition:background-color .35s ease; visibility:hidden; }
+.gal-view.open{ visibility:visible; }
+body.gv-dim .gal-view{ background:rgba(10,10,10,.35); }
+.gv-wrap{ display:flex; flex-direction:column; align-items:center; gap:18px; min-height:100%; padding:56px 20px 40px; }
+.gv-head{ position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; width:100%; color:#fff; text-align:center; }
+.gal-view:not(.flying) .gv-head{ transition:opacity .2s ease-out; }   /* fades in on landing, hides instantly on take-off */
+.gv-head .kicker{ font-size:10px; font-weight:800; letter-spacing:.2em; line-height:12px; text-transform:uppercase; color:rgba(255,255,255,.7); }
+.gv-head h2{ margin:0; font-family:var(--font-display); font-size:22px; font-weight:800; letter-spacing:-.01em; line-height:1.1; text-transform:uppercase; }
+.gv-head .x{ position:absolute; top:-6px; right:0; width:32px; height:32px; display:flex; align-items:center; justify-content:center; padding:0; border:0; background:transparent; cursor:pointer; }
+.gv-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; width:100%; }
+.gv-frame{ position:relative; aspect-ratio:1; background:#D2D2D2; transform:rotate(var(--r, 0deg));
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,.45)); will-change:transform; }
+.gal-view.flying .gv-head{ opacity:0; }
+@media (min-width:900px){
+  .gv-wrap{ gap:26px; padding:64px 40px 56px; }
+  .gv-head .kicker{ font-size:12px; line-height:14px; }
+  .gv-head h2{ font-size:36px; }
+  .gv-grid{ grid-template-columns:repeat(5, 1fr); gap:22px; max-width:1100px; }
 }
