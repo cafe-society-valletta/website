@@ -86,9 +86,15 @@
     zoomer.style.transform = z === 1 ? "" : `translate(${tx}px, ${ty}px) scale(${z})`;
     clip.classList.toggle("zoomed", z > 1);
   };
+  // zoomed, the book grows over the whole screen (over the title and menu bar), not cropped to its frame:
+  // keep it covering the screen where it's bigger than the screen, and fully on screen where it's smaller
   const clamp = () => {
-    const W = clip.clientWidth, H = clip.clientHeight;
-    tx = Math.min(0, Math.max(W - W * z, tx)); ty = Math.min(0, Math.max(H - H * z, ty));
+    const r = clip.getBoundingClientRect(), W = r.width * z, H = r.height * z, vw = innerWidth, vh = innerHeight;
+    const lim = (t, start, size, view) => {
+      const lo = size >= view ? view - size - start : -start, hi = size >= view ? -start : view - size - start;
+      return Math.min(hi, Math.max(lo, t));
+    };
+    tx = lim(tx, r.left, W, vw); ty = lim(ty, r.top, H, vh);
   };
   const zoomTo = (s, cx, cy, anim) => {          // keep the point under (cx, cy) in place
     const px = (cx - tx) / z, py = (cy - ty) / z;
