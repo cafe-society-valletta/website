@@ -69,7 +69,7 @@
     // slide straight to the open-book position (cover in the right half) so nothing re-centres or bounces back
     stage.classList.add("arriving");
     book.classList.add("bk-enter");
-    setTimeout(() => stage.classList.remove("arriving"), 1700);
+    pf.on("flip", () => stage.classList.remove("arriving"));     // only once it has actually opened (a hidden tab can delay the turn)
     setTimeout(() => { if (pf.getCurrentPageIndex() === 0) pf.flipNext(); }, 480);   // opens while still sliding in — just a glimpse of the cover
     setTimeout(() => book.classList.remove("bk-enter"), 950);
   }
