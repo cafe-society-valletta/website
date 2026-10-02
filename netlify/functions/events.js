@@ -12,7 +12,9 @@
 const CAL_ID = "110b92e33944a25f0690ba21c0fef7a40ab58f2b8ef1502bfcf60310618f47a7@group.calendar.google.com";
 const FEED = `https://calendar.google.com/calendar/ical/${encodeURIComponent(CAL_ID)}/public/basic.ics`;
 const TZ = "Europe/Malta";
-const DAYS_BACK = 7, DAYS_AHEAD = 150;
+// Past events stay on the calendar from the first month the site shows (October 2026) — no lifespan
+// cutoff yet (Chef, 2026-10-01). Upcoming events: the next DAYS_AHEAD days.
+const FIRST_DAY = Date.UTC(2026, 9, 1), DAYS_AHEAD = 150;
 
 // ---------- iCal parsing ----------
 function unfold(text){ return text.replace(/\r\n/g, "\n").replace(/\n[ \t]/g, ""); }
@@ -66,8 +68,11 @@ const hm = t => (t && t.h != null) ? `${pad(t.h)}:${pad(t.mi)}` : "";
 
 // ---------- description → text, poster, "More info" link and artist socials ----------
 // Paste links on their own lines in the event description. Instagram / SoundCloud / Spotify /
-// YouTube / Bandcamp / Resident Advisor / TikTok links become icon links; "Name: <url>" groups
-// a link under that artist; an image URL becomes the poster; any other URL is "More info".
+// YouTube / Bandcamp / Resident Advisor / TikTok profile links become artist icon links; "Name: <url>"
+// groups a link under that artist; an image URL becomes the poster. Every other URL becomes a
+// button — "Label: <url>" sets its text (Tickets:, Photos:, Recording:…); unlabelled, a video
+// (YouTube watch / youtu.be / live / shorts, Vimeo) reads "Watch", a Photo Lab gallery link reads
+// "Photos", anything else "More info".
 const PLATFORMS = [
   { id:"instagram",  re:/(^|\.)instagram\.com$/i },
   { id:"soundcloud", re:/(^|\.)soundcloud\.com$/i },
@@ -104,8 +109,10 @@ function social(url){
   return { platform: pf.id, url: u.toString(), label: handle || NAMES[pf.id] };
 }
 
+const isVideo = u => /(^|\.)youtu\.be$/i.test(u.hostname) || (/(^|\.)youtube\.com$/i.test(u.hostname) && /^\/(watch|live\/|shorts\/|embed\/)/.test(u.pathname)) || /(^|\.)vimeo\.com$/i.test(u.hostname);
+const isGallery = u => /(^|\.)cafesocietyvalletta\.(com|netlify\.app)$/i.test(u.hostname) && /gallery/.test(u.pathname);
 function parseDescription(raw){
-  const out = {}, socials = [], rest = [];
+  const out = {}, socials = [], rest = [], links = [];
   for (let line of htmlToText(raw).split("\n")){
     line = line.trim();
     const urls = line.match(/https?:\/\/[^\s<>"]+/gi) || [];
@@ -113,9 +120,14 @@ function parseDescription(raw){
     const m = left.match(/^(.+?)\s*[:\-–—]\s*$/);            // "Denzel Sharkey: <url>"
     for (const url of urls){
       if (/\.(?:jpe?g|png|webp|gif)(?:\?\S*)?$/i.test(url) && !out.poster){ out.poster = url; continue; }
-      const s = social(url);
+      let u = null; try { u = new URL(url); } catch {}
+      const s = u && !isVideo(u) ? social(url) : null;
       if (s){ if (m) s.artist = m[1].trim(); socials.push(s); continue; }
-      if (!out.link){ out.link = url; if (left && left.length <= 30){ out.linkLabel = left.replace(/[:\-–—]\s*$/, "").trim(); left = ""; } }
+      const link = { url };
+      if (left && left.length <= 30 && urls.length === 1){ link.label = left.replace(/[:\-–—]\s*$/, "").trim(); left = ""; }
+      else if (u && isVideo(u)) link.label = "Watch";
+      else if (u && isGallery(u)) link.label = "Photos";
+      links.push(link);
     }
     if (urls.length && m) left = "";
     rest.push(left);
@@ -123,6 +135,7 @@ function parseDescription(raw){
   const text = rest.filter(Boolean).join("\n").trim();
   if (text) out.text = text;
   if (socials.length) out.socials = socials;
+  if (links.length){ out.links = links; out.link = links[0].url; if (links[0].label) out.linkLabel = links[0].label; }   // link/linkLabel kept for older pages
   return out;
 }
 
@@ -160,7 +173,7 @@ exports.handler = async () => {
     const raw = parseICS(await res.text());
 
     const now = new Date();
-    const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - DAYS_BACK));
+    const from = new Date(FIRST_DAY);
     const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + DAYS_AHEAD));
 
     // one-off edits of a repeating event replace that day's occurrence
