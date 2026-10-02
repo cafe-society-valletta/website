@@ -14,12 +14,12 @@ gallery.html      Photo Lab — film rolls; a roll with data-gallery opens the s
                   'Download full res' button (GALLERY_SETS[name].dl = base URL of the originals, hosted off-repo)
 lostsouls.html    Lost Souls Club
 menu.html         Menu — the printed A5 booklet as a 3D flip book (assets/js/menu.js): closed cover → A4-wide spreads →
-                  back cover. Pages = assets/img/menu/menu-NN.jpg (1240px wide) + menu-NN-s.jpg (700px), rendered
+                  back cover; pinch-to-zoom on touch screens. Pages = assets/img/menu/menu-NN.jpg (1240px wide) + menu-NN-s.jpg (700px), rendered
                   from the menu PDF; data-pages on #booklet = page count. Missing images show numbered placeholders.
 shop.html         The Society Collection — categories open inline in place (product carousel
                   bleeds right); product view = full-bleed swipe photos + info (assets/js/shop.js). Products in
                   assets/js/shop-data.js (PLACEHOLDERS, Shopify-shaped). Plan: Paper/site own the look, Shopify only
-                  does bag/checkout + stock. Deep links: shop.html#apparel, shop.html#p/<handle>.
+                  does bag/checkout + stock. Deep links: shop.html#apparel, shop.html#p/<handle> (e.g. #p/apparel-test-1).
 board.html        Meet Me at Society (message board — login/post, localStorage only)
 
 assets/css/style.css   Single stylesheet for all 7 pages. Pages 2–6: phone (<700px) = Paper phone
