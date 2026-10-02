@@ -334,6 +334,17 @@
     t.addEventListener("click", () => open(t));
     t.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); open(t); } });
   });
+  // deep link: gallery.html#qlv-pride (or about.html#the-drinks) opens that gallery on arrival — used by
+  // "Photos →" buttons on past events in the Events Calendar
+  const slug = x => x.toLowerCase().replace(/['’]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const want = decodeURIComponent(location.hash.slice(1));
+  if (want){
+    const hit = [...tiles].find(t => (t.dataset.slug || slug(t.dataset.gallery || t.querySelector("h3")?.getAttribute("aria-label") || "")) === want);
+    if (hit){
+      const sec = hit.closest(".about-sec"); if (sec) sec.classList.add("open");
+      setTimeout(() => { hit.scrollIntoView({ block:"center" }); setTimeout(() => open(hit), 350); }, 250);
+    }
+  }
 })();
 
 /* About → Galleries: cover tiles — the photo Chef picked (GALLERY_SETS[name].cover); none yet = grey tile */

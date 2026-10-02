@@ -1,6 +1,6 @@
 /* =========================================================
-   EVENTS CALENDAR — month grids (Monday first) from today's month
-   onwards; each event is a thumbnail on its day. Tapping a thumbnail
+   EVENTS CALENDAR — month grids (Monday first) from October 2026 (past events stay,
+   faded) to a few months ahead; each event is a thumbnail on its day. Tapping a thumbnail
    opens a detail row under that week (one open at a time).
 
    Events load LIVE from the "Events" Google Calendar via netlify/functions/events.js;
@@ -39,6 +39,7 @@
   ];
 
   const MONTHS_AHEAD = 3;
+  const FIRST_MONTH = new Date(2026, 9, 1);   // October 2026 — nothing earlier is shown
   const cal = document.getElementById("calendar");
   if (!cal) return;
 
@@ -100,10 +101,20 @@
     });
     return box;
   }
-  function moreLink(ev){
-    const a = el("a","more", `${ev.linkLabel || "More info"} →`); a.href = ev.link;
-    if (/^https?:/.test(ev.link)){ a.target = "_blank"; a.rel = "noopener"; }
-    return a;
+  // every non-artist link in the description becomes a button: "Photos →" (a Photo Lab gallery),
+  // "Watch →" (a YouTube / Vimeo recording), "Tickets →"… — "Label: <url>" in the description sets the text
+  function moreLinks(ev){
+    const list = ev.links || (ev.link ? [{ url: ev.link, label: ev.linkLabel }] : []);
+    if (!list.length) return null;
+    const box = el("div","more-links");
+    list.forEach(l => {
+      let href = l.url;
+      try { const u = new URL(l.url, location.href); if (/cafesocietyvalletta\.(com|netlify\.app)$/i.test(u.hostname) || u.origin === location.origin) href = u.pathname.replace(/^\//, "") + u.search + u.hash; } catch (e) {}
+      const a = el("a","more", `${l.label || "More info"} →`); a.href = href;
+      if (/^https?:/.test(href)){ a.target = "_blank"; a.rel = "noopener"; }
+      box.appendChild(a);
+    });
+    return box;
   }
 
   // Desktop: clicking an event slides the calendar left and opens the poster panel beside it.
@@ -198,7 +209,8 @@
     const p = detail.querySelector("p"); if (ev.text) p.textContent = ev.text; else p.remove();
     const dBox = detail.querySelector(".details"), dSoc = socialsFor(ev);
     if (dSoc) dBox.appendChild(dSoc);
-    if (ev.link) dBox.appendChild(moreLink(ev));
+    const dMore = moreLinks(ev); if (dMore) dBox.appendChild(dMore);
+    if (d < today){ detail.querySelector(".kicker").textContent = "Past event:"; }
     detail.querySelector(".x").addEventListener("click", () => hideDetail());
     const thumb = thumbOf(cell);
     const wasOpen = layout.classList.contains("open");
@@ -231,9 +243,14 @@
     flight.onfinish = () => { flight = null; clearTimeout(landTimer); landed(); };
     flight.oncancel = () => { flight = null; clearTimeout(landTimer); layout.classList.remove("flying"); };
   }
-  // phone: tap outside the card or press Escape to close
+  // a click/tap anywhere closes the open poster (Chef) — except links (location, artist icons, More info, menu)
+  // and other events' thumbnails, which switch to that event instead
   if (detail){
-    detail.addEventListener("click", e => { if (e.target === detail) hideDetail(); });
+    document.addEventListener("click", e => {
+      if (!layout || !layout.classList.contains("open")) return;
+      if (e.target.closest("a, .thumb")) return;
+      hideDetail();
+    });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && layout && layout.classList.contains("open")) hideDetail(); });
     wide.addEventListener("change", () => document.body.classList.toggle("ev-open", !wide.matches && layout.classList.contains("open")));
   }
@@ -255,7 +272,7 @@
     if (ev.poster){ poster.style.backgroundImage = `url('${ev.poster}')`; if (ev.posterFit === "contain"){ poster.style.backgroundSize = "88% auto"; poster.style.backgroundColor = "#0A0A0A"; poster.style.border = "1px solid rgba(255,255,255,.3)"; } }
     const pSoc = socialsFor(ev);
     if (pSoc) p.querySelector(".info").appendChild(pSoc);
-    if (ev.link) p.querySelector(".info").appendChild(moreLink(ev));
+    const pMore = moreLinks(ev); if (pMore) p.querySelector(".info").appendChild(pMore);
     p.querySelector(".x").addEventListener("click", closePanel);
     weekRow.after(p);
     cell.classList.add("sel");
@@ -265,18 +282,16 @@
   let months = [];
   function render(){
   closePanel(); hideDetail(true); cal.innerHTML = ""; months = [];
-  // in the last week of a month, start the calendar at next month
-  const daysLeft = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate() - today.getDate();
-  // …unless something is still on this month
-  let upcomingThisMonth = false;
-  for (let t = new Date(today); t.getMonth() === today.getMonth(); t.setDate(t.getDate() + 1)) if (eventsOn(t).length) { upcomingThisMonth = true; break; }
-  const offset = (daysLeft < 7 && !upcomingThisMonth) ? 1 : 0;
-  // show at least MONTHS_AHEAD months, extending down to the month of the last listed event (max 6)
+  // months run from the first month the calendar covers (October 2026 — past events stay up, no
+  // lifespan cutoff yet) to at least MONTHS_AHEAD months from now, or the month of the last listed
+  // event (max 6 ahead); the page scrolls to the current month on arrival
+  const thisIdx = (today.getFullYear() - FIRST_MONTH.getFullYear()) * 12 + today.getMonth() - FIRST_MONTH.getMonth();
   const lastEv = EVENTS.reduce((m, e) => e.date > m ? e.date : m, "");
-  const lastIdx = lastEv ? (+lastEv.slice(0,4) - today.getFullYear()) * 12 + (+lastEv.slice(5,7) - 1 - today.getMonth()) + 1 : 0;
-  const count = Math.min(6, Math.max(MONTHS_AHEAD + offset, lastIdx));
+  const lastIdx = lastEv ? (+lastEv.slice(0,4) - FIRST_MONTH.getFullYear()) * 12 + (+lastEv.slice(5,7) - 1 - FIRST_MONTH.getMonth()) : 0;
+  const count = Math.max(thisIdx + MONTHS_AHEAD, Math.min(thisIdx + 6, lastIdx + 1));
+  const offset = 0;
   for (let i = offset; i < count; i++){
-    const first = new Date(today.getFullYear(), today.getMonth() + i, 1);
+    const first = new Date(FIRST_MONTH.getFullYear(), FIRST_MONTH.getMonth() + i, 1);
     const box = el("section","month");
     box.setAttribute("aria-label", `${MONTH_NAMES[first.getMonth()]} ${first.getFullYear()}`);
     const head = el("div","m-head");
@@ -300,11 +315,12 @@
         if (date.getMonth() !== first.getMonth()) cell.classList.add("out");
         if (+date === +today) cell.classList.add("today");
         cell.appendChild(el("span","n", String(date.getDate())));
-        if (date.getMonth() === first.getMonth() && date >= today){
-          const evs = eventsOn(date);
+        if (date.getMonth() === first.getMonth()){
+          const past = date < today;
+          const evs = past ? EVENTS.filter(e => e.date === key(date)) : eventsOn(date);   // past: one-off events only (no weekly)
           if (evs.length){
             const ev = evs[0];
-            const t = el("button","thumb"); t.type = "button";
+            const t = el("button", past ? "thumb past" : "thumb"); t.type = "button";
             t.setAttribute("aria-label", `${ev.title}, ${date.getDate()} ${MONTH_NAMES[date.getMonth()]}`);
             if (ev.poster) t.style.backgroundImage = `url('${ev.poster}')`;
             if (ev.posterFit === "contain"){ t.style.backgroundSize = "90% auto"; t.style.backgroundColor = "#0A0A0A"; }
@@ -320,17 +336,36 @@
       }
       box.appendChild(row);
     } while (d.getMonth() === first.getMonth());
-    months.push({ box, prev, next });
+    months.push({ box, prev, next, first });
     cal.appendChild(box);
   }
   months.forEach((m, i) => {
     m.prev.disabled = i === 0;
     m.next.disabled = i === months.length - 1;
-    m.prev.addEventListener("click", () => months[i-1] && months[i-1].box.scrollIntoView({ behavior:"smooth", block:"start" }));
-    m.next.addEventListener("click", () => months[i+1] && months[i+1].box.scrollIntoView({ behavior:"smooth", block:"start" }));
+    m.prev.addEventListener("click", () => showMonth(i - 1));
+    m.next.addEventListener("click", () => showMonth(i + 1));
   });
+  // desktop shows one month at a time (CSS hides the rest); keep the month being viewed across re-renders
+  let idx = curFirst ? months.findIndex(m => +m.first === +curFirst) : -1;
+  if (idx < 0) idx = months.findIndex(m => m.first.getFullYear() === today.getFullYear() && m.first.getMonth() === today.getMonth());
+  showMonth(idx < 0 ? 0 : idx);
   }
-  render();
+  let curFirst = null;
+  function showMonth(i){
+    if (!months[i]) return;
+    months.forEach((m, j) => m.box.classList.toggle("cur", j === i));
+    curFirst = months[i].first;
+  }
+  // arrive on the current month (earlier months sit above it) — re-applied after the live feed
+  // re-renders, unless the visitor has already started scrolling
+  let moved = false;
+  ["wheel","touchmove","keydown","mousedown"].forEach(t => addEventListener(t, () => { moved = true; }, { once:true, passive:true }));
+  function toThisMonth(){
+    if (moved || location.hash || wide.matches) return;   // desktop: one month on show, nothing to scroll to
+    const m = months.find(x => x.first.getFullYear() === today.getFullYear() && x.first.getMonth() === today.getMonth());
+    if (m && months.indexOf(m) > 0) requestAnimationFrame(() => m.box.scrollIntoView({ block:"start" }));
+  }
+  render(); toThisMonth();
   wide.addEventListener && wide.addEventListener("change", () => { closePanel(); hideDetail(true); });
 
   // Live events straight from the Google Calendar (netlify/functions/events.js).
@@ -341,7 +376,7 @@
       .then(data => {
         if (!data || !Array.isArray(data.events)) return;
         EVENTS = data.events.map(e => e.poster ? e : Object.assign({}, LOGO, e));
-        render();
+        render(); toThisMonth();
       })
       .catch(() => {});
   }
