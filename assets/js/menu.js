@@ -43,8 +43,8 @@
     width: 620, height: 877,                 // one A5 page (ratio 0.707); the book is two of these
     size: "stretch", minWidth: 120, maxWidth: 1240, minHeight: 170, maxHeight: 1754,
     showCover: true, usePortrait: false,     // always spreads, also on phones (Chef)
-    flippingTime: reduce ? 1 : 1000,
-    maxShadowOpacity: .45, drawShadow: true, showPageCorners: true,
+    flippingTime: reduce ? 1 : 480,           // quick, crisp turns
+    maxShadowOpacity: .25, drawShadow: true, showPageCorners: true,
     mobileScrollSupport: true, swipeDistance: 30, startZIndex: 2
   });
   pf.loadFromHTML(pages);
