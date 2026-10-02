@@ -6,6 +6,13 @@
 /* Site font "CS Neutra" — free stand-in for Neutraface Text (Chef, 2026-09-30):
    Josefin Sans for the thin/light weights (under 350), Jost for everything from Book up.
    Self-hosted (SIL Open Font License). */
+/* Old Standard TT (SIL OFL) — 19th-century dictionary face, used for the shop's dictionary entry */
+@font-face{ font-family:'Old Standard TT'; font-style:normal; font-weight:400; font-display:swap; src:url('../fonts/old-standard-tt-latin-400-normal.woff2') format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face{ font-family:'Old Standard TT'; font-style:normal; font-weight:400; font-display:swap; src:url('../fonts/old-standard-tt-latin-ext-400-normal.woff2') format('woff2'); unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face{ font-family:'Old Standard TT'; font-style:italic; font-weight:400; font-display:swap; src:url('../fonts/old-standard-tt-latin-400-italic.woff2') format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face{ font-family:'Old Standard TT'; font-style:italic; font-weight:400; font-display:swap; src:url('../fonts/old-standard-tt-latin-ext-400-italic.woff2') format('woff2'); unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face{ font-family:'Old Standard TT'; font-style:normal; font-weight:700; font-display:swap; src:url('../fonts/old-standard-tt-latin-700-normal.woff2') format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face{ font-family:'Old Standard TT'; font-style:normal; font-weight:700; font-display:swap; src:url('../fonts/old-standard-tt-latin-ext-700-normal.woff2') format('woff2'); unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 @font-face{ font-family:'CS Neutra'; src:url('../fonts/josefin-sans-latin-wght-normal.woff2') format('woff2'); font-weight:100 349; font-display:swap; unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
 @font-face{ font-family:'CS Neutra'; src:url('../fonts/josefin-sans-latin-ext-wght-normal.woff2') format('woff2'); font-weight:100 349; font-display:swap; unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
 @font-face{ font-family:'CS Josefin'; src:url('../fonts/josefin-sans-latin-wght-normal.woff2') format('woff2'); font-weight:100 700; font-display:swap; }   /* bold Josefin for links inside light copy */
@@ -525,7 +532,22 @@ body.shop-body{ background:#12305C; }
 .cat.open .cat-body{ margin-left:calc(-1 * var(--pull)); }
 .cat.open .item{ flex-basis:188px; }
 .cat.tossing .cat-inner, .cat.tossing .strip{ overflow:visible; }
+.cat.tossing .cat-inner{ clip-path:inset(-200vh -200vw 0 -200vw); }   /* prints may fly above and sideways, but nothing spills over the rows below while it opens */
 .strip .soon{ margin:0; font-size:12px; opacity:.8; }
+/* category write-up above the products (e.g. Tools With Terroir): a dictionary entry, then body text like the About copy */
+.cat-intro{ display:flex; flex-direction:column; gap:10px; padding:2px 14px 20px 2px; max-width:760px; font-weight:400; letter-spacing:0; text-transform:none; text-shadow:0 1px 6px rgba(0,0,0,.45); }
+.dict{ box-sizing:border-box; margin:0 22px; padding:10px 0 12px; font-family:'Old Standard TT', 'Iowan Old Style', Palatino, Georgia, serif; font-size:10.5px; line-height:1.42; }   /* phone: smaller than the body text */
+.dict p{ margin:0; padding-left:1.4em; text-indent:-1.4em; text-align:justify; text-align-last:left; hyphens:auto; -webkit-hyphens:auto; }   /* hanging indent, like a dictionary column */
+.dict-word{ font-size:1.08em; font-weight:700; letter-spacing:.01em; }
+.dict-ipa{ margin:0 .15em; }
+.dict-pos{ margin-right:.2em; }
+.dict-num{ font-weight:700; margin-right:.1em; }
+.dict-origin{ margin-top:4px !important; }
+.dict-label{ font-variant:small-caps; text-transform:lowercase; letter-spacing:.06em; font-weight:600; margin-right:.3em; }
+.intro-p{ margin:0; font-family:'CS Josefin', var(--font-display); font-size:12px; font-weight:400; letter-spacing:0; line-height:120%; text-align:justify; }
+.cat-body{ grid-template-columns:minmax(0,1fr); }
+.cat-inner{ min-width:0; }
+
 /* COMING SOON written in the middle of every product photo while the shop isn't open (SHOP_COMING_SOON in shop-data.js) */
 .soon-band{ position:absolute; inset:0; z-index:2; display:flex; align-items:center; justify-content:center; text-align:center;
   color:#fff; font-size:11px; font-weight:700; letter-spacing:.2em; line-height:14px; text-shadow:0 1px 6px rgba(0,0,0,.35); pointer-events:none; }
@@ -715,6 +737,9 @@ body.menu-body{ background:var(--black); }
   .cat-body{ margin-right:calc((var(--colv) - 100vw) / 2); }
   .strip{ gap:22px; padding:6px calc((100vw - var(--colv)) / 2) 32px 2px; }
   .item{ flex-basis:210px; }
+  .cat-intro{ gap:16px; padding:6px 96px 28px 2px; max-width:none; }   /* same 96px margin on the right as the zoomed title has on the left */
+  .dict{ margin:0 12%; padding:14px 0 16px; font-size:17px; }   /* tabbed in from the body text's margins */
+  .intro-p{ font-size:17px; }
   /* the open category "zooms in": title + carousel slide out to the left side of the screen
      (40px from the edge) and the thumbnails grow; the rule lines stay on the 720 column */
   .shop{ --colv:min(720px, calc(100vw - 80px)); }   /* the column width in vw terms (--col uses %, which changes meaning inside the list) */
