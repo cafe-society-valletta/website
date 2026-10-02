@@ -19,6 +19,7 @@
     const src = p.images && p.images[i];
     if (src){ const img = el("img"); img.src = src; img.alt = p.title + (i ? ` — photo ${i+1}` : ""); img.loading = "lazy"; box.appendChild(img); }
     else { box.classList.add("blank"); box.appendChild(el("span", null, big ? `${p.title} · photo ${i+1}` : "")); }
+    if (window.SHOP_COMING_SOON) box.appendChild(el("b", "soon-band", "COMING SOON"));
     return box;
   }
 

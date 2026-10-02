@@ -3,6 +3,9 @@
    images[], options/variants) so these can later be swapped for live Shopify products;
    Shopify then only handles the bag/checkout and stock. Photos: images[] = file paths
    (empty → placeholder tiles). */
+// While the shop isn't open, every product photo carries a COMING SOON band (set to false to remove).
+window.SHOP_COMING_SOON = true;
+
 window.SHOP_CATEGORIES = [
   { id:"apparel",   title:"APPAREL" },
   { id:"artwork",   title:"ARTWORK & PRINTS" },
