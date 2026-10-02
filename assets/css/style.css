@@ -577,7 +577,7 @@ body.menu-body{ background:var(--black); }
 .bk-stage.closed-back{ transform:translateX(25%); }
 .bk-stage.arriving{ transform:none; transition:none; }
 .bk-clip{ position:relative; touch-action:pan-y; }    /* pinch is handled in menu.js (zooms the book, not the page) */
-.bk-clip.zoomed{ overflow:hidden; touch-action:none; }   /* zoomed: the book is cropped to its frame */
+.bk-clip.zoomed{ z-index:70; touch-action:none; }   /* zoomed: the book spreads over the whole screen, above the title and menu bar */
 .bk-zoom{ transform-origin:0 0; will-change:transform; }
 .bk-book{ width:100%; margin:0 auto; -webkit-user-select:none; user-select:none; }
 /* arrival: the closed menu slides in from the right with a slight tilt, then opens (menu.js) */
