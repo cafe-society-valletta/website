@@ -8,6 +8,7 @@
    Self-hosted (SIL Open Font License). */
 @font-face{ font-family:'CS Neutra'; src:url('../fonts/josefin-sans-latin-wght-normal.woff2') format('woff2'); font-weight:100 349; font-display:swap; unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
 @font-face{ font-family:'CS Neutra'; src:url('../fonts/josefin-sans-latin-ext-wght-normal.woff2') format('woff2'); font-weight:100 349; font-display:swap; unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face{ font-family:'CS Josefin'; src:url('../fonts/josefin-sans-latin-wght-normal.woff2') format('woff2'); font-weight:100 700; font-display:swap; }   /* bold Josefin for links inside light copy */
 @font-face{ font-family:'CS Neutra'; src:url('../fonts/jost-latin-wght-normal.woff2') format('woff2'); font-weight:350 900; font-display:swap; unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
 @font-face{ font-family:'CS Neutra'; src:url('../fonts/jost-latin-ext-wght-normal.woff2') format('woff2'); font-weight:350 900; font-display:swap; unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
 
@@ -303,6 +304,7 @@ body.about-body{ background:var(--white); }
 @keyframes secIn{ from{ opacity:0; } to{ opacity:1; } }
 .sec-1 .sec-body{ padding-bottom:40px; }
 .sec-2 .sec-body{ gap:13px; padding-bottom:40px; }
+.sec-body p a{ color:inherit; text-decoration:none; font-family:'CS Josefin', var(--font-display); font-weight:600; }   /* inline links in About copy: same Josefin face as the copy, just bolder (Chef) */
 .sec-body > p{ align-self:stretch; margin:0; font-family:var(--font-display); font-size:12px; font-weight:300; line-height:120%; text-align:justify; }
 .fig{ margin:0; width:100%; }
 .fig img{ width:100%; height:auto; }
@@ -324,13 +326,16 @@ body.about-body{ background:var(--white); }
    EVENT CALENDAR  (artboard "03 Events")
    ========================================================= */
 body.events-body{ background:var(--black); }
-.events{ background:var(--black) url('../img/p-bg-events-polaroids.jpg') 50% 0/cover no-repeat; color:var(--white); }
+.events{ background:var(--black); color:var(--white); isolation:isolate; }
+/* the page photo sits on its own layer so it can dim + blur with the calendar when a poster is open */
+.events::before{ content:""; position:absolute; inset:-14px; z-index:-1; background:url('../img/p-bg-events-polaroids.jpg') 50% 0/cover no-repeat; transition:filter .45s ease; }
+body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
 .events-scrim{ position:absolute; top:0; left:0; right:0; height:190px; background:linear-gradient(180deg, rgba(10,10,10,.85) 0%, rgba(10,10,10,.7) 55%, rgba(10,10,10,0) 100%); pointer-events:none; }
 .ev-head{ position:relative; display:flex; flex-direction:column; align-items:center; padding:29px 0 6px; }
 .ev-head img{ width:106px; height:37px; }
 .ev-head h1{ margin:-1px 0 0; font-family:var(--font-display); font-size:34px; font-weight:300; letter-spacing:.02em; line-height:42px; }
 .cal{ position:relative; display:flex; flex-direction:column; gap:28px; padding:8px 32px 48px; }
-.month{ background:rgba(10,10,10,.78); border:1px solid rgba(255,255,255,.55); scroll-margin-top:16px; }
+.month{ background:rgba(10,10,10,.78); border:1px solid rgba(255,255,255,.55); scroll-margin-top:52px; }   /* clears the sticky menu bar */
 .m-head{ display:flex; align-items:center; justify-content:space-between; padding:14px; border-bottom:1px solid rgba(255,255,255,.55); }
 .m-head h2{ margin:0; font-size:15px; font-weight:700; letter-spacing:.15em; line-height:18px; text-transform:uppercase; }
 .m-head button{ background:none; border:0; padding:0 2px; font-family:var(--font-display); font-size:14px; line-height:18px; color:rgba(255,255,255,.6); cursor:pointer; }
@@ -346,8 +351,9 @@ body.events-body{ background:var(--black); }
 .day:last-child{ border-right:0; }
 .day .n{ font-size:11px; font-weight:700; line-height:12px; }
 .day.out .n{ opacity:.3; }
-.day.today .n{ text-decoration:underline; text-underline-offset:2px; }
+.day.today{ background:rgba(255,255,255,.2); }   /* today: lighter cell */
 .day.sel{ background:rgba(255,255,255,.12); }
+.day.today.sel{ background:rgba(255,255,255,.3); }
 .thumb{ align-self:center; width:40px; height:40px; padding:0; border:1px solid rgba(255,255,255,.8); background:var(--grey-placeholder) center/cover no-repeat; cursor:pointer; }
 .day.sel .thumb{ border:2px solid #fff; }
 .ev-panel{ display:flex; flex-direction:column; gap:12px; padding:14px; background:rgba(10,10,10,.92); border-top:2px solid #fff; border-bottom:1px solid rgba(255,255,255,.3); }
@@ -371,6 +377,9 @@ body.events-body{ background:var(--black); }
 .ev-detail .details, .ev-detail .x{ transition:opacity .12s ease-out; }
 .ev-layout.flying .ev-detail .details, .ev-layout.flying .ev-detail .x{ opacity:0; }
 .day .thumb.away{ visibility:hidden; }
+.day .thumb.past{ opacity:.55; filter:grayscale(.5); transition:opacity .2s, filter .2s; }   /* past events: still open, just faded */
+.day .thumb.past:hover, .day .thumb.past:focus-visible{ opacity:1; filter:none; }
+.more-links{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px 16px; }
 .ev-layout.snap, .ev-layout.snap *, body.ev-snap .ev-head{ transition:none !important; }
 .ev-layout .cal, .ev-head{ transition:filter .45s ease, transform .5s cubic-bezier(.2,.8,.2,1), opacity .45s ease; }
 .ev-layout.dim .cal, body.ev-dim .ev-head{ filter:brightness(.72) blur(1.5px); }
@@ -489,6 +498,91 @@ body.shop-body{ background:#12305C; }
 .shop-cats{ position:relative; margin:0; padding:8px 32px 56px; list-style:none; }
 .shop-cats::before{ content:""; display:block; height:1px; background:#fff; }
 .shop-cats li{ display:flex; align-items:center; justify-content:space-between; padding:15px 2px; border-bottom:1px solid #fff; font-size:15px; font-weight:700; letter-spacing:.1em; line-height:18px; }
+/* categories open inline in place (assets/js/shop.js); a
+   carousel strip of products runs out past the right edge of the column */
+.shop{ overflow-x:clip; }
+.shop-cats li.cat{ display:block; padding:0; }
+.cat-row{ display:flex; width:100%; align-items:center; justify-content:space-between; padding:15px 2px; background:none; border:0; color:inherit; font:inherit; letter-spacing:inherit; text-align:left; cursor:pointer; }
+.cat-row .arr{ flex-shrink:0; transition:transform .52s cubic-bezier(.22,.8,.24,1); }
+.cat.open .cat-row .arr{ transform:rotate(90deg); }
+.cat-body{ display:grid; grid-template-rows:0fr; margin-right:-32px; }
+.cat.open .cat-body{ grid-template-rows:1fr; }
+.cat-inner{ overflow:hidden; min-height:0; }
+.strip{ display:flex; gap:14px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-padding-left:2px; padding:2px 32px 20px 2px; scrollbar-width:none; overscroll-behavior-x:contain; }
+.strip::-webkit-scrollbar{ display:none; }
+.item{ flex:0 0 132px; display:flex; flex-direction:column; gap:3px; scroll-snap-align:start; color:#fff; text-decoration:none; }
+.item .ph{ aspect-ratio:1; margin-bottom:5px; transform:rotate(var(--r, 0deg)); }   /* very slightly askew, like the gallery prints */
+.item .name{ font-size:11px; font-weight:700; letter-spacing:.08em; line-height:14px; text-transform:uppercase; }
+.item .price{ font-size:11px; font-weight:500; letter-spacing:.06em; line-height:14px; opacity:.8; }
+.item:hover .ph{ outline:1px solid #fff; outline-offset:-1px; }
+/* the open category "zooms in": title + carousel slide out toward the screen edge (12px phone /
+   40px desktop) and grow (title ×1.33, thumbnails ×1.43); the rule lines stay on the column */
+.cat{ --pull:20px; }
+.cat-body{ transition:grid-template-rows .52s cubic-bezier(.22,.8,.24,1); }   /* size + position glide via JS transforms (shop.js) */
+.cat-row span{ display:inline-block; transform-origin:0 0; will-change:transform; }
+.strip{ transform-origin:0 0; }
+.cat.open .cat-row{ margin-left:calc(-1 * var(--pull)); width:calc(100% + var(--pull)); font-size:20px; }
+.cat.open .cat-body{ margin-left:calc(-1 * var(--pull)); }
+.cat.open .item{ flex-basis:188px; }
+.cat.tossing .cat-inner, .cat.tossing .strip{ overflow:visible; }
+.strip .soon{ margin:0; font-size:12px; opacity:.8; }
+.ph, .pd-ph{ position:relative; overflow:hidden; background:rgba(255,255,255,.14); }
+.ph img, .pd-ph img{ width:100%; height:100%; object-fit:cover; display:block; }
+.ph.blank::after{ content:""; position:absolute; inset:28%; border:1px solid rgba(255,255,255,.35); border-radius:50% 50% 8% 8%; }   /* faint bottle outline */
+.pd-ph.blank{ display:flex; align-items:flex-end; justify-content:flex-start; padding:16px; }
+.pd-ph.blank span{ font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; opacity:.55; }
+
+/* product view — full screen, full-bleed photos (swipe), info below (phone) / beside (desktop) */
+body.pd-on{ overflow:hidden; }
+.pd{ position:fixed; inset:0; z-index:60; background:#12305C; color:#fff; overflow-y:auto; overscroll-behavior:contain; opacity:0; transform:translateY(16px); transition:opacity .26s ease, transform .26s ease; }
+.pd.in{ opacity:1; transform:none; }
+.pd[hidden]{ display:none !important; }
+.pd-media{ position:relative; }
+.pd-track{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; }
+.pd-track::-webkit-scrollbar{ display:none; }
+.pd-ph{ flex:0 0 100%; aspect-ratio:4/5; scroll-snap-align:start; background:linear-gradient(160deg, #2A5E9C, #173E70); }
+.pd-dots{ position:absolute; left:0; right:0; bottom:12px; display:flex; justify-content:center; gap:8px; }
+.pd-dots button{ width:7px; height:7px; padding:0; border:1px solid #fff; border-radius:50%; background:transparent; cursor:pointer; }
+.pd-dots button.on{ background:#fff; }
+.pd-nav{ display:none; }
+.pd-x{ position:fixed; top:10px; right:10px; z-index:2; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border:0; border-radius:50%; background:rgba(10,30,70,.55); cursor:pointer; }
+.pd-info{ display:flex; flex-direction:column; gap:10px; padding:22px 32px 48px; min-height:calc(100vh - 125vw);
+  background:linear-gradient(rgba(10,30,70,.25), rgba(10,30,70,.25)), #1D4E89 url('../img/p-bg-collection-mobile.jpg') 50% 0/cover no-repeat; text-shadow:0 1px 8px rgba(0,0,0,.45); }   /* cyanotype behind the details, same scrim as the shop page */
+.pd-opts button, .pd-add{ text-shadow:none; }
+.pd-kicker{ margin:0; font-size:10px; font-weight:700; letter-spacing:.2em; line-height:12px; opacity:.75; }
+.pd-title{ margin:0; font-size:22px; font-weight:700; letter-spacing:.06em; line-height:26px; text-transform:uppercase; }
+.pd-price{ margin:0; font-size:15px; font-weight:500; letter-spacing:.06em; }
+.pd-opts{ display:flex; flex-wrap:wrap; gap:8px; padding-top:6px; }
+.pd-opts button{ min-width:44px; height:36px; padding:0 12px; border:1px solid rgba(255,255,255,.7); background:transparent; color:#fff; font:700 12px/1 var(--font-display); letter-spacing:.1em; cursor:pointer; }
+.pd-opts button[aria-checked="true"]{ background:#fff; color:#12305C; border-color:#fff; }
+.pd-add{ margin-top:8px; height:48px; border:0; background:#fff; color:#12305C; font:700 13px/1 var(--font-display); letter-spacing:.2em; cursor:pointer; }
+.pd-add:disabled{ background:rgba(255,255,255,.35); color:#fff; cursor:default; }
+.pd-note{ margin:0; min-height:14px; font-size:11px; line-height:14px; opacity:.8; }
+.pd-desc{ margin:4px 0 0; padding-top:14px; border-top:1px solid rgba(255,255,255,.4); font-size:13px; font-weight:300; line-height:19px; }
+
+/* =========================================================
+   MENU — the A5 booklet as a 3D flip book (assets/js/menu.js)
+   ========================================================= */
+body.menu-body{ background:var(--black); }
+.menu-page{ background:var(--black); color:var(--white); }
+.booklet{ display:flex; flex-direction:column; align-items:center; gap:14px; padding:20px 8px 40px; }   /* phone: open book nearly edge to edge (8px each side) */
+.bk-stage{ width:100%; transition:transform .9s cubic-bezier(.4,.1,.2,1); }
+/* closed on a cover the single page sits centred (StPageFlip draws the cover in one half of the spread) */
+.bk-stage.closed-front{ transform:translateX(-25%); }
+.bk-stage.closed-back{ transform:translateX(25%); }
+.bk-stage.arriving{ transform:none; transition:none; }
+.bk-book{ width:100%; margin:0 auto; -webkit-user-select:none; user-select:none; }
+/* arrival: the closed menu slides in from the right with a slight tilt, then opens (menu.js) */
+.bk-book.bk-enter{ animation:bk-in .9s cubic-bezier(.2,.8,.25,1) both; }
+@keyframes bk-in{ from{ transform:translateX(70vw) rotate(5deg); opacity:0; } 60%{ opacity:1; } to{ transform:none; opacity:1; } }
+.bk-page{ background:#151515; overflow:hidden; }
+.bk-page img{ display:block; width:100%; height:100%; object-fit:cover; pointer-events:none; }
+.bk-page.ph{ display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.18); }
+.bk-page.ph::before{ content:"PAGE " attr(data-n); font-size:10px; font-weight:700; letter-spacing:.2em; color:rgba(255,255,255,.4); }
+.bk-nav{ display:flex; align-items:center; gap:22px; }
+.bk-nav button{ width:36px; height:36px; display:flex; align-items:center; justify-content:center; padding:0; border:1px solid rgba(255,255,255,.6); border-radius:50%; background:transparent; color:#fff; font:400 16px/1 var(--font-display); cursor:pointer; }
+.bk-nav button:disabled{ opacity:.25; cursor:default; }
+.bk-count{ min-width:96px; text-align:center; font-size:11px; font-weight:700; letter-spacing:.2em; line-height:14px; white-space:pre; }
 
 /* =========================================================
    DESKTOP (≥900px) — Paper artboards D02–D06 ("Desktop 1440")
@@ -543,12 +637,14 @@ body.shop-body{ background:#12305C; }
   .gal-grid .gal h3 b{ font-size:30px; }
 
   /* EVENT CALENDAR (D03) */
-  .events{ background:linear-gradient(rgba(10,10,10,.12), rgba(10,10,10,.12)), var(--black) url('../img/p-bg-events-desktop.jpg') 100% 50%/cover no-repeat; }
+  .events::before{ background:linear-gradient(rgba(10,10,10,.12), rgba(10,10,10,.12)), var(--black) url('../img/p-bg-events-desktop.jpg') 100% 50%/cover no-repeat; }
   .events-scrim{ height:260px; background:linear-gradient(180deg, rgba(10,10,10,.6) 0%, rgba(10,10,10,.35) 55%, rgba(10,10,10,0) 100%); }
   .ev-head{ gap:12px; padding:56px 0 0; }
   .ev-head img{ width:150px; height:52px; }
   .ev-head h1{ margin:0; font-size:60px; line-height:66px; }
   .cal{ width:var(--col); margin-inline:auto; gap:32px; padding:32px 0 72px; }
+  .month{ scroll-margin-top:72px; display:none; }
+  .month.cur{ display:block; }   /* desktop: one month at a time, ← → to change */
   .m-head{ padding:18px 20px; }
   .m-head h2{ font-size:20px; line-height:24px; }
   .m-head button{ font-size:18px; line-height:22px; }
@@ -587,6 +683,16 @@ body.shop-body{ background:#12305C; }
   .ls-ig svg{ width:44px; height:44px; }
   .ls-ig span{ font-size:12px; line-height:14px; }
 
+  /* MENU — the open booklet nearly full width (Chef) */
+  .booklet{ gap:22px; padding:36px 0 64px; }
+  .bk-stage{ width:calc(100vw - 96px); }
+  /* menu page header: logo and "menu" side by side (one short row, so more of the big book is on screen) */
+  .menu-page .ev-head{ flex-direction:row; justify-content:center; align-items:center; gap:28px; padding:22px 0 0; }
+  .menu-page .ev-head img{ width:200px; height:70px; }
+  .menu-page .ev-head h1{ margin:0; font-size:76px; line-height:76px; transform:translateY(-6px); }
+  .menu-page .booklet{ padding-top:18px; }   /* open, the spread runs nearly the full width of the window (48px each side) */
+  .bk-count{ font-size:13px; }
+
   /* SOCIETY COLLECTION (D06) */
   .shop{ background-image:url('../img/p-bg-collection-desktop.jpg'); }
   .bar-collection .tab{ background-image:url('../img/p-tab-collection-desktop.png') !important; }
@@ -594,7 +700,33 @@ body.shop-body{ background:#12305C; }
   .shop-head img{ width:460px; height:133px; }
   .shop-cats{ width:var(--col); margin-inline:auto; padding:40px 0 72px; }
   .shop-cats li{ padding:24px 2px; font-size:24px; line-height:28px; }
-  .shop-cats li svg{ width:27px; height:18px; }
+  .shop-cats li svg.arr{ width:27px; height:18px; }
+  .cat-row{ padding:24px 2px; }
+  .cat-body{ margin-right:calc((var(--colv) - 100vw) / 2); }
+  .strip{ gap:22px; padding:6px calc((100vw - var(--colv)) / 2) 32px 2px; }
+  .item{ flex-basis:210px; }
+  /* the open category "zooms in": title + carousel slide out to the left side of the screen
+     (40px from the edge) and the thumbnails grow; the rule lines stay on the 720 column */
+  .shop{ --colv:min(720px, calc(100vw - 80px)); }   /* the column width in vw terms (--col uses %, which changes meaning inside the list) */
+  .cat{ --pull:max(0px, calc((100vw - var(--colv)) / 2 - 96px)); }   /* 96px from the window edge (never further in than the column) */
+  .cat.open .cat-row{ margin-left:calc(-1 * var(--pull)); width:calc(100% + var(--pull)); font-size:32px; }
+  .cat.open .cat-body{ margin-left:calc(-1 * var(--pull)); }
+  .cat.open .item{ flex-basis:300px; }
+  .item .name{ font-size:13px; line-height:16px; }
+  .item .price{ font-size:13px; line-height:16px; }
+  /* product view: photos fill the left, info panel on the right */
+  .pd{ display:flex; overflow:hidden; }
+  .pd-media{ flex:1 1 auto; min-width:0; height:100vh; }
+  .pd-track{ height:100%; }
+  .pd-ph{ aspect-ratio:auto; height:100%; }
+  .pd-nav{ display:flex; position:absolute; top:50%; width:44px; height:44px; margin-top:-22px; align-items:center; justify-content:center; border:0; border-radius:50%; background:rgba(10,30,70,.45); color:#fff; font:400 18px/1 var(--font-display); cursor:pointer; }
+  .pd-nav.prev{ left:20px; } .pd-nav.next{ right:20px; }
+  .pd-dots{ bottom:24px; }
+  .pd-info{ flex:0 0 420px; height:100vh; min-height:0; overflow-y:auto; justify-content:center; gap:14px; padding:72px 48px; background-image:linear-gradient(rgba(10,30,70,.25), rgba(10,30,70,.25)), url('../img/p-bg-collection-desktop.jpg'); background-position:0 0, 100% 50%; }
+  .pd-title{ font-size:30px; line-height:36px; }
+  .pd-price{ font-size:18px; }
+  .pd-desc{ font-size:15px; line-height:22px; }
+  .pd-x{ top:20px; right:20px; }
 }
 
 /* HOME desktop (≥900px) — Paper D01: the whole menu on one centred line,
