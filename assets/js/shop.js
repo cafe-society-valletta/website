@@ -39,6 +39,20 @@
       strip.appendChild(a);
     });
     if (!strip.children.length) strip.appendChild(el("p", "soon", "Coming soon."));
+    if (c.intro){                                   // optional write-up above the products (SHOP_CATEGORIES[].intro)
+      const intro = el("div", "cat-intro"), I = c.intro;
+      if (I.entry){                                 // laid out like a printed dictionary entry: run-in, hanging indent
+        const E = I.entry, d = el("div", "dict");
+        const main = el("p", "dict-main");
+        const senses = (E.senses || []).map((s, i) => (E.senses.length > 1 || true ? `<b class="dict-num">${i + 1}</b> ` : "") + s).join(" ");
+        main.innerHTML = `<b class="dict-word">${E.syll || E.word}</b> <span class="dict-ipa">${E.ipa}</span> <i class="dict-pos">${E.pos}</i> ${senses}`;
+        d.appendChild(main);
+        if (E.origin){ const o = el("p", "dict-origin"); o.innerHTML = `<span class="dict-label">Origin</span> ${E.origin}.`; d.appendChild(o); }
+        intro.appendChild(d);
+      }
+      [].concat(I.body || (I.entry ? [] : I)).forEach(par => intro.appendChild(el("p", "intro-p", par)));
+      inner.appendChild(intro);
+    }
     inner.appendChild(strip); body.appendChild(inner);
     sec.append(row, body); list.appendChild(sec);
     row.addEventListener("click", () => setCat(sec.classList.contains("open") ? null : c.id, true));
@@ -72,6 +86,21 @@
       it.querySelectorAll(".name, .price").forEach(tx => tx.animate([{ opacity:0 }, { opacity:1 }], { duration:300, delay: delay + 380, fill:"backwards" }));
     });
     clearTimeout(sec._toss); sec._toss = setTimeout(() => sec.classList.remove("tossing"), end + 30);
+    // the dictionary entry arrives last: a beat after the products land it fades in and comes into focus
+    const dict = sec.querySelector(".dict");
+    // the body text starts right under the title; then the entry opens a space above it (sliding the text and
+    // products down) while it fades in and sharpens into that space
+    if (dict){
+      // GPU-only (no layout per frame): the entry already holds its space; the text and products below are drawn
+      // shifted up into it, then glide down while the entry fades and sharpens in
+      const shift = dict.offsetHeight + (parseFloat(getComputedStyle(dict.parentNode).rowGap) || 0), at = end;
+      const below = [...dict.parentNode.querySelectorAll(".intro-p")].concat(strip);
+      const ease = "cubic-bezier(.25,.8,.3,1)";
+      below.forEach(n => n.animate([{ transform:`translateY(${-shift}px)` }, { transform:"none" }],
+        { duration:340, delay:at, easing:ease, fill:"backwards" }));
+      dict.animate([{ opacity:0, filter:"blur(2px)" }, { opacity:1, filter:"blur(0)" }],
+        { duration:260, delay:at + 70, easing:"ease-out", fill:"backwards" });
+    }
   }
   let openCat = null;
   function setCat(id, user){
