@@ -4,7 +4,7 @@ The official website for Café Society Valletta, a bar on 13 St John Street, Val
 
 ## Project structure
 
-Static, 7-page HTML site. No build step, no package manager, no framework.
+Static, 8-page HTML site. No build step, no package manager, no framework.
 
 ```
 index.html       Home
@@ -13,7 +13,13 @@ events.html       Events (upcoming/past toggle)
 gallery.html      Photo Lab — film rolls; a roll with data-gallery opens the same gallery viewer, and its photos get a
                   'Download full res' button (GALLERY_SETS[name].dl = base URL of the originals, hosted off-repo)
 lostsouls.html    Lost Souls Club
-shop.html         The Society Collection (product category grid)
+menu.html         Menu — the printed A5 booklet as a 3D flip book (assets/js/menu.js): closed cover → A4-wide spreads →
+                  back cover. Pages = assets/img/menu/menu-NN.jpg (1240px wide) + menu-NN-s.jpg (700px), rendered
+                  from the menu PDF; data-pages on #booklet = page count. Missing images show numbered placeholders.
+shop.html         The Society Collection — categories open inline in place (product carousel
+                  bleeds right); product view = full-bleed swipe photos + info (assets/js/shop.js). Products in
+                  assets/js/shop-data.js (PLACEHOLDERS, Shopify-shaped). Plan: Paper/site own the look, Shopify only
+                  does bag/checkout + stock. Deep links: shop.html#apparel, shop.html#p/<handle>.
 board.html        Meet Me at Society (message board — login/post, localStorage only)
 
 assets/css/style.css   Single stylesheet for all 7 pages. Pages 2–6: phone (<700px) = Paper phone
@@ -32,7 +38,10 @@ netlify/functions/events.js  Netlify Function (zero-dependency, no build step): 
                         feed, returns upcoming events as JSON. Needs the calendar shared publicly with full
                         details. No API key. Event description parsing: Instagram/SoundCloud/Spotify/YouTube/Bandcamp/RA/TikTok
                         URLs → artist icon links ("Name: <url>" groups them by artist); image URL → poster; any other URL →
-                        "More info" (short text on its line, e.g. "Tickets:", becomes the label); the rest → description.
+                        "More info" (short text on its line, e.g. "Tickets:", becomes the label); YouTube/Vimeo → "Watch",
+                        cafesocietyvalletta gallery URL → "Photos"; several links allowed. Feed starts 1 Oct 2026 (FIRST_DAY)
+                        and keeps all past events (no lifespan yet); past days show faded, kicker "Past event:".
+                        Photo Lab deep link: gallery.html#<data-slug> opens that roll (e.g. #qlv-pride).
 assets/js/chars.js     Home "Characters" parade frame clock — keeps the line's step and every
                         figure's pose change on the same 1.5 fps frame (one jump per frame).
 assets/js/board.js     Message board rendering, seed data, login/post (client-side only —

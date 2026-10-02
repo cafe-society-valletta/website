@@ -3,32 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Events Calendar — Café Society Valletta</title>
-<meta name="description" content="What's on at Café Society Valletta — the events calendar.">
+<title>Menu — Café Society Valletta</title>
+<meta name="description" content="The Café Society Valletta menu — cocktails, wine, the back bar and bar snacks.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☕</text></svg>">
+<link rel="preload" as="image" href="assets/img/menu/menu-01.jpg" imagesrcset="assets/img/menu/menu-01-s.jpg 700w, assets/img/menu/menu-01.jpg 1240w" imagesizes="(min-width: 900px) 42vw, 50vw">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body class="v2-body events-body">
+<body class="v2-body menu-body">
 
-<div class="page v2 events">
+<div class="page v2 menu-page">
   <header class="site-bar bar-clear" data-bar>
     <a href="index.html">Home</a>
     <a href="about.html">About</a>
-    <a href="menu.html">Menu</a>
-    <a href="events.html" class="two tab" aria-current="page">Events <br>Calendar</a>
+    <a href="menu.html" class="tab" aria-current="page">Menu</a>
+    <a href="events.html" class="two">Events <br>Calendar</a>
     <a href="gallery.html" class="two">Photo <br>Lab</a>
     <a href="lostsouls.html" class="logo logo-lsc"><img src="assets/img/p-nav-lsc.png" alt="Lost Souls Club"></a>
     <a href="shop.html" class="logo logo-col"><img src="assets/img/p-nav-collection.png" alt="The Society Collection"></a>
   </header>
-  <div class="events-scrim" aria-hidden="true"></div>
   <div class="ev-head">
     <img src="assets/img/p-cs-logo.png" alt="Café Society Valletta" width="106" height="37">
-    <h1>events calendar</h1>
+    <h1>menu</h1>
   </div>
-  <div class="ev-layout" id="ev-layout">
-  <div class="cal" id="calendar" aria-live="polite"></div>
-  <aside class="ev-detail" id="ev-detail" aria-live="polite" aria-label="Event details"></aside>
-  </div>
+  <!-- The printed A5 booklet as a flip book. Pages: assets/img/menu/menu-01.jpg … menu-NN.jpg
+       (+ -s.jpg phone size), made from the menu PDF. data-pages = page count (even). -->
+  <section class="booklet" id="booklet" data-pages="20" aria-label="Menu booklet" aria-roledescription="flip book">
+    <div class="bk-stage"><div class="bk-book" id="bk-book"></div></div>
+    <div class="bk-nav">
+      <button type="button" class="bk-prev" aria-label="Previous page">←</button>
+      <span class="bk-count" aria-live="polite"></span>
+      <button type="button" class="bk-next" aria-label="Next page">→</button>
+    </div>
+  </section>
   <footer class="site-footer footer-dark footer-backed">
     <a class="ig" href="https://instagram.com/cafesociety_valletta" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.6" cy="6.4" r="1.2" fill="currentColor" stroke="none"/></svg><span>@cafesociety_valletta</span></a>
     <i class="sep"></i>
@@ -39,8 +45,8 @@
     <a class="mail" href="mailto:cafesocietyvalletta@gmail.com"><svg viewBox="0 0 24 18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="1" width="22" height="16" rx="2"/><path d="M1.5 2L12 10L22.5 2"/></svg><span>cafesocietyvalletta@gmail.com</span></a>
   </footer>
 </div>
-
 <script src="assets/js/main.js" defer></script>
-<script src="assets/js/events.js" defer></script>
+<script src="assets/js/vendor/page-flip.browser.js" defer></script>
+<script src="assets/js/menu.js" defer></script>
 </body>
 </html>
