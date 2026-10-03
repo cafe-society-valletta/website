@@ -19,6 +19,9 @@
   // Lost Souls Club nights with no poster of their own show the stacked LSC logo instead (Chef)
   const LSC = { poster:"assets/img/p-lsc-stacked.png", posterFit:"contain", posterSize:"auto 80%", logoAlt:"Lost Souls Club" };
   const isLSC = e => /^lost souls club/i.test(e.title || "");
+  // MasterTape (every Tuesday): Chef's poster is the default for any MasterTape night without one of its own
+  const MASTERTAPE_POSTER = "assets/img/p-poster-mastertape.jpg";
+  const isMasterTape = e => /^master\s*tape/i.test(e.title || "");
   let EVENTS = [
     { date:"2026-09-30", title:"Dusk Busk: Denzel Sharkey", time:"20:00 – 23:00", location:"Cafe Society Valletta",
       text:"Live music on the steps of St. John's Street", poster:"assets/img/p-poster-dusk-busk.jpg",
@@ -41,7 +44,11 @@
   const WEEKLY = [
     { day:0, title:"Lost Souls Club", time:"Every Sunday",
       text:"Our flagship Sunday night — fully staff-run and operated, with the profits split between the staff who volunteered. Hospitality and nightlife workers get 20% off, ask at the bar for a Lost Souls Club sticker to claim your hospo discount!",
-      ...LSC, link:"lostsouls.html" }
+      ...LSC, link:"lostsouls.html" },
+    { day:2, title:"MasterTape", time:"20:00 – 23:00", poster:MASTERTAPE_POSTER,
+      text:"MasterTape time! Every Tuesday 2 djs sets, one of them being recorded and posted on LostxTape Youtube channel",
+      links:[ { url:"https://docs.google.com/forms/d/e/1FAIpQLSeMjhNfxcUjhrnV9O_MBIKoKDs-nND2Ltehu7tSoJ01ER1yUA/viewform", label:"Wanna play? Submit here", form:true } ],
+      socials:[ { platform:"youtube", url:"https://youtube.com/@lostxtapesss", label:"@lostxtapesss" } ] }
   ];
 
   const MONTHS_AHEAD = 3;
@@ -129,14 +136,16 @@
   }
   // every non-artist link in the description becomes a button: "Photos →" (a Photo Lab gallery),
   // "Watch →" (a YouTube / Vimeo recording), "Tickets →"… — "Label: <url>" in the description sets the text
-  function moreLinks(ev){
-    const list = ev.links || (ev.link ? [{ url: ev.link, label: ev.linkLabel }] : []);
+  // forms = true → only sign-up form buttons (shown above the artist links); otherwise every other link
+  function moreLinks(ev, forms){
+    const list = (ev.links || (ev.link ? [{ url: ev.link, label: ev.linkLabel }] : [])).filter(l => !!l.form === !!forms);
     if (!list.length) return null;
-    const box = el("div","more-links");
+    const box = el("div", forms ? "form-links" : "more-links");
     list.forEach(l => {
       let href = l.url;
       try { const u = new URL(l.url, location.href); if (/cafesocietyvalletta\.(com|netlify\.app)$/i.test(u.hostname) || u.origin === location.origin) href = u.pathname.replace(/^\//, "") + u.search + u.hash; } catch (e) {}
-      const a = el("a","more", `${l.label || "More info"} →`); a.href = href;
+      const a = forms ? el("a","form-btn", "") : el("a","more", `${l.label || "More info"} →`); a.href = href;
+      if (forms) a.textContent = l.label || "Sign up";
       if (/^https?:/.test(href)){ a.target = "_blank"; a.rel = "noopener"; }
       box.appendChild(a);
     });
@@ -237,6 +246,7 @@
     detail.querySelector("h3").textContent = ev.title;
     const p = detail.querySelector("p"); if (ev.text) p.textContent = ev.text; else p.remove();
     const dBox = detail.querySelector(".details"), dSoc = socialsFor(ev);
+    const dForm = moreLinks(ev, true); if (dForm) dBox.appendChild(dForm);
     if (dSoc) dBox.appendChild(dSoc);
     const dMore = moreLinks(ev); if (dMore) dBox.appendChild(dMore);
     if (d < today){ detail.querySelector(".kicker").textContent = "Past event:"; }
@@ -300,6 +310,7 @@
     const poster = p.querySelector(".poster");
     if (ev.poster){ poster.style.backgroundImage = `url('${ev.poster}')`; if (ev.posterFit === "contain"){ poster.style.backgroundSize = ev.posterSize || "88% auto"; poster.style.backgroundColor = "#0A0A0A"; poster.style.border = "1px solid rgba(255,255,255,.3)"; } }
     const pSoc = socialsFor(ev);
+    const pForm = moreLinks(ev, true); if (pForm) p.querySelector(".info").appendChild(pForm);
     if (pSoc) p.querySelector(".info").appendChild(pSoc);
     const pMore = moreLinks(ev); if (pMore) p.querySelector(".info").appendChild(pMore);
     p.querySelector(".x").addEventListener("click", closePanel);
@@ -406,7 +417,7 @@
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then(data => {
         if (!data || !Array.isArray(data.events)) return;
-        EVENTS = data.events.map(e => e.poster ? e : Object.assign({}, isLSC(e) ? LSC : LOGO, e));
+        EVENTS = data.events.map(e => e.poster ? e : Object.assign({}, isLSC(e) ? LSC : isMasterTape(e) ? { poster:MASTERTAPE_POSTER } : LOGO, e));
         render(); toThisMonth();
       })
       .catch(() => {});
