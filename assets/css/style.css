@@ -76,6 +76,10 @@ button{ font-family:inherit; }
    --nose = nose-tip height as a fraction of the image height. */
 .char{ flex-shrink:0; line-height:0; --dy:-2px; --rot:1.5deg; --nose:.08; --h:calc(120px * var(--s)); margin-top:calc(var(--nose-line) - var(--h) * var(--nose)); }
 .char-dj{ --h:calc(70px * var(--s)); margin-left:-8px; margin-right:-8px; } /* booths have empty air above the decks — tuck neighbours in slightly */
+/* each DJ sized by the face, not the booth: nose-to-mouth matched across the three DJs and to the other characters (Chef) */
+.char-dj:nth-child(1){ --h:calc(60px * var(--s)); }    /* p-char-01 (headphones, chain) */
+.char-dj:nth-child(6){ --h:calc(62.3px * var(--s)); }  /* p-char-16 (curly hair, pointing) */
+.char-dj:nth-child(11){ --h:calc(77px * var(--s)); }   /* p-char-11 (DOLLS tank) */
 .char img{ height:var(--h); width:auto; transform-origin:50% 100%; --lean:calc(var(--rot) * .3); animation:chars-march calc(var(--beat) * 4) steps(1,end) infinite; }
 .char:nth-child(1){ --dy:-1px;  --rot:1.12deg; --nose:0.01; }
 .char:nth-child(2){ --dy:-3px; --rot:-2.25deg; --nose:0.1; }
@@ -384,6 +388,11 @@ body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
 .ev-detail .details, .ev-detail .x{ transition:opacity .12s ease-out; }
 .ev-layout.flying .ev-detail .details, .ev-layout.flying .ev-detail .x{ opacity:0; }
 .day .thumb.away{ visibility:hidden; }
+/* desktop hover box: event name, date, time */
+.ev-tip{ position:absolute; z-index:60; max-width:260px; padding:9px 12px 10px; background:rgba(10,10,10,.94); border:1px solid rgba(255,255,255,.5); pointer-events:none; opacity:0; transform:translateY(3px); transition:opacity .12s ease, transform .12s ease; text-align:center; }
+.ev-tip.on{ opacity:1; transform:none; }
+.ev-tip .tt{ font-size:14px; font-weight:700; letter-spacing:.04em; line-height:17px; text-transform:uppercase; color:#fff; }
+.ev-tip .td{ margin-top:4px; font-size:11px; font-weight:700; letter-spacing:.12em; line-height:14px; text-transform:uppercase; color:rgba(255,255,255,.72); white-space:nowrap; }
 .day .thumb.past{ opacity:.55; filter:grayscale(.5); transition:opacity .2s, filter .2s; }   /* past events: still open, just faded */
 .day .thumb.past:hover, .day .thumb.past:focus-visible{ opacity:1; filter:none; }
 .more-links{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px 16px; }
