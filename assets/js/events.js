@@ -62,9 +62,37 @@
   const key = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
   const today = new Date(); today.setHours(0,0,0,0);
 
+  // Maltese public holidays — worked out for any year (the 14 national holidays; Good Friday from Easter).
+  // Holidays that fall on a weekend stay on their date in Malta. CLOSED: the bar is shut (no weekly nights).
+  const CLOSED = ["12-25", "01-01"];
+  const holCache = {};
+  function maltaHolidays(y){
+    if (holCache[y]) return holCache[y];
+    // Western Easter (anonymous Gregorian algorithm) → Good Friday
+    const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25),
+          g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4,
+          l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451),
+          mo = Math.floor((h + l - 7 * m + 114) / 31), da = ((h + l - 7 * m + 114) % 31) + 1;
+    const gf = new Date(y, mo - 1, da - 2);
+    const list = [
+      ["01-01", "New Year's Day", "New Year"], ["02-10", "Feast of St Paul's Shipwreck", "St Paul"],
+      ["03-19", "Feast of St Joseph", "St Joseph"], [`${pad(gf.getMonth()+1)}-${pad(gf.getDate())}`, "Good Friday", "Good Friday"],
+      ["03-31", "Freedom Day", "Freedom Day"], ["05-01", "Workers' Day", "Workers' Day"], ["06-07", "Sette Giugno", "Sette Giugno"],
+      ["06-29", "Feast of St Peter & St Paul (Mnarja)", "Mnarja"], ["08-15", "Feast of the Assumption (Santa Marija)", "Santa Marija"],
+      ["09-08", "Victory Day", "Victory Day"], ["09-21", "Independence Day", "Independence"],
+      ["12-08", "Feast of the Immaculate Conception", "Immaculate"], ["12-13", "Republic Day", "Republic Day"], ["12-25", "Christmas Day", "Christmas"]
+    ];
+    const map = {};
+    list.forEach(([md, name, short]) => { map[`${y}-${md}`] = { name, short }; });
+    return holCache[y] = map;
+  }
+  const EVES = { "12-24": "Christmas Eve", "12-31": "New Year's Eve" };   // labelled, not public holidays
+  const holidayOn = d => maltaHolidays(d.getFullYear())[key(d)] || (EVES[key(d).slice(5)] ? { name: EVES[key(d).slice(5)], short: EVES[key(d).slice(5)], eve: true } : null);
+  const closedOn = d => CLOSED.includes(key(d).slice(5));
+
   function eventsOn(d){
     const list = EVENTS.filter(e => e.date === key(d));
-    WEEKLY.forEach(w => { if (w.day === d.getDay()) list.push(w); });
+    if (!closedOn(d)) WEEKLY.forEach(w => { if (w.day === d.getDay()) list.push(w); });   // no regular nights when we're closed
     return list;
   }
 
@@ -354,8 +382,21 @@
         cell.dataset.date = key(date);
         if (date.getMonth() !== first.getMonth()) cell.classList.add("out");
         if (+date === +today) cell.classList.add("today");
-        cell.appendChild(el("span","n", String(date.getDate())));
+        const top = el("div","top"); top.appendChild(el("span","n", String(date.getDate()))); cell.appendChild(top);
         if (date.getMonth() === first.getMonth()){
+          const hol = holidayOn(date), shut = closedOn(date);
+          if (shut){
+            cell.classList.add("closed"); cell.title = (hol ? hol.name + " — " : "") + "Closed";
+            cell.appendChild(el("span","shut","Closed"));
+          }
+          if (hol){
+            if (!shut) cell.classList.add("hol");
+            if (!shut) cell.title = hol.name + (hol.eve ? "" : " (public holiday)");
+            const lab = el("span","hol-name"); lab.innerHTML = `<span class="full"></span><span class="short"></span>`;
+            lab.querySelector(".full").textContent = hol.name.replace(/^Feast of (the )?/, "").replace(/ \(.*\)$/, "");
+            lab.querySelector(".short").textContent = hol.short;
+            top.appendChild(lab);
+          }
           const past = date < today;
           const evs = past ? EVENTS.filter(e => e.date === key(date)) : eventsOn(date);   // past: one-off events only (no weekly)
           if (evs.length){
@@ -397,6 +438,7 @@
     if (!months[i]) return;
     months.forEach((m, j) => m.box.classList.toggle("cur", j === i));
     curFirst = months[i].first;
+    fitHolidays();
   }
   // arrive on the current month (earlier months sit above it) — re-applied after the live feed
   // re-renders, unless the visitor has already started scrolling
@@ -407,7 +449,26 @@
     const m = months.find(x => x.first.getFullYear() === today.getFullYear() && x.first.getMonth() === today.getMonth());
     if (m && months.indexOf(m) > 0) requestAnimationFrame(() => m.box.scrollIntoView({ block:"start" }));
   }
-  render(); toThisMonth();
+  // shrink each holiday name until the whole name fits beside the date, above the thumbnail
+  function fitHolidays(){
+    // every label gets the same size: the largest that lets the longest name fit beside its date and above a
+    // full-size thumbnail (room is reserved for one even on days without an event)
+    const labs = [...cal.querySelectorAll(".day .hol-name")].filter(l => l.offsetParent);   // desktop shows one month at a time
+    if (!labs.length) return;
+    const anyThumb = cal.querySelector(".thumb"), thH = anyThumb ? anyThumb.offsetHeight : (wide.matches ? 60 : 40);
+    labs.forEach(l => l.style.fontSize = "");
+    let fs = parseFloat(getComputedStyle(labs[0]).fontSize);
+    const fits = lab => {
+      const cell = lab.closest(".day"), cs = getComputedStyle(cell);
+      const room = cell.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - thH - 2;
+      return lab.scrollWidth <= lab.clientWidth + .5 && lab.scrollHeight <= room;
+    };
+    while (fs > 3.5 && !labs.every(fits)){ fs -= .25; labs.forEach(l => l.style.fontSize = fs + "px"); }
+  }
+
+  render(); toThisMonth(); fitHolidays();
+  if (document.fonts) document.fonts.ready.then(fitHolidays);
+  addEventListener("resize", () => { clearTimeout(fitHolidays.t); fitHolidays.t = setTimeout(fitHolidays, 150); });
   wide.addEventListener && wide.addEventListener("change", () => { closePanel(); hideDetail(true); });
 
   // Live events straight from the Google Calendar (netlify/functions/events.js).
@@ -418,7 +479,7 @@
       .then(data => {
         if (!data || !Array.isArray(data.events)) return;
         EVENTS = data.events.map(e => e.poster ? e : Object.assign({}, isLSC(e) ? LSC : isMasterTape(e) ? { poster:MASTERTAPE_POSTER } : LOGO, e));
-        render(); toThisMonth();
+        render(); toThisMonth(); fitHolidays();
       })
       .catch(() => {});
   }
