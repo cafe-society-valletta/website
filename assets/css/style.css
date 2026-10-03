@@ -362,6 +362,14 @@ body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
 .day:last-child{ border-right:0; }
 .day .n{ font-size:11px; font-weight:700; line-height:12px; }
 .day.out .n{ opacity:.3; }
+/* public holidays (Malta) + closed days */
+.day .top{ display:flex; align-items:flex-start; justify-content:space-between; gap:2px; min-width:0; }   /* holiday name sits beside the date */
+.day .hol-name{ flex:1; min-width:0; text-align:right; font-size:7px; font-weight:700; letter-spacing:0; line-height:1.15; text-transform:uppercase; color:rgba(255,255,255,.75); white-space:normal; overflow:hidden; }
+.day .hol-name .short{ display:none; }   /* the whole name, shrunk to fit beside the date (events.js fitHolidays) */
+.day.hol{ background:rgba(255,255,255,.07); }
+.day.closed{ background:rgba(0,0,0,.35); }
+.day.closed .n{ opacity:.45; }
+.day .shut{ align-self:center; margin:auto 0; font-size:8px; font-weight:700; letter-spacing:.14em; line-height:10px; text-transform:uppercase; color:rgba(255,255,255,.8); }
 .day.today{ background:rgba(255,255,255,.2); }   /* today: lighter cell */
 .day.sel{ background:rgba(255,255,255,.12); }
 .day.today.sel{ background:rgba(255,255,255,.3); }
@@ -699,6 +707,8 @@ body.menu-body{ background:var(--black); }
   .m-days span{ padding:9px 0; font-size:12px; line-height:14px; }
   .day{ height:96px; padding:6px; }
   .day .n{ font-size:14px; line-height:16px; }
+  .day .hol-name{ font-size:9px; letter-spacing:.06em; }
+  .day .shut{ font-size:12px; letter-spacing:.18em; line-height:14px; }
   .thumb{ width:60px; height:60px; }
   .ev-panel{ gap:18px; padding:22px; }
   .ev-panel .when{ font-size:12px; line-height:14px; }
