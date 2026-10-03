@@ -361,3 +361,13 @@
     box.style.backgroundImage = `url('assets/img/gallery/${g.dir}/${file}')`;
   });
 })();
+
+/* Links marked data-desktop-newtab (e.g. 77 Cellar's Instagram on About) open in a new tab on desktop (≥900px);
+   on phones they open in place, so the Instagram app can take over. */
+(() => {
+  const desk = matchMedia("(min-width: 900px)");
+  document.querySelectorAll("a[data-desktop-newtab]").forEach(a => {
+    const set = () => { if (desk.matches) a.target = "_blank"; else a.removeAttribute("target"); };
+    set(); desk.addEventListener ? desk.addEventListener("change", set) : desk.addListener(set);
+  });
+})();

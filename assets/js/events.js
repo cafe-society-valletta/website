@@ -13,9 +13,12 @@
 (function(){
   "use strict";
 
-  // Synced from the "Events" Google Calendar (…f47a7@group.calendar.google.com) on 2026-09-30.
+  // Synced from the "Events" Google Calendar (…f47a7@group.calendar.google.com) on 2026-10-02.
   // Events with no poster of their own show the Café Society logo.
   const LOGO = { poster:"assets/img/p-cs-logo.png", posterFit:"contain" };
+  // Lost Souls Club nights with no poster of their own show the stacked LSC logo instead (Chef)
+  const LSC = { poster:"assets/img/p-lsc-stacked.png", posterFit:"contain", posterSize:"auto 80%", logoAlt:"Lost Souls Club" };
+  const isLSC = e => /^lost souls club/i.test(e.title || "");
   let EVENTS = [
     { date:"2026-09-30", title:"Dusk Busk: Denzel Sharkey", time:"20:00 – 23:00", location:"Cafe Society Valletta",
       text:"Live music on the steps of St. John's Street", poster:"assets/img/p-poster-dusk-busk.jpg",
@@ -25,6 +28,9 @@
     { date:"2026-10-03", title:"Note Bianca w/ Molario",    time:"21:00 – 01:00", ...LOGO },
     { date:"2026-10-09", title:"Andrea Giordani",           time:"21:00 – 01:00", ...LOGO },
     { date:"2026-10-10", title:"Uzay",                      time:"21:00 – 01:00", ...LOGO },
+    { date:"2026-10-11", title:"Lost Souls Club: G2G",      time:"14:00 – 01:00", location:"Cafe Society Valletta",
+      text:"OPEN DECKS 2 pm - 10 pm\nThen Pæbo and Tédé behind the decks from 10 pm\n20% off for hospo workers!",
+      poster:"https://drive.google.com/thumbnail?id=1WczboRDbkdqqZXByFVllWucJh4z5ZNyw&sz=w1000" },
     { date:"2026-10-16", title:"Society Session w/ Brian James", time:"21:00 – 01:00", ...LOGO },
     { date:"2026-10-17", title:"P Risco",                   time:"21:00 – 01:00", ...LOGO },
     { date:"2026-10-23", title:"ENG",                       time:"21:00 – 01:00", ...LOGO },
@@ -34,8 +40,8 @@
 
   const WEEKLY = [
     { day:0, title:"Lost Souls Club", time:"Every Sunday",
-      text:"Our flagship Sunday night — fully staff-run and operated, with the profits split between the staff who volunteered. Hospitality and nightlife people, expat and local, all welcome.",
-      poster:"assets/img/p-ls-script.png", posterFit:"contain", link:"lostsouls.html" }
+      text:"Our flagship Sunday night — fully staff-run and operated, with the profits split between the staff who volunteered. Hospitality and nightlife workers get 20% off, ask at the bar for a Lost Souls Club sticker to claim your hospo discount!",
+      ...LSC, link:"lostsouls.html" }
   ];
 
   const MONTHS_AHEAD = 3;
@@ -56,6 +62,26 @@
   }
 
   function el(tag, cls, html){ const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
+
+  // desktop hover: a small box over the thumbnail with the event's name, date and time
+  const hoverable = window.matchMedia("(hover: hover) and (min-width: 900px)");
+  let tip = null;
+  function tipShow(t, ev, d){
+    if (!hoverable.matches) return;
+    if (!tip){ tip = el("div", "ev-tip"); tip.setAttribute("role", "tooltip"); document.body.appendChild(tip); }
+    tip.innerHTML = "";
+    tip.appendChild(el("div", "tt", "")).textContent = ev.title;
+    tip.appendChild(el("div", "td", "")).textContent = `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()].slice(0,3)}` + (ev.time ? ` · ${ev.time}` : "");
+    const r = t.getBoundingClientRect();
+    tip.style.left = "0px"; tip.style.top = "0px"; tip.classList.add("on");
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    const x = Math.min(innerWidth - w - 8, Math.max(8, r.left + r.width / 2 - w / 2));
+    const y = r.top - h - 10 >= 8 ? r.top - h - 10 : r.bottom + 10;     // above the thumbnail, or below if there's no room
+    tip.style.left = x + scrollX + "px"; tip.style.top = y + scrollY + "px";
+  }
+  function tipHide(){ if (tip) tip.classList.remove("on"); }
+  addEventListener("scroll", tipHide, { passive:true });
+  document.addEventListener("click", tipHide, true);
 
   let openPanel = null, openCell = null;
   function closePanel(){
@@ -194,7 +220,10 @@
       t.style.setProperty("--ty", ((r() * 2 - 1) * 5).toFixed(1) + "px");
     });
     const img = detail.querySelector(".poster");
-    const useLogo = () => { img.src = "assets/img/p-cs-logo.png"; img.alt = "Café Society Valletta"; img.classList.add("logo"); };
+    const useLogo = () => {
+      const own = ev.posterFit === "contain" && ev.poster;            // a logo of its own (e.g. Lost Souls Club), else the bar's
+      img.src = own ? ev.poster : "assets/img/p-cs-logo.png"; img.alt = own && ev.logoAlt || "Café Society Valletta"; img.classList.add("logo");
+    };
     if (ev.poster && ev.posterFit !== "contain"){ img.src = ev.poster; img.alt = `${ev.title} poster`; img.onerror = () => { img.onerror = null; useLogo(); }; }
     else useLogo();
     detail.querySelector(".when .date").textContent = `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()].slice(0,3)}`;
@@ -269,7 +298,7 @@
     p.querySelector("h3").textContent = ev.title;
     p.querySelector("p").textContent = ev.text || "";
     const poster = p.querySelector(".poster");
-    if (ev.poster){ poster.style.backgroundImage = `url('${ev.poster}')`; if (ev.posterFit === "contain"){ poster.style.backgroundSize = "88% auto"; poster.style.backgroundColor = "#0A0A0A"; poster.style.border = "1px solid rgba(255,255,255,.3)"; } }
+    if (ev.poster){ poster.style.backgroundImage = `url('${ev.poster}')`; if (ev.posterFit === "contain"){ poster.style.backgroundSize = ev.posterSize || "88% auto"; poster.style.backgroundColor = "#0A0A0A"; poster.style.border = "1px solid rgba(255,255,255,.3)"; } }
     const pSoc = socialsFor(ev);
     if (pSoc) p.querySelector(".info").appendChild(pSoc);
     const pMore = moreLinks(ev); if (pMore) p.querySelector(".info").appendChild(pMore);
@@ -323,11 +352,13 @@
             const t = el("button", past ? "thumb past" : "thumb"); t.type = "button";
             t.setAttribute("aria-label", `${ev.title}, ${date.getDate()} ${MONTH_NAMES[date.getMonth()]}`);
             if (ev.poster) t.style.backgroundImage = `url('${ev.poster}')`;
-            if (ev.posterFit === "contain"){ t.style.backgroundSize = "90% auto"; t.style.backgroundColor = "#0A0A0A"; }
+            if (ev.posterFit === "contain"){ t.style.backgroundSize = ev.posterSize || "90% auto"; t.style.backgroundColor = "#0A0A0A"; }
             t.addEventListener("click", () => {
               if (openCell === cell){ if (detail) hideDetail(); else closePanel(); }
               else panelFor(ev, date, cell, row);
             });
+            t.addEventListener("mouseenter", () => tipShow(t, ev, date));
+            t.addEventListener("mouseleave", tipHide);
             cell.appendChild(t);
           }
         }
@@ -375,7 +406,7 @@
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then(data => {
         if (!data || !Array.isArray(data.events)) return;
-        EVENTS = data.events.map(e => e.poster ? e : Object.assign({}, LOGO, e));
+        EVENTS = data.events.map(e => e.poster ? e : Object.assign({}, isLSC(e) ? LSC : LOGO, e));
         render(); toThisMonth();
       })
       .catch(() => {});
