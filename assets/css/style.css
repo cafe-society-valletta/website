@@ -396,6 +396,13 @@ body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
 .day .thumb.past{ opacity:.55; filter:grayscale(.5); transition:opacity .2s, filter .2s; }   /* past events: still open, just faded */
 .day .thumb.past:hover, .day .thumb.past:focus-visible{ opacity:1; filter:none; }
 .more-links{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px 16px; }
+/* sign-up form button (e.g. MasterTape "Wanna play? Submit here"): boxed, sits just above the artist links' rule */
+.form-links{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
+.ev-panel .form-links{ justify-content:flex-start; }
+.form-btn{ display:inline-block; padding:8px 14px 7px; border:1px solid #fff; color:#fff; font-size:11px; font-weight:700; letter-spacing:.14em; line-height:14px; text-transform:uppercase; text-decoration:none; transition:background .15s, color .15s; }
+.form-btn:hover, .form-btn:focus-visible{ background:#fff; color:#0A0A0A; }
+@media (min-width:900px){ .form-btn{ font-size:11px; letter-spacing:.1em; line-height:15px; padding:9px 12px 8px; } }
+.form-btn{ max-width:100%; box-sizing:border-box; text-align:center; text-wrap:balance; }
 .ev-layout.snap, .ev-layout.snap *, body.ev-snap .ev-head{ transition:none !important; }
 .ev-layout .cal, .ev-head{ transition:filter .45s ease, transform .5s cubic-bezier(.2,.8,.2,1), opacity .45s ease; }
 .ev-layout.dim .cal, body.ev-dim .ev-head{ filter:brightness(.72) blur(1.5px); }
