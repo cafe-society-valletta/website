@@ -72,7 +72,8 @@ const hm = t => (t && t.h != null) ? `${pad(t.h)}:${pad(t.mi)}` : "";
 // groups a link under that artist; an image URL becomes the poster. Every other URL becomes a
 // button — "Label: <url>" sets its text (Tickets:, Photos:, Recording:…); unlabelled, a video
 // (YouTube watch / youtu.be / live / shorts, Vimeo) reads "Watch", a Photo Lab gallery link reads
-// "Photos", anything else "More info".
+// "Photos", anything else "More info". A Google Form (docs.google.com/forms, forms.gle) becomes a boxed
+// button just above the artist links ("Wanna play? Submit here: <form url>"; unlabelled: "Sign up").
 const PLATFORMS = [
   { id:"instagram",  re:/(^|\.)instagram\.com$/i },
   { id:"soundcloud", re:/(^|\.)soundcloud\.com$/i },
@@ -110,6 +111,7 @@ function social(url){
 }
 
 const isVideo = u => /(^|\.)youtu\.be$/i.test(u.hostname) || (/(^|\.)youtube\.com$/i.test(u.hostname) && /^\/(watch|live\/|shorts\/|embed\/)/.test(u.pathname)) || /(^|\.)vimeo\.com$/i.test(u.hostname);
+const isForm = u => (/(^|\.)docs\.google\.com$/i.test(u.hostname) && /^\/forms\//.test(u.pathname)) || /(^|\.)forms\.gle$/i.test(u.hostname);
 const isGallery = u => /(^|\.)cafesocietyvalletta\.(com|netlify\.app)$/i.test(u.hostname) && /gallery/.test(u.pathname);
 function parseDescription(raw){
   const out = {}, socials = [], rest = [], links = [];
@@ -127,6 +129,7 @@ function parseDescription(raw){
       if (left && left.length <= 30 && urls.length === 1){ link.label = left.replace(/[:\-–—]\s*$/, "").trim(); left = ""; }
       else if (u && isVideo(u)) link.label = "Watch";
       else if (u && isGallery(u)) link.label = "Photos";
+      if (u && isForm(u)){ link.form = true; if (!link.label) link.label = "Sign up"; }   // sign-up forms show as a button above the artist links
       links.push(link);
     }
     if (urls.length && m) left = "";
