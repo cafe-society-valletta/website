@@ -16,4 +16,5 @@ window.GALLERY_SETS = {
 
   /* Photo Lab rolls — dl: base URL of the full-resolution originals (<dir>-NN.jpg), shown as a download button */
   "ROLL 01": { dir: "roll-01", count: 92, dl: "" },
+  "ROLL 02": { dir: "roll-02", count: 32, dl: "" },
 };
