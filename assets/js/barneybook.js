@@ -69,12 +69,29 @@
   }
   // the photo is rendered twice: beside the name on phones (.bb-ph-m), beside the ingredients on desktop (.bb-top) — CSS shows one
   function rerenderPhoto(){ if(!open) return; $list.querySelectorAll(".bb-item.open .bb-ph").forEach(el => el.outerHTML = photo(open)); }
-  if(MEDIA_API) fetch(MEDIA_API).then(r => r.ok ? r.json() : null).then(d => {
-    if(!d || !d.media) return;
+  // Speed: the last list is kept in localStorage so photos show instantly on repeat visits (Google's script can take a few
+  // seconds to wake up); the fresh list replaces it when it arrives. Thumbnails are preloaded in the background so a card
+  // opens with its photo already there.
+  const MKEY = "bb-media", preloaded = new Set();
+  function useMedia(d){
+    if(!d || !d.media) return false;
+    media = {};
     for(const [k, files] of Object.entries(d.media)) media[k] = files.map(f => f.video
       ? { video:true, href:`https://drive.google.com/file/d/${f.id}/preview`, thumb:`https://drive.google.com/thumbnail?id=${f.id}&sz=w800` }
       : { src:`https://drive.google.com/thumbnail?id=${f.id}&sz=w800`, big:`https://drive.google.com/thumbnail?id=${f.id}&sz=w2400` });
-    rerenderPhoto();
+    rerenderPhoto(); preload();
+    return true;
+  }
+  function preload(){
+    const urls = Object.values(media).flat().map(m => m.video ? m.thumb : m.src).filter(u => u && !preloaded.has(u));
+    const next = () => { const u = urls.shift(); if(!u) return; preloaded.add(u);
+      const im = new Image(); im.decoding = "async"; im.onload = im.onerror = next; im.src = u; };
+    const go = () => { for(let i = 0; i < 3; i++) next(); };   // 3 at a time, after the page has settled
+    ("requestIdleCallback" in window) ? requestIdleCallback(go, { timeout:2000 }) : setTimeout(go, 600);
+  }
+  try { useMedia(JSON.parse(localStorage.getItem(MKEY) || "null")); } catch(e) {}
+  if(MEDIA_API) fetch(MEDIA_API).then(r => r.ok ? r.json() : null).then(d => {
+    if(useMedia(d)) try { localStorage.setItem(MKEY, JSON.stringify({ media:d.media })); } catch(e) {}
   }).catch(() => {});
 
   // Upload: pick a photo/video → photos shrink to 2000px JPEG in the browser → POST to the Apps Script (text/plain, no preflight).
