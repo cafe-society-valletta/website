@@ -943,6 +943,10 @@ body.bb-body{ background:var(--black); }
 .bb-box input::placeholder{ color:rgba(10,10,10,.45); }
 .bb-box:focus-within{ box-shadow:0 0 0 1px var(--black); }
 .bb-filters{ display:flex; flex-wrap:wrap; gap:4px; }
+/* category legend folds away with the compact header (search focused or list scrolled) to give the list/card more room */
+.bb-filters{ max-height:120px; overflow:hidden; transition:max-height 1.15s var(--wheel), margin 1.15s var(--wheel), opacity .35s ease-out; }
+.bb-compact .bb-filters{ max-height:0; opacity:0; pointer-events:none; margin-top:-22px; }   /* cancels the sheet's 22px row gap */
+@media (max-width:899px){ .bb-compact .bb-filters{ margin-top:-18px; } }
 .bb-filters button{ flex-shrink:0; white-space:nowrap; padding:6px 7px; border:1px solid rgba(10,10,10,.5); background:none; color:var(--black); font:500 11px/1.2 var(--font-display); letter-spacing:.1em; text-transform:uppercase; cursor:pointer; }
 .bb-filters button[aria-pressed="true"]{ background:var(--black); border-color:var(--black); color:#000; }
 .bb-list{ list-style:none; margin:0; padding:0; border-top:1px solid rgba(10,10,10,.25); }
@@ -997,7 +1001,7 @@ textarea.bb-in{ resize:vertical; min-height:72px; }
 .bb-msg{ font-size:13px; }
 .bb-note{ margin:0; font-size:14px; line-height:1.4; }
 .bb-none{ margin:0; font-size:16px; color:rgba(10,10,10,.55); }
-@media (prefers-reduced-motion:reduce){ .bb, .bb.bb-compact, .bb-sub-space, /* same shadow the logo casts on the page: light from the right, soft warm-brown shadow falling down-left */
+@media (prefers-reduced-motion:reduce){ .bb-filters{ transition:none; } .bb, .bb.bb-compact, .bb-sub-space, /* same shadow the logo casts on the page: light from the right, soft warm-brown shadow falling down-left */
 .bb-sub-top{ text-shadow:-1.5px 1.5px 3px rgba(70,50,40,.38); }
 .bb-sub-top{ transition:none; } }
 @media (hover:hover){ .bb-name:hover span{ text-decoration:underline; text-underline-offset:5px; text-decoration-thickness:1px; } }
@@ -1023,9 +1027,9 @@ textarea.bb-in{ resize:vertical; min-height:72px; }
 .bb-item.open{ background:rgba(var(--c),.13); padding-right:14px; }
 .bb-name small{ padding:3px 6px 2px; border:1px solid rgb(var(--c)); background:rgba(var(--c),.3); color:var(--black); }
 .bb-name{ align-items:center; }
-.bb-filters button[data-t]:not([data-t=""]){ border-color:rgb(var(--c)); }
+.bb-filters button[data-t]:not([data-t=""]){ border-color:rgb(var(--c)); background:rgba(var(--c),.3); }   /* same fill as the row tags */
 .bb-filters button[data-t=""][aria-pressed="true"]{ background:rgba(10,10,10,.1); border-color:var(--black); color:var(--black); }
-.bb-filters button[data-t]:not([data-t=""])[aria-pressed="true"]{ background:rgba(var(--c),.45); border-color:rgb(var(--c)); color:var(--black); }
+.bb-filters button[data-t]:not([data-t=""])[aria-pressed="true"]{ background:rgba(var(--c),.7); border-color:rgb(var(--c)); color:var(--black); }
 .bb-meta span, .bb-lab, .bb-ing li.h{ color:var(--black); }
 /* Barney Book photo — square thumbnail beside the ingredients, above the method */
 .bb-top{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:start; }
