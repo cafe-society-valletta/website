@@ -942,7 +942,7 @@ body.bb-body{ background:var(--black); }
 .bb-box input{ flex:1; min-width:0; height:100%; padding:0; border:0; outline:0; background:none; color:var(--black); font:400 19px/1 var(--font-display); letter-spacing:.02em; -webkit-appearance:none; appearance:none; }
 .bb-box input::placeholder{ color:rgba(10,10,10,.45); }
 .bb-box:focus-within{ box-shadow:0 0 0 1px var(--black); }
-.bb-filters{ display:flex; gap:4px; }
+.bb-filters{ display:flex; flex-wrap:wrap; gap:4px; }
 .bb-filters button{ flex-shrink:0; white-space:nowrap; padding:6px 7px; border:1px solid rgba(10,10,10,.5); background:none; color:var(--black); font:500 11px/1.2 var(--font-display); letter-spacing:.1em; text-transform:uppercase; cursor:pointer; }
 .bb-filters button[aria-pressed="true"]{ background:var(--black); border-color:var(--black); color:#000; }
 .bb-list{ list-style:none; margin:0; padding:0; border-top:1px solid rgba(10,10,10,.25); }
