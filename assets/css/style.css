@@ -7,6 +7,7 @@
    Josefin Sans for the thin/light weights (under 350), Jost for everything from Book up.
    Self-hosted (SIL Open Font License). */
 /* Old Standard TT (SIL OFL) — 19th-century dictionary face, used for the shop's dictionary entry */
+@font-face{ font-family:'Fondamento'; font-style:normal; font-weight:400; font-display:swap; src:url('../fonts/fondamento-latin-400-normal.woff2') format('woff2'); }   /* Barney Book subheader */
 @font-face{ font-family:'Old Standard TT'; font-style:normal; font-weight:400; font-display:swap; src:url('../fonts/old-standard-tt-latin-400-normal.woff2') format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face{ font-family:'Old Standard TT'; font-style:normal; font-weight:400; font-display:swap; src:url('../fonts/old-standard-tt-latin-ext-400-normal.woff2') format('woff2'); unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 @font-face{ font-family:'Old Standard TT'; font-style:italic; font-weight:400; font-display:swap; src:url('../fonts/old-standard-tt-latin-400-italic.woff2') format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
@@ -892,3 +893,168 @@ body.gv-dim .gal-view{ background:rgba(10,10,10,.35); }
   .gv-head .gv-date{ font-size:13px; line-height:16px; }
   .gv-grid{ grid-template-columns:repeat(5, 1fr); gap:22px; max-width:1100px; }
 }
+
+/* =========================================================
+   BARNEY BOOK  (artboards "08 Barney Book" / "D08 Barney Book · Desktop 1440") — unlisted, /barneybook
+   ========================================================= */
+body.bb-body{ background:var(--black); }
+.bb{ background:var(--black); color:var(--white); }
+/* logo v3 (shadow baked in; book ends ~76% down, the ribbon hangs below): the sheet starts ~45% down the logo and the
+   subheader sits just under the book, with the ribbon falling across it.
+   --lw = logo width, --lh = its height (art is 2.48:1) */
+/* --lk = logo scale: 1 on arrival (matches Paper), .5 once the search is in use ("compact"). It is a registered
+   property so it can be transitioned; the header, sheet padding and tagline position all follow it, so the whole
+   top of the page settles together. Easing = "wheel of fortune": a quick shove, then a long, smooth coast to a stop,
+   no bounce. */
+@property --lk{ syntax:'<number>'; inherits:true; initial-value:1; }
+.bb{ --lw:min(390px, calc(100vw - 12px)); --lk:1; --lh:calc(var(--lw) * var(--lk) / 2.48);
+  --wheel:cubic-bezier(.1,.75,.12,1); transition:--lk 1.15s var(--wheel); }
+.bb.bb-compact{ --lk:.5; }
+.bb-head{ position:relative; z-index:2; display:flex; justify-content:center; align-items:flex-start; height:calc(7px + var(--lh) * .45 + 13px); padding:7px 0 0; }
+.bb-head img{ display:block; width:calc(var(--lw) * var(--lk)); height:auto; max-width:none; }
+/* the tagline sits on top of the logo (ribbon passes behind it). The sheet's mask makes it its own layer, so the visible
+   copy lives in the header (above the logo) and an invisible twin in the sheet holds its space. */
+.bb-br{ display:none; }   /* Chef's three-line break, desktop only */
+.bb-sub-space{ visibility:hidden; max-height:12em; overflow:hidden; transition:max-height 1.15s var(--wheel), margin 1.15s var(--wheel); }
+.bb-compact .bb-sub-space{ max-height:0; margin-bottom:-18px; }
+/* same shadow the logo casts on the page: light from the right, soft warm-brown shadow falling down-left */
+.bb-sub-top{ text-shadow:-1.5px 1.5px 3px rgba(70,50,40,.38); }
+.bb-sub-top{ transition:opacity .35s ease-out, transform 1.15s var(--wheel), filter .35s ease-out; transform-origin:50% 0; }
+.bb-compact .bb-sub-top{ opacity:0; transform:translateY(-10px) scale(.94); filter:blur(1.5px); pointer-events:none; }
+.bb-sub-top{ position:absolute; left:46px; right:46px; top:calc(11px + var(--lh) * .76); z-index:1; }   /* insets = sheet margin 32 + padding 14 */
+.bb-sub{ margin:0 auto 4px; max-width:320px; font-family:'Fondamento', var(--font-display); font-size:15px; line-height:1.2; text-align:center; text-wrap:balance; color:var(--black); }
+/* the recipe sheet: a page from the logo's notebook — its paper tone, brightened and warmed toward red (#FCF2EA), with a soft
+   gradient + fine grain, torn top and bottom (the torn shape is a mask, so grain + gradient run right to the edge) */
+.bb-search{ position:relative; display:flex; flex-direction:column; gap:18px; margin:-13px 32px 39px; padding:calc(var(--lh) * .31 + 4px) 14px 39px; color:var(--black);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.7' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .38  0 0 0 0 .24  0 0 0 0 .2  1.2 0 0 0 -.56'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), radial-gradient(120% 70% at 50% 35%, #FFFAF6 0%, #FCF2EA 45%, #F5E5D9 100%);
+  --edge:14px;
+  box-shadow:inset 0 0 12px rgba(110,70,50,.26), inset 0 0 4px rgba(110,70,50,.22);   /* shading stops before the text starts */   /* aged-paper edges: soft warm shading in from every side */
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 14' preserveAspectRatio='none'%3E%3Cpath d='M0 14 L0 6.8 L5.7 6.7 L10 5.7 L14.6 5.1 L16.9 7.7 L19.1 9.2 L23.7 7.4 L27.8 6.5 L29.9 8 L35.3 8.1 L39.3 8.6 L42.4 10.2 L47.8 10.9 L50.7 9.7 L54.3 11 L60.1 9.3 L65.8 10.9 L69.4 9.5 L74.5 7.3 L80.3 8 L82.7 8.2 L85.5 8.4 L88.2 8.4 L90.7 7.3 L96.6 9.9 L102.1 8.9 L107.5 9.4 L110.4 8.6 L113.7 6 L118 7.1 L121.5 7 L125.4 7.2 L128.2 6.1 L133.4 4.8 L139.2 4.4 L144.7 4.7 L147.2 3.2 L150.1 3.9 L155.4 4.2 L158.1 3.2 L162.3 6 L165.5 5.2 L168.5 5.4 L172 6 L177.6 8.9 L182.3 7.1 L184.4 10.5 L190.3 9 L194.2 9.7 L200.2 8.4 L205.1 9.6 L210 10.6 L213.4 11 L218.8 10.7 L224.3 11 L227.8 11 L230.2 11 L235.7 11 L240.6 11 L246 9.7 L248.1 10 L251 10.6 L255.5 11 L257.5 10.4 L260.3 9.3 L265 9.1 L268.3 8.4 L273.5 11 L277 11 L279.6 11 L285 11 L288.1 9.9 L291.2 9 L295.7 9 L301 10.5 L303.3 9 L305.5 9.7 L308.7 8.7 L312.6 9.1 L315.5 7.2 L319.3 8.4 L324.5 9.9 L327.3 7.6 L331.2 8.9 L334.6 11 L339 11 L344.2 10.9 L349.1 9.8 L353.6 11 L357.9 11 L363.7 10.9 L366.5 11 L371 10.8 L377 11 L382.1 10.4 L387.6 8.7 L391.8 10.8 L393.9 10.6 L396.6 10.5 L399.1 9.3 L404 10.4 L409.8 10.4 L412.1 9.5 L415.3 10.3 L419.4 11 L422.6 10.6 L428.2 9.7 L434.1 9.8 L436.9 9.9 L441.3 8.4 L445.4 8 L449.7 8 L451.9 8.1 L457.7 9.5 L461.6 8.3 L466.9 9.6 L470.2 8.6 L480 6.8 L480 14Z'/%3E%3C/svg%3E") top/100% var(--edge) no-repeat, linear-gradient(#000 0 0) center/100% calc(100% - 2 * var(--edge) + 2px) no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 14' preserveAspectRatio='none'%3E%3Cpath d='M0 0 L0 7.2 L5.7 7.3 L10 8.3 L14.6 8.9 L16.9 6.3 L19.1 4.8 L23.7 6.6 L27.8 7.5 L29.9 6 L35.3 5.9 L39.3 5.4 L42.4 3.8 L47.8 3.1 L50.7 4.3 L54.3 3 L60.1 4.7 L65.8 3.1 L69.4 4.5 L74.5 6.7 L80.3 6 L82.7 5.8 L85.5 5.6 L88.2 5.6 L90.7 6.7 L96.6 4.1 L102.1 5.1 L107.5 4.6 L110.4 5.4 L113.7 8 L118 6.9 L121.5 7 L125.4 6.8 L128.2 7.9 L133.4 9.2 L139.2 9.6 L144.7 9.3 L147.2 10.8 L150.1 10.1 L155.4 9.8 L158.1 10.8 L162.3 8 L165.5 8.8 L168.5 8.6 L172 8 L177.6 5.1 L182.3 6.9 L184.4 3.5 L190.3 5 L194.2 4.3 L200.2 5.6 L205.1 4.4 L210 3.4 L213.4 3 L218.8 3.3 L224.3 3 L227.8 3 L230.2 3 L235.7 3 L240.6 3 L246 4.3 L248.1 4 L251 3.4 L255.5 3 L257.5 3.6 L260.3 4.7 L265 4.9 L268.3 5.6 L273.5 3 L277 3 L279.6 3 L285 3 L288.1 4.1 L291.2 5 L295.7 5 L301 3.5 L303.3 5 L305.5 4.3 L308.7 5.3 L312.6 4.9 L315.5 6.8 L319.3 5.6 L324.5 4.1 L327.3 6.4 L331.2 5.1 L334.6 3 L339 3 L344.2 3.1 L349.1 4.2 L353.6 3 L357.9 3 L363.7 3.1 L366.5 3 L371 3.2 L377 3 L382.1 3.6 L387.6 5.3 L391.8 3.2 L393.9 3.4 L396.6 3.5 L399.1 4.7 L404 3.6 L409.8 3.6 L412.1 4.5 L415.3 3.7 L419.4 3 L422.6 3.4 L428.2 4.3 L434.1 4.2 L436.9 4.1 L441.3 5.6 L445.4 6 L449.7 6 L451.9 5.9 L457.7 4.5 L461.6 5.7 L466.9 4.4 L470.2 5.4 L480 7.2 L480 0Z'/%3E%3C/svg%3E") bottom/100% var(--edge) no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 14' preserveAspectRatio='none'%3E%3Cpath d='M0 14 L0 6.8 L5.7 6.7 L10 5.7 L14.6 5.1 L16.9 7.7 L19.1 9.2 L23.7 7.4 L27.8 6.5 L29.9 8 L35.3 8.1 L39.3 8.6 L42.4 10.2 L47.8 10.9 L50.7 9.7 L54.3 11 L60.1 9.3 L65.8 10.9 L69.4 9.5 L74.5 7.3 L80.3 8 L82.7 8.2 L85.5 8.4 L88.2 8.4 L90.7 7.3 L96.6 9.9 L102.1 8.9 L107.5 9.4 L110.4 8.6 L113.7 6 L118 7.1 L121.5 7 L125.4 7.2 L128.2 6.1 L133.4 4.8 L139.2 4.4 L144.7 4.7 L147.2 3.2 L150.1 3.9 L155.4 4.2 L158.1 3.2 L162.3 6 L165.5 5.2 L168.5 5.4 L172 6 L177.6 8.9 L182.3 7.1 L184.4 10.5 L190.3 9 L194.2 9.7 L200.2 8.4 L205.1 9.6 L210 10.6 L213.4 11 L218.8 10.7 L224.3 11 L227.8 11 L230.2 11 L235.7 11 L240.6 11 L246 9.7 L248.1 10 L251 10.6 L255.5 11 L257.5 10.4 L260.3 9.3 L265 9.1 L268.3 8.4 L273.5 11 L277 11 L279.6 11 L285 11 L288.1 9.9 L291.2 9 L295.7 9 L301 10.5 L303.3 9 L305.5 9.7 L308.7 8.7 L312.6 9.1 L315.5 7.2 L319.3 8.4 L324.5 9.9 L327.3 7.6 L331.2 8.9 L334.6 11 L339 11 L344.2 10.9 L349.1 9.8 L353.6 11 L357.9 11 L363.7 10.9 L366.5 11 L371 10.8 L377 11 L382.1 10.4 L387.6 8.7 L391.8 10.8 L393.9 10.6 L396.6 10.5 L399.1 9.3 L404 10.4 L409.8 10.4 L412.1 9.5 L415.3 10.3 L419.4 11 L422.6 10.6 L428.2 9.7 L434.1 9.8 L436.9 9.9 L441.3 8.4 L445.4 8 L449.7 8 L451.9 8.1 L457.7 9.5 L461.6 8.3 L466.9 9.6 L470.2 8.6 L480 6.8 L480 14Z'/%3E%3C/svg%3E") top/100% var(--edge) no-repeat, linear-gradient(#000 0 0) center/100% calc(100% - 2 * var(--edge) + 2px) no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 14' preserveAspectRatio='none'%3E%3Cpath d='M0 0 L0 7.2 L5.7 7.3 L10 8.3 L14.6 8.9 L16.9 6.3 L19.1 4.8 L23.7 6.6 L27.8 7.5 L29.9 6 L35.3 5.9 L39.3 5.4 L42.4 3.8 L47.8 3.1 L50.7 4.3 L54.3 3 L60.1 4.7 L65.8 3.1 L69.4 4.5 L74.5 6.7 L80.3 6 L82.7 5.8 L85.5 5.6 L88.2 5.6 L90.7 6.7 L96.6 4.1 L102.1 5.1 L107.5 4.6 L110.4 5.4 L113.7 8 L118 6.9 L121.5 7 L125.4 6.8 L128.2 7.9 L133.4 9.2 L139.2 9.6 L144.7 9.3 L147.2 10.8 L150.1 10.1 L155.4 9.8 L158.1 10.8 L162.3 8 L165.5 8.8 L168.5 8.6 L172 8 L177.6 5.1 L182.3 6.9 L184.4 3.5 L190.3 5 L194.2 4.3 L200.2 5.6 L205.1 4.4 L210 3.4 L213.4 3 L218.8 3.3 L224.3 3 L227.8 3 L230.2 3 L235.7 3 L240.6 3 L246 4.3 L248.1 4 L251 3.4 L255.5 3 L257.5 3.6 L260.3 4.7 L265 4.9 L268.3 5.6 L273.5 3 L277 3 L279.6 3 L285 3 L288.1 4.1 L291.2 5 L295.7 5 L301 3.5 L303.3 5 L305.5 4.3 L308.7 5.3 L312.6 4.9 L315.5 6.8 L319.3 5.6 L324.5 4.1 L327.3 6.4 L331.2 5.1 L334.6 3 L339 3 L344.2 3.1 L349.1 4.2 L353.6 3 L357.9 3 L363.7 3.1 L366.5 3 L371 3.2 L377 3 L382.1 3.6 L387.6 5.3 L391.8 3.2 L393.9 3.4 L396.6 3.5 L399.1 4.7 L404 3.6 L409.8 3.6 L412.1 4.5 L415.3 3.7 L419.4 3 L422.6 3.4 L428.2 4.3 L434.1 4.2 L436.9 4.1 L441.3 5.6 L445.4 6 L449.7 6 L451.9 5.9 L457.7 4.5 L461.6 5.7 L466.9 4.4 L470.2 5.4 L480 7.2 L480 0Z'/%3E%3C/svg%3E") bottom/100% var(--edge) no-repeat; }
+/* crumpled, uneven edges: a relief of folds lit from the right (same light as the logo) plus a few warm stains,
+   multiplied over the paper and masked to a band round the edges that fades into the page colour */
+.bb-search::after{ content:""; position:absolute; inset:0; pointer-events:none; mix-blend-mode:multiply; --band:13px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .02' numOctaves='5' seed='7' stitchTiles='stitch'/%3E%3CfeDiffuseLighting lighting-color='%23FFF1E4' surfaceScale='8' diffuseConstant='1'%3E%3CfeDistantLight azimuth='0' elevation='60'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E") 0 0/600px 600px, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55  0 0 0 0 .36  0 0 0 0 .26  0 0 0 -3.2 2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E") 0 0/500px 500px;
+  -webkit-mask:linear-gradient(to right,#000,transparent var(--band)), linear-gradient(to left,#000,transparent var(--band)), linear-gradient(to bottom,#000,transparent calc(var(--band) + var(--edge, 14px))), linear-gradient(to top,#000,transparent calc(var(--band) + var(--edge, 14px)));
+          mask:linear-gradient(to right,#000,transparent var(--band)), linear-gradient(to left,#000,transparent var(--band)), linear-gradient(to bottom,#000,transparent calc(var(--band) + var(--edge, 14px))), linear-gradient(to top,#000,transparent calc(var(--band) + var(--edge, 14px))); }
+.bb-box{ display:flex; align-items:center; gap:12px; height:56px; padding:0 16px; border:1.5px solid var(--black); cursor:text; }
+.bb-box svg{ width:20px; height:20px; flex-shrink:0; }
+.bb-box input{ flex:1; min-width:0; height:100%; padding:0; border:0; outline:0; background:none; color:var(--black); font:400 19px/1 var(--font-display); letter-spacing:.02em; -webkit-appearance:none; appearance:none; }
+.bb-box input::placeholder{ color:rgba(10,10,10,.45); }
+.bb-box:focus-within{ box-shadow:0 0 0 1px var(--black); }
+.bb-filters{ display:flex; gap:4px; }
+.bb-filters button{ flex-shrink:0; white-space:nowrap; padding:6px 7px; border:1px solid rgba(10,10,10,.5); background:none; color:var(--black); font:500 11px/1.2 var(--font-display); letter-spacing:.1em; text-transform:uppercase; cursor:pointer; }
+.bb-filters button[aria-pressed="true"]{ background:var(--black); border-color:var(--black); color:#000; }
+.bb-list{ list-style:none; margin:0; padding:0; border-top:1px solid rgba(10,10,10,.25); }
+.bb-item{ border-bottom:1px solid rgba(10,10,10,.25); }
+.bb-name{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; width:100%; padding:14px 0; border:0; background:none; color:var(--black); text-align:left; cursor:pointer; font-family:var(--font-display); }
+.bb-name span{ font-size:20px; font-weight:500; letter-spacing:.04em; line-height:1.15; text-transform:uppercase; }
+.bb-name small{ flex-shrink:0; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:rgba(10,10,10,.5); }
+.bb-item.open .bb-name{ padding-top:18px; }
+.bb-item.open .bb-name span{ font-size:30px; font-weight:600; letter-spacing:.03em; line-height:1; }
+.bb-card{ display:flex; flex-direction:column; gap:20px; padding:6px 0 22px; }
+.bb-meta{ margin:0; display:flex; gap:8px; align-items:baseline; font-size:20px; font-weight:500; }
+.bb-meta + .bb-meta{ margin-top:-12px; }
+.bb-meta span, .bb-lab{ font-size:11px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:rgba(10,10,10,.55); }
+.bb-ing{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:max-content 1fr; gap:10px 14px; align-items:baseline; }   /* qty column = widest qty in the recipe */
+.bb-ing li{ display:contents; }
+.bb-ing b{ min-width:72px; font-size:24px; font-weight:700; line-height:1.1; white-space:nowrap; }
+.bb-ing span{ font-size:20px; line-height:1.25; }
+.bb-ing li.h{ display:block; grid-column:1 / -1; padding-top:6px; font-size:11px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:rgba(10,10,10,.55); }
+.bb-ing a, .bb-link{ color:inherit; text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:1px; }
+.bb-method{ list-style:none; margin:0; padding:0; counter-reset:s; display:flex; flex-direction:column; gap:10px; }
+.bb-method li{ counter-increment:s; display:flex; gap:12px; font-size:17px; line-height:1.4; }
+.bb-method li::before{ content:counter(s); width:18px; flex-shrink:0; font-weight:700; }
+.bb-more{ display:flex; justify-content:space-between; align-items:center; width:100%; padding:10px 0 0; border:0; border-top:1px dashed rgba(10,10,10,.3); background:none; color:var(--black); font:500 11px/1.4 var(--font-display); letter-spacing:.14em; text-transform:uppercase; cursor:pointer; }
+.bb-more i{ font-style:normal; font-size:16px; letter-spacing:0; }
+.bb-extra{ display:flex; flex-direction:column; gap:8px; }
+.bb-extra[hidden]{ display:none; }
+.bb-extra p{ margin:0; font-size:16px; line-height:1.4; }
+.bb-extra .bb-lab{ font-size:11px; padding-top:6px; }
+.bb-extra .bb-lab:first-child{ padding-top:0; }
+.bb-link{ font-size:16px; line-height:1.5; align-self:flex-start; }
+.bb-extra img, .bb-extra video{ width:100%; height:auto; display:block; }
+/* comments + suggested edits */
+.bb-talk{ display:flex; flex-direction:column; gap:14px; padding-top:12px; border-top:1px dashed rgba(10,10,10,.3); }
+.bb-talk-btns{ display:flex; gap:8px; flex-wrap:wrap; }
+.bb-tb{ padding:8px 12px; border:1px solid var(--black); background:none; color:var(--black); font:500 11px/1.2 var(--font-display); letter-spacing:.12em; text-transform:uppercase; cursor:pointer; }
+.bb-tb[aria-expanded="true"]{ background:var(--black); color:#FCF2EA; }
+.bb-panel{ display:flex; flex-direction:column; gap:14px; }
+.bb-comments{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; }
+.bb-comments li{ display:flex; flex-direction:column; gap:3px; padding-left:10px; border-left:2px solid rgba(10,10,10,.2); }
+.bb-comments p{ margin:0; font-size:16px; line-height:1.4; }
+.bb-comments .bb-who{ font-size:11px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; }
+.bb-comments .bb-who span{ margin-left:6px; font-weight:400; letter-spacing:.06em; opacity:.6; }
+.bb-form{ display:flex; flex-direction:column; gap:8px; }
+.bb-in{ width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--black); border-radius:0; background:rgba(255,255,255,.35); color:var(--black); font:400 16px/1.35 var(--font-display); -webkit-appearance:none; appearance:none; }
+.bb-in::placeholder{ color:rgba(10,10,10,.45); }
+.bb-in:focus{ outline:none; box-shadow:0 0 0 1px var(--black); }
+textarea.bb-in{ resize:vertical; min-height:72px; }
+.bb-hp{ position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
+.bb-send{ display:flex; justify-content:flex-end; align-items:center; gap:12px; }
+.bb-send button{ padding:9px 14px; border:1px solid var(--black); background:var(--black); color:#FCF2EA; font:500 11px/1.2 var(--font-display); letter-spacing:.12em; text-transform:uppercase; cursor:pointer; }
+.bb-send button:disabled{ opacity:.5; cursor:default; }
+.bb-msg{ font-size:13px; }
+.bb-note{ margin:0; font-size:14px; line-height:1.4; }
+.bb-none{ margin:0; font-size:16px; color:rgba(10,10,10,.55); }
+@media (prefers-reduced-motion:reduce){ .bb, .bb.bb-compact, .bb-sub-space, /* same shadow the logo casts on the page: light from the right, soft warm-brown shadow falling down-left */
+.bb-sub-top{ text-shadow:-1.5px 1.5px 3px rgba(70,50,40,.38); }
+.bb-sub-top{ transition:none; } }
+@media (hover:hover){ .bb-name:hover span{ text-decoration:underline; text-underline-offset:5px; text-decoration-thickness:1px; } }
+@media (min-width:900px){
+  .bb{ --lw:724px; }   /* matches Chef's Paper desktop logo */
+  .bb-compact .bb-sub-space{ margin-bottom:-22px; }
+  .bb-sub{ max-width:640px; font-size:22px; margin-bottom:10px; text-wrap:wrap; }
+  .bb-br{ display:inline; }
+  .bb-sub-top{ text-shadow:-2.5px 2.5px 5px rgba(70,50,40,.38); }
+  .bb-sub-space{ width:100%; max-width:640px; }
+  .bb-sub-top{ top:calc(28px + var(--lh) * .76); left:0; right:0; width:min(640px, calc(var(--col) - 64px)); }
+  .bb-head{ height:calc(20px + var(--lh) * .45 + 15px); padding:20px 0 0; }
+  .bb-search::after{ --band:28px; }
+  .bb-search{ width:var(--col); margin:-15px auto 65px; padding:calc(var(--lh) * .31 + 8px) 32px 55px; gap:22px; --edge:16px; box-shadow:inset 0 0 24px rgba(110,70,50,.26), inset 0 0 5px rgba(110,70,50,.22); }
+  .bb-box{ height:64px; padding:0 20px; }
+  .bb-box input{ font-size:22px; }
+}
+/* type colours — black text on the paper sheet; colour = left accent, tag + filter fill/border:
+   signature yellow · classic blue · prep red · food green */
+.bb{ --c-sig:242,206,75; --c-classic:111,168,224; --c-prep:229,102,95; --c-food:121,194,126; }
+[data-t="sig"]{ --c:var(--c-sig); } [data-t="classic"]{ --c:var(--c-classic); } [data-t="prep"]{ --c:var(--c-prep); } [data-t="food"]{ --c:var(--c-food); }
+.bb-item{ border-left:4px solid rgb(var(--c)); padding:0 0 0 14px; }
+.bb-item.open{ background:rgba(var(--c),.13); padding-right:14px; }
+.bb-name small{ padding:3px 6px 2px; border:1px solid rgb(var(--c)); background:rgba(var(--c),.3); color:var(--black); }
+.bb-name{ align-items:center; }
+.bb-filters button[data-t]:not([data-t=""]){ border-color:rgb(var(--c)); }
+.bb-filters button[data-t=""][aria-pressed="true"]{ background:rgba(10,10,10,.1); border-color:var(--black); color:var(--black); }
+.bb-filters button[data-t]:not([data-t=""])[aria-pressed="true"]{ background:rgba(var(--c),.45); border-color:rgb(var(--c)); color:var(--black); }
+.bb-meta span, .bb-lab, .bb-ing li.h{ color:var(--black); }
+/* Barney Book photo — square thumbnail beside the ingredients, above the method */
+.bb-top{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:start; }
+.bb-top-l{ display:flex; flex-direction:column; gap:20px; min-width:0; }
+.bb-ph{ width:112px; display:flex; flex-direction:column; gap:6px; }
+.bb-sq{ position:relative; aspect-ratio:1; overflow:hidden; background:rgba(10,10,10,.06); }
+.bb-sq img{ width:100%; height:100%; object-fit:cover; display:block; }
+.bb-sq-empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:8px; box-sizing:border-box; border:1px dashed rgba(10,10,10,.45); background:rgba(255,255,255,.25); text-align:center; }
+.bb-sq-empty span{ font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:rgba(10,10,10,.55); }
+.bb-sq-empty .bb-up{ padding:0; border:0; background:none; color:var(--black); font:500 13px/1.2 var(--font-display); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+.bb-arw{ position:absolute; top:50%; transform:translateY(-50%); width:26px; height:26px; padding:0; border:0; border-radius:50%; background:rgba(252,242,234,.85); color:var(--black); font:400 20px/24px var(--font-display); cursor:pointer; }
+.bb-arw[data-shot="-1"]{ left:4px; } .bb-arw[data-shot="1"]{ right:4px; }
+.bb-count{ position:absolute; right:4px; bottom:4px; padding:1px 5px; background:rgba(10,10,10,.6); color:#FCF2EA; font-size:10px; letter-spacing:.08em; }
+.bb-vid{ display:block; width:100%; height:100%; position:relative; }
+.bb-vid i{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-style:normal; font-size:28px; color:#FCF2EA; text-shadow:0 1px 6px rgba(0,0,0,.5); }
+.bb-upmsg{ margin:0; font-size:12px; line-height:1.3; }
+@media (min-width:900px){ .bb-ph{ width:220px; grid-column:2; grid-row:1; } .bb-top-l{ grid-column:1; grid-row:1; } .bb-arw{ width:32px; height:32px; font-size:24px; line-height:30px; } }
+/* phone + tablet: thumbnail sits beside the recipe name, ingredients run full width below */
+.bb-ph-m{ display:none; }
+@media (max-width:899px){
+  .bb-top .bb-ph{ display:none; }
+  .bb-top{ display:block; }
+  .bb-item.open{ display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:12px; }
+  .bb-item.open > .bb-name{ grid-column:1; grid-row:1; align-self:start; }
+  .bb-item.open > .bb-ph-m{ display:block; grid-column:2; grid-row:1; padding-top:14px; }
+  .bb-item.open > .bb-ph-m:empty{ display:none; }
+  .bb-item.open > .bb-card{ grid-column:1 / -1; }
+  .bb-ph-m .bb-ph{ width:96px; }
+  .bb-item.open .bb-name{ flex-direction:column; align-items:flex-start; gap:8px; }
+}
+.bb-item.open .bb-name span{ display:block; max-width:100%; overflow:hidden; }
+@media (max-width:389px){ .bb-ph-m .bb-ph{ width:84px; } .bb-sq-empty span{ font-size:9px; } .bb-sq-empty .bb-up{ font-size:12px; } }
