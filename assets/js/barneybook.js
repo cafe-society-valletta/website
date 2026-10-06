@@ -54,7 +54,7 @@
   /* ---------- photos: square thumbnail beside the ingredients, arrows when there's more than one ----------
      Approved media come from the Barney Book Apps Script (Drive: Barney Book/<type>/<recipe>/, files directly in the
      recipe folder = approved). Uploads land in <recipe>/To review until a manager moves them up. */
-  const MEDIA_API = "";   // Apps Script web-app URL (…/exec). Empty = uploads not switched on yet.
+  const MEDIA_API = "https://script.google.com/macros/s/AKfycbwXYEd2F0vTS7hwkgG3c47HEAb1hfnO7ShrwxJFcxt7zb-T-C6xTKnXsMQKVrt61vhc/exec";   // Apps Script "Barney Book Photos" (cafesocietyvalletta). Public read-only list + upload-to-review.
   let media = {}, shot = 0, upMsg = "";
   const mediaFor = r => (media[r.id] || r.media || []).map(m => typeof m === "string" ? { src:m, video:/\.(mp4|webm|mov)$/i.test(m) } : m);
   function photo(r){
@@ -63,7 +63,7 @@
     if(!list.length) return `<div class="bb-ph"><div class="bb-sq bb-sq-empty"><span>No photo yet</span><button type="button" class="bb-up">Upload photo</button></div>${msg}</div>`;
     const i = ((shot % list.length) + list.length) % list.length, m = list[i];
     const pic = m.video ? `<a class="bb-vid" href="${esc(m.href || m.src)}" target="_blank" rel="noopener"><img src="${esc(m.thumb || "")}" alt="" loading="lazy"><i>▶</i></a>`
-                        : `<img src="${esc(m.src)}" alt="${esc(r.n)}" loading="lazy">`;
+                        : `<a class="bb-big" href="${esc(m.big || m.src)}" target="_blank" rel="noopener"><img src="${esc(m.src)}" alt="${esc(r.n)}" loading="lazy"></a>`;
     const nav = list.length > 1 ? `<button type="button" class="bb-arw" data-shot="-1" aria-label="Previous photo">‹</button><button type="button" class="bb-arw" data-shot="1" aria-label="Next photo">›</button><span class="bb-count">${i+1}/${list.length}</span>` : "";
     return `<div class="bb-ph"><div class="bb-sq">${pic}${nav}</div>${msg}</div>`;
   }
@@ -73,7 +73,7 @@
     if(!d || !d.media) return;
     for(const [k, files] of Object.entries(d.media)) media[k] = files.map(f => f.video
       ? { video:true, href:`https://drive.google.com/file/d/${f.id}/preview`, thumb:`https://drive.google.com/thumbnail?id=${f.id}&sz=w800` }
-      : { src:`https://drive.google.com/thumbnail?id=${f.id}&sz=w1200` });
+      : { src:`https://drive.google.com/thumbnail?id=${f.id}&sz=w800`, big:`https://drive.google.com/thumbnail?id=${f.id}&sz=w2400` });
     rerenderPhoto();
   }).catch(() => {});
 
@@ -160,7 +160,7 @@
     const hits = R.filter(r => !type || r.t===type).map(r => [r, score(r,q)]).filter(([,s]) => s)
       .sort((a,b) => b[1]-a[1] || a[0].n.localeCompare(b[0].n)).map(([r]) => r);
     $list.innerHTML = hits.map(r => `<li class="bb-item${open===r ? " open" : ""}" data-k="${r.k}" data-t="${r.t}">
-      <button type="button" class="bb-name" aria-expanded="${open===r}"><span>${esc(r.n)}</span><small>${TYPE[r.t]}</small></button>
+      <button type="button" class="bb-name" aria-expanded="${open===r}"><span>${esc(r.n)}</span>${r.p ? `<b class="bb-p">€${esc(r.p)}</b>` : ""}<small>${TYPE[r.t]}</small></button>
       ${open===r ? `<div class="bb-ph-m">${photo(r)}</div>` + card(r) : ""}</li>`).join("");
     $none.hidden = hits.length > 0;
     fitName();
