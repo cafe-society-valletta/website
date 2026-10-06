@@ -1056,7 +1056,8 @@ textarea.bb-in{ resize:vertical; min-height:72px; }
   .bb-item.open > .bb-card{ grid-column:1 / -1; }
   .bb-ph-m .bb-ph{ width:96px; }
   .bb-item.open .bb-name{ flex-direction:row; flex-wrap:wrap; align-items:center; gap:8px 12px; }
-  .bb-item.open .bb-name span{ flex-basis:100%; }
+  .bb-item.open .bb-name span{ flex-basis:100%; line-height:1.3; }
+  .bb-name span{ line-height:1.3; }
   .bb-item.open .bb-p{ order:2; margin-left:0; font-size:18px; }
   .bb-item.open .bb-name small{ order:1; }
 }
@@ -1064,5 +1065,7 @@ textarea.bb-in{ resize:vertical; min-height:72px; }
 .bb-name span{ flex:1 1 auto; min-width:0; }
 .bb-p{ flex-shrink:0; margin-left:auto; font-size:16px; font-weight:700; letter-spacing:.02em; white-space:nowrap; color:rgba(10,10,10,.8); }
 .bb-item.open .bb-p{ font-size:20px; }
+.bb-v{ font-style:normal; white-space:nowrap; }
+.bb-pv{ font-weight:700; color:rgba(10,10,10,.8); letter-spacing:.02em; white-space:nowrap; }
 .bb-item.open .bb-name span{ display:block; max-width:100%; overflow:hidden; }
 @media (max-width:389px){ .bb-ph-m .bb-ph{ width:84px; } .bb-sq-empty span{ font-size:9px; } .bb-sq-empty .bb-up{ font-size:12px; } }
