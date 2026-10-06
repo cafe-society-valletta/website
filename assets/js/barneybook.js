@@ -246,11 +246,31 @@
   $q.addEventListener("input", typed);
 
   /* arrival = Paper layout (big logo + tagline). Focusing the search or scrolling the list makes the page "compact":
-     tagline fades, logo halves, the search box rides up. It stays compact for the rest of the visit (Chef's call). */
+     tagline fades, logo halves, legend folds, the search box rides up. The search ✕ or a tap on the logo brings the full layout back. */
   const $bb = document.querySelector(".bb");
-  const compact = () => { if($bb && !$bb.classList.contains("bb-compact")) $bb.classList.add("bb-compact"); };
+  let holdFull = false;
+  const compact = () => { if(holdFull) return; if($bb && !$bb.classList.contains("bb-compact")) $bb.classList.add("bb-compact"); };
   $q.addEventListener("focus", compact);
   addEventListener("scroll", () => { if(scrollY > 8) compact(); }, { passive:true });
+  // Back to the full arrival layout (big logo, tagline, category legend): the search box's ✕ or a tap on the logo.
+  function expand(){
+    cancelAnimationFrame(glideRaf);
+    holdFull = true; $q.blur();
+    if($q.value){ $q.value = ""; }
+    $list.style.minHeight = ""; open = null; render();
+    history.replaceState(null, "", location.pathname + location.search);
+    if($bb) $bb.classList.remove("bb-compact");
+    scrollTo({ top:0, behavior: calm.matches ? "auto" : "smooth" });
+    // ignore the scroll events of this glide; compact again on the next real scroll or search tap
+    const t0 = performance.now(), wait = () => { if(scrollY <= 8 || performance.now() - t0 > 1500) setTimeout(() => holdFull = false, 120); else requestAnimationFrame(wait); };
+    requestAnimationFrame(wait);
+  }
+  $q.addEventListener("search", () => { if(!$q.value) expand(); });            // ✕ clear button (Chrome/Safari)
+  $q.addEventListener("input", e => { if(!$q.value && !e.inputType) expand(); }); // ✕ on browsers that only fire input
+  const $logo = document.querySelector(".bb-head picture");
+  if($logo){ $logo.setAttribute("role", "button"); $logo.tabIndex = 0; $logo.setAttribute("aria-label", "Back to the top of the Barney Book");
+    $logo.addEventListener("click", expand);
+    $logo.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); expand(); } }); }
   $q.addEventListener("keydown", e => {
     if(e.key==="Enter"){ const first=$list.querySelector(".bb-item"); if(first){ show(R[first.dataset.k], true); $q.blur(); } }
     if(e.key==="Escape"){ $q.value=""; open=null; render(); }
