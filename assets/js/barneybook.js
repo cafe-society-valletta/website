@@ -7,9 +7,18 @@
   const norm = s => (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim();
   const slug = s => norm(s).replace(/ /g,"-");
   const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  // Variant prices: p:"9/9/11" on "Aperol / Campari / Limoncello Spritz" puts each price beside its variant
+  // ("Aperol €9 / Campari €9 / Limoncello €11 Spritz") instead of one price on the right.
+  const nameHTML = r => {
+    if(!r.pv) return esc(r.n);
+    const parts = r.n.split(" / "), last = parts.pop(), w = last.split(" "), lead = parts[0].split(" ").length;
+    parts.push(w.slice(0, lead).join(" ")); const tail = w.slice(lead).join(" ");
+    return parts.map((v,i) => `<i class="bb-v">${esc(v)} <b class="bb-pv">€${esc(r.pv[i])}</b>${i < parts.length-1 ? " /" : ""}</i>`).join(" ") + (tail ? " " + esc(tail) : "");
+  };
 
   R.forEach((r,k) => {
     r.k = k; r.id = slug(r.n);
+    if(r.p && r.p.includes("/") && r.p.split("/").length === r.n.split(" / ").length) r.pv = r.p.split("/");
     r.ing = (r.i||[]).map(s => s[0]==="#" ? {h:s.slice(1)} : (([q,it]) => ({q:q||"", it:it===undefined ? q : it}))(s.split("|")));
     r.nn = norm(r.n);
     r.hay = norm([r.n, ...(r.a||[]), ...r.ing.map(x=>x.it||x.h)].join(" "));
@@ -177,7 +186,7 @@
     const hits = R.filter(r => !type || r.t===type).map(r => [r, score(r,q)]).filter(([,s]) => s)
       .sort((a,b) => b[1]-a[1] || a[0].n.localeCompare(b[0].n)).map(([r]) => r);
     $list.innerHTML = hits.map(r => `<li class="bb-item${open===r ? " open" : ""}" data-k="${r.k}" data-t="${r.t}">
-      <button type="button" class="bb-name" aria-expanded="${open===r}"><span>${esc(r.n)}</span>${r.p ? `<b class="bb-p">€${esc(r.p)}</b>` : ""}<small>${TYPE[r.t]}</small></button>
+      <button type="button" class="bb-name" aria-expanded="${open===r}"><span>${nameHTML(r)}</span>${r.p && !r.pv ? `<b class="bb-p">€${esc(r.p)}</b>` : ""}<small>${TYPE[r.t]}</small></button>
       ${open===r ? `<div class="bb-ph-m">${photo(r)}</div>` + card(r) : ""}</li>`).join("");
     $none.hidden = hits.length > 0;
     fitName();
