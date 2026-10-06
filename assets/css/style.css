@@ -1033,6 +1033,7 @@ textarea.bb-in{ resize:vertical; min-height:72px; }
 .bb-ph{ width:112px; display:flex; flex-direction:column; gap:6px; }
 .bb-sq{ position:relative; aspect-ratio:1; overflow:hidden; background:rgba(10,10,10,.06); }
 .bb-sq img{ width:100%; height:100%; object-fit:cover; display:block; }
+.bb-big{ display:block; width:100%; height:100%; cursor:zoom-in; }
 .bb-sq-empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:8px; box-sizing:border-box; border:1px dashed rgba(10,10,10,.45); background:rgba(255,255,255,.25); text-align:center; }
 .bb-sq-empty span{ font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:rgba(10,10,10,.55); }
 .bb-sq-empty .bb-up{ padding:0; border:0; background:none; color:var(--black); font:500 13px/1.2 var(--font-display); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
@@ -1054,7 +1055,14 @@ textarea.bb-in{ resize:vertical; min-height:72px; }
   .bb-item.open > .bb-ph-m:empty{ display:none; }
   .bb-item.open > .bb-card{ grid-column:1 / -1; }
   .bb-ph-m .bb-ph{ width:96px; }
-  .bb-item.open .bb-name{ flex-direction:column; align-items:flex-start; gap:8px; }
+  .bb-item.open .bb-name{ flex-direction:row; flex-wrap:wrap; align-items:center; gap:8px 12px; }
+  .bb-item.open .bb-name span{ flex-basis:100%; }
+  .bb-item.open .bb-p{ order:2; margin-left:0; font-size:18px; }
+  .bb-item.open .bb-name small{ order:1; }
 }
+/* selling price (Lightspeed): right-aligned, just before the category tag; collapsed and open */
+.bb-name span{ flex:1 1 auto; min-width:0; }
+.bb-p{ flex-shrink:0; margin-left:auto; font-size:16px; font-weight:700; letter-spacing:.02em; white-space:nowrap; color:rgba(10,10,10,.8); }
+.bb-item.open .bb-p{ font-size:20px; }
 .bb-item.open .bb-name span{ display:block; max-width:100%; overflow:hidden; }
 @media (max-width:389px){ .bb-ph-m .bb-ph{ width:84px; } .bb-sq-empty span{ font-size:9px; } .bb-sq-empty .bb-up{ font-size:12px; } }
