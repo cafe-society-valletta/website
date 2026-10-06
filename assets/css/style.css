@@ -911,6 +911,7 @@ body.bb-body{ background:var(--black); }
   --wheel:cubic-bezier(.1,.75,.12,1); transition:--lk 1.15s var(--wheel); }
 .bb.bb-compact{ --lk:.5; }
 .bb-head{ position:relative; z-index:2; display:flex; justify-content:center; align-items:flex-start; height:calc(7px + var(--lh) * .45 + 13px); padding:7px 0 0; }
+.bb-head picture{ cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .bb-head img{ display:block; width:calc(var(--lw) * var(--lk)); height:auto; max-width:none; }
 /* the tagline sits on top of the logo (ribbon passes behind it). The sheet's mask makes it its own layer, so the visible
    copy lives in the header (above the logo) and an invisible twin in the sheet holds its space. */
