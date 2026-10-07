@@ -502,6 +502,9 @@
         // the bend moves pixels further than that patch, so bits of text went missing. After any change on the screen,
         // nudge the filter so WebKit redraws the whole glass (once per frame at most).
         if(/AppleWebKit/.test(navigator.userAgent) && !/Chrome\/|Chromium|Edg\/|Firefox|OPR\//.test(navigator.userAgent)){
+          // WebKit measures the filter from the nearest compositing layer; on some screens (NEW POST on iPhone) the glass
+          // stopped being one and the bend shifted by the glass's offset in the monitor. Force it to be its own layer.
+          glass.style.transform = "translate3d(0,0,0)"; glass.style.willChange = "transform";
           let queued = 0, flip = false;
           const redraw = () => { if(queued) return; queued = requestAnimationFrame(() => { queued = 0; flip = !flip;   // switching to the twin filter repaints the whole layer
             glass.style.filter = flip ? `url(#${id}-b)` : warp; }); };   // (adding a CSS filter function moved Safari's origin again)
