@@ -138,9 +138,11 @@
     const f = $author.value ? $subject : $author; f.focus({ preventScroll:true }); f.value += e.key; counts();
   });
 
-  // ---- 8-bit mouse pointer: over the screen the system cursor is hidden and a green pixel arrow is drawn INSIDE the
-  // screen, at the un-bent pointer position — so the CRT filter bends it exactly like the text and media (it sits over
-  // whatever a click will hit). An I-beam over text fields. Mouse/trackpad devices only.
+  // ---- 8-bit mouse pointer: over the screen the system cursor is hidden and a green pixel arrow (I-beam over text fields)
+  // follows the mouse along the CRT curve. It lives OUTSIDE the bent screen (position:fixed on <body>), so moving it never
+  // re-renders the expensive SVG filter; instead its spot is bent in JS with the same displacement map: we find the screen
+  // point q whose bent image shows the un-bent point p under the mouse (q + d(q) = p), i.e. it sits over what a click hits.
+  // Mouse/trackpad devices only.
   if(matchMedia("(hover: hover) and (pointer: fine)").matches){
     const ARROW = ["X","XX","XoX","XooX","XoooX","XooooX","XoooooX","XooooooX","XoooooooX","XooooooooX","XoooooXXXXX","XooXooX","XoX.XooX","XX..XooX","X....XooX",".....XooX","......XX"];
     const BEAM = ["XXX.XXX","...X...","...X...","...X...","...X...","...X...","...X...","...X...","...X...","...X...","...X...","...X...","XXX.XXX"];
@@ -149,17 +151,27 @@
       return "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${Math.max(...rows.map(r => r.length))} ${rows.length}" shape-rendering="crispEdges">${r}</svg>`); };
     const arrow = svg(ARROW, true), beam = svg(BEAM, false);   // arrow: green fill, dark pixel outline
     const ptr = document.createElement("i"); ptr.className = "mmb-ptr"; ptr.setAttribute("aria-hidden", "true"); ptr.hidden = true;
-    const draw = (img, ar) => { ptr.style.backgroundImage = `url("${img}")`; ptr.style.aspectRatio = ar; };
-    let last = null, kind = "";
-    const place = () => { if(!last) return; const r = screen.getBoundingClientRect();
-      ptr.style.left = (last.x - r.left + screen.scrollLeft) + "px"; ptr.style.top = (last.y - r.top + screen.scrollTop) + "px";
+    document.body.appendChild(ptr);
+    let kind = "", frame = 0, last = null;
+    const lin = b => { const c = b / 255; return c <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); };   // map bytes are sRGB-encoded linear values
+    const bend = (x, y, w, h) => {   // un-bent screen point → where the filter draws it
+      const m = warpMap; if(!m || screen.classList.contains("full")) return [x, y];
+      const S = m.range * w, d = (qx, qy) => { const mx = Math.min(m.w - 1, Math.max(0, Math.round(qx / w * m.w - .5))),
+        my = Math.min(m.h - 1, Math.max(0, Math.round(qy / h * m.h - .5))), k = (my * m.w + mx) * 4;
+        return [S * (lin(m.px[k]) - .5), S * (lin(m.px[k + 1]) - .5)]; };
+      let qx = x, qy = y; for(let n = 0; n < 5; n++){ const [dx, dy] = d(qx, qy); qx = x - dx; qy = y - dy; }
+      return [qx, qy]; };
+    const place = () => { frame = 0; if(!last) return; const r = screen.getBoundingClientRect();
+      const [qx, qy] = bend(last.x - r.left, last.y - r.top, r.width, r.height);
       const k = last.t && last.t.closest && last.t.closest("input:not([type=file]), textarea") ? "beam" : "arrow";
-      if(k !== kind){ kind = k; k === "beam" ? draw(beam, "7 / 13") : draw(arrow, "11 / 17"); ptr.classList.toggle("beam", k === "beam"); } };
+      if(k !== kind){ kind = k; ptr.style.backgroundImage = `url("${k === "beam" ? beam : arrow}")`; ptr.style.aspectRatio = k === "beam" ? "7 / 13" : "11 / 17"; ptr.classList.toggle("beam", k === "beam"); }
+      const full = screen.classList.contains("full"), wpx = full ? (k === "beam" ? 10 : 16) : Math.max(k === "beam" ? 10 : 16, r.width * (k === "beam" ? .0125 : .02));
+      const ox = k === "beam" ? wpx / 2 : 0, oy = k === "beam" ? wpx * 13 / 14 : 0;   // arrow: tip on the spot; I-beam: centred
+      ptr.style.width = wpx + "px"; ptr.style.transform = `translate3d(${r.left + qx - ox}px, ${r.top + qy - oy}px, 0)`; };
     screen.classList.add("mm-ptr-on");
-    screen.addEventListener("pointermove", e => { if(e.pointerType !== "mouse") return; if(!ptr.isConnected) screen.appendChild(ptr);
-      last = { x:e.clientX, y:e.clientY, t:e.target }; ptr.hidden = false; place(); });
+    screen.addEventListener("pointermove", e => { if(e.pointerType !== "mouse") return;
+      last = { x:e.clientX, y:e.clientY, t:e.target }; ptr.hidden = false; if(!frame) frame = requestAnimationFrame(place); });
     screen.addEventListener("pointerleave", () => { ptr.hidden = true; last = null; });
-    screen.addEventListener("scroll", place, { passive:true });
   }
 
   // ---- [FULLSCREEN]: the screen zooms out of the monitor into a flat, full-window terminal (no casing, menu or footer,
@@ -213,24 +225,30 @@
 
   // CRT curve: everything on the screen is bent with the same barrel distortion as the intro clip (ffmpeg lenscorrection
   // k1 .32 / k2 .06 on the scaled frame, centre magnified ~1.22× so the corners land on the corners, as in the clips). An SVG displacement map (assets/img/mm-warp-*.png; R = x shift, G = y shift,
-  // 0.5 = none) is applied as a CSS filter to the screen, sized in px to the screen and re-sized with it.
+  // 0.5 = none, stored sRGB-encoded and read in linearRGB — Safari always reads displacement maps in linearRGB, so this is the only
+  // setting that bends the same in Safari and Chrome; old sRGB maps mm-warp-*.png shifted everything right on iPhones) is applied as a CSS filter to the screen, sized in px to the screen and re-sized with it.
   // WARP_SCALE = the map's full range in screen-box px at the size the map was made for (phone 933 px wide, desktop 868).
   let warp = "";   // the CRT filter (set once its map has loaded); dropped in fullscreen
+  var warpMap = null;   // the map's pixels, for bending the pointer in JS: { w, h, px, range }
   (function curve(){
-    const desk = box.classList.contains("mm-computer"), url = desk ? "assets/img/mm-warp-desk.png" : "assets/img/mm-warp-phone.png";
+    const desk = box.classList.contains("mm-computer"), url = desk ? "assets/img/mm-warp2-desk.png" : "assets/img/mm-warp2-phone.png";
     const RANGE = desk ? 81 / 868 : 151 / 933;   // displacement range as a fraction of the screen width
     const NS = "http://www.w3.org/2000/svg", id = "mm-crt";
     const svg = document.createElementNS(NS, "svg"); svg.setAttribute("width", "0"); svg.setAttribute("height", "0");
     svg.setAttribute("aria-hidden", "true"); svg.style.position = "absolute";
-    svg.innerHTML = `<filter id="${id}" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    svg.innerHTML = `<filter id="${id}" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" color-interpolation-filters="linearRGB">
       <feImage preserveAspectRatio="none" result="map"/><feDisplacementMap in="SourceGraphic" in2="map" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation="0.35"/></filter>`;
     document.body.appendChild(svg);
     const f = svg.querySelector("filter"), img = svg.querySelector("feImage"), dm = svg.querySelector("feDisplacementMap");
     const size = () => { const w = screen.clientWidth, h = screen.clientHeight; if(!w || !h) return;
       for(const [el, a] of [[f, { x:0, y:0, width:w, height:h }], [img, { x:0, y:0, width:w, height:h }]]) for(const k in a) el.setAttribute(k, a[k]);
       dm.setAttribute("scale", (RANGE * w).toFixed(1)); };
+    // the page preloads the map (<link rel=preload>), so this is normally instant
     fetch(url).then(r => r.blob()).then(b => new Promise(ok => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); }))
-      .then(data => { img.setAttribute("href", data); size(); warp = `url(#${id})`; if(!screen.classList.contains("full")) screen.style.filter = warp; new ResizeObserver(size).observe(screen); })
+      .then(data => { img.setAttribute("href", data); size(); warp = `url(#${id})`; if(!screen.classList.contains("full")) screen.style.filter = warp; new ResizeObserver(size).observe(screen);
+        const im = new Image(); im.onload = () => { const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight;
+          const g = c.getContext("2d"); g.drawImage(im, 0, 0); warpMap = { w:c.width, h:c.height, px:g.getImageData(0, 0, c.width, c.height).data, range:RANGE }; };
+        im.src = data; })
       .catch(() => {});
   })();
 
