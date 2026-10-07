@@ -38,6 +38,7 @@
   screen.innerHTML = `
     <div class="mmb">
       <button type="button" class="mmb-btn mmb-back" hidden>&lt;- GO BACK</button>
+      <img class="mmb-logo" src="assets/img/mm-logo.webp" alt="Meet Me at Society">
       <section class="mmb-home">
         <p class="mmb-write-row"><a class="mmb-write" href="#new" role="button">[ WRITE A POST ]</a><button type="button" class="mmb-btn mmb-fs">[FULLSCREEN]</button></p>
         <p class="mmb-hint mmb-home-hint" aria-live="polite"></p>
@@ -161,7 +162,14 @@
         return [S * (lin(m.px[k]) - .5), S * (lin(m.px[k + 1]) - .5)]; };
       let qx = x, qy = y; for(let n = 0; n < 5; n++){ const [dx, dy] = d(qx, qy); qx = x - dx; qy = y - dy; }
       return [qx, qy]; };
+    // desktop glass outline (fraction of the glass box; quadratic fits of the monitor photo's glass edge): outside it the
+    // normal system cursor comes back
+    const EDGE = box.classList.contains("mm-computer") ? { top:[.09268, -.0883, -.00293], bottom:[-.12059, .13698, .9662], left:[.05491, -.05618, .00466], right:[-.04281, .04188, .99292] } : null;
+    const q2 = (c, t) => (c[0] * t + c[1]) * t + c[2];
+    const onGlass = (nx, ny) => !EDGE || (ny > q2(EDGE.top, nx) && ny < q2(EDGE.bottom, nx) && nx > q2(EDGE.left, ny) && nx < q2(EDGE.right, ny));
     const place = () => { frame = 0; if(!last) return; const r = screen.getBoundingClientRect();
+      const out = !screen.classList.contains("full") && !onGlass((last.x - r.left) / r.width, (last.y - r.top) / r.height);
+      screen.classList.toggle("mm-ptr-out", out); ptr.hidden = out; if(out) return;
       const [qx, qy] = bend(last.x - r.left, last.y - r.top, r.width, r.height);
       const k = last.t && last.t.closest && last.t.closest("input:not([type=file]), textarea") ? "beam" : "arrow";
       if(k !== kind){ kind = k; ptr.style.backgroundImage = `url("${k === "beam" ? beam : arrow}")`; ptr.style.aspectRatio = k === "beam" ? "7 / 13" : "11 / 17"; ptr.classList.toggle("beam", k === "beam"); }
@@ -172,7 +180,7 @@
       ptr.style.width = wpx + "px"; ptr.style.transform = `translate3d(${r.left - b.left + qx - ox}px, ${r.top - b.top + qy - oy}px, 0)`; };
     screen.classList.add("mm-ptr-on");
     screen.addEventListener("pointermove", e => { if(e.pointerType !== "mouse") return;
-      last = { x:e.clientX, y:e.clientY, t:e.target }; ptr.hidden = false; if(!frame) frame = requestAnimationFrame(place); });
+      last = { x:e.clientX, y:e.clientY, t:e.target }; if(!frame) frame = requestAnimationFrame(place); });
     screen.addEventListener("pointerleave", () => { ptr.hidden = true; last = null; });
   }
 
@@ -256,14 +264,15 @@
     svg.setAttribute("aria-hidden", "true"); svg.style.position = "absolute";
     svg.innerHTML = `<filter id="${id}" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feImage preserveAspectRatio="none" result="map"/><feDisplacementMap in="SourceGraphic" in2="map" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation="0.35"/></filter>`;
+    const twin = svg.querySelector("filter").cloneNode(true); twin.id = id + "-b"; svg.appendChild(twin);   // identical copy: Safari redraw switches between the two
     document.body.appendChild(svg);
-    const f = svg.querySelector("filter"), img = svg.querySelector("feImage"), dm = svg.querySelector("feDisplacementMap");
+    const fs = [...svg.querySelectorAll("filter")], img = svg.querySelector("feImage");
     const size = () => { const w = glass.clientWidth, h = glass.clientHeight; if(!w || !h) return;
-      for(const [el, a] of [[f, { x:0, y:0, width:w, height:h }], [img, { x:0, y:0, width:w, height:h }]]) for(const k in a) el.setAttribute(k, a[k]);
-      dm.setAttribute("scale", (RANGE * w).toFixed(1)); };
+      for(const f of fs){ for(const el of [f, f.querySelector("feImage")]) for(const [k, v] of Object.entries({ x:0, y:0, width:w, height:h })) el.setAttribute(k, v);
+        f.querySelector("feDisplacementMap").setAttribute("scale", (RANGE * w).toFixed(1)); } };
     // the page preloads the map (<link rel=preload>), so this is normally instant
     fetch(url).then(r => r.blob()).then(b => new Promise(ok => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); }))
-      .then(data => { img.setAttribute("href", data); size(); warp = `url(#${id})`; glass.style.filter = warp; new ResizeObserver(size).observe(glass);
+      .then(data => { fs.forEach(f => f.querySelector("feImage").setAttribute("href", data)); size(); warp = `url(#${id})`; glass.style.filter = warp; new ResizeObserver(size).observe(glass);
         const im = new Image(); im.onload = () => { const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight;
           const g = c.getContext("2d"); g.drawImage(im, 0, 0); warpMap = { w:c.width, h:c.height, px:g.getImageData(0, 0, c.width, c.height).data, range:RANGE }; };
         im.src = data;
@@ -272,8 +281,8 @@
         // nudge the filter so WebKit redraws the whole glass (once per frame at most).
         if(/AppleWebKit/.test(navigator.userAgent) && !/Chrome\/|Chromium|Edg\/|Firefox|OPR\//.test(navigator.userAgent)){
           let queued = 0, flip = false;
-          const redraw = () => { if(queued) return; queued = requestAnimationFrame(() => { queued = 0; flip = !flip;   // a changed CSS filter value repaints the whole layer
-            glass.style.filter = flip ? warp + " brightness(1.0001)" : warp; }); };
+          const redraw = () => { if(queued) return; queued = requestAnimationFrame(() => { queued = 0; flip = !flip;   // switching to the twin filter repaints the whole layer
+            glass.style.filter = flip ? `url(#${id}-b)` : warp; }); };   // (adding a CSS filter function moved Safari's origin again)
           new MutationObserver(redraw).observe(glass, { subtree:true, childList:true, characterData:true, attributes:true });
           for(const ev of ["scroll", "animationend", "animationstart", "transitionend", "transitionrun", "pointerover", "pointerout", "focusin", "focusout", "input"])
             glass.addEventListener(ev, redraw, { capture:true, passive:true });
