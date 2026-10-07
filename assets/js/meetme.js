@@ -40,7 +40,7 @@
       <button type="button" class="mmb-btn mmb-back" hidden>&lt;- GO BACK</button>
       <img class="mmb-logo" src="assets/img/mm-logo.webp" alt="Meet Me at Society">
       <section class="mmb-home">
-        <p class="mmb-write-row"><a class="mmb-write" href="#new" role="button">[ WRITE A POST ]</a><button type="button" class="mmb-btn mmb-fs">[FULLSCREEN]</button></p>
+        <p class="mmb-write-row"><a class="mmb-write" href="#new" role="button">[ WRITE A POST ]</a><img class="mmb-mark" src="assets/img/mm-logo.webp" alt="Meet Me at Society"><button type="button" class="mmb-btn mmb-fs">[FULLSCREEN]</button></p>
         <p class="mmb-hint mmb-home-hint" aria-live="polite"></p>
         <div class="mmb-inbox">
           ${rule("=", 160)}<h2 class="mmb-title">M E S S A G E&nbsp;&nbsp;&nbsp;I N B O X</h2>${rule("=", 160)}
@@ -206,18 +206,56 @@
   // no CRT warp) — the SYSOP-console look. [<- GO BACK] (or Esc on the home screen) zooms it back into the monitor.
   // The screen element is moved to <body> while full (the monitors are transformed, which would trap position:fixed).
   let home = null;
+  // The monitor itself zooms in behind it: the glass centre is pulled to the middle of the window and scaled until the
+  // casing leaves the frame, the pixels go out of focus (blur), and a green-black veil fades in to the flat fullscreen
+  // background. GO BACK plays it in reverse. (The screen rides on <body> for the whole move so it isn't zoomed/blurred.)
+  const DUR = 650, veil = document.createElement("div"); veil.className = "mm-veil"; document.body.appendChild(veil);
+  let busy = false;
+  const zoomKeys = () => {   // box keyframes: [flat, zoomed in on the glass]
+    const g = glass.getBoundingClientRect(), br = box.getBoundingClientRect(), vw = innerWidth, vh = innerHeight;
+    const k = Math.max(vw / g.width, vh / g.height) * 1.3, ox = g.left + g.width / 2, oy = g.top + g.height / 2;
+    const origin = `${ox - br.left}px ${oy - br.top}px`;
+    const t = new DOMMatrix(getComputedStyle(box).transform);   // the box's own CSS translate also gets scaled by k: take it back out
+    const dx = vw / 2 - ox - (k - 1) * t.e, dy = vh / 2 - oy - (k - 1) * t.f;
+    return [{ transformOrigin:origin, scale:"1", translate:"0px 0px", filter:"blur(0px)" },
+            { transformOrigin:origin, scale:String(k), translate:`${dx}px ${dy}px`, filter:"blur(14px)" }];
+  };
   function setFull(on){
-    if(on === screen.classList.contains("full")) return;
-    const a = screen.getBoundingClientRect();
-    if(on){ home = [screen.parentNode, screen.nextSibling]; document.body.appendChild(screen); }
-    else home[0].insertBefore(screen, home[1]);
-    screen.classList.toggle("full", on); document.documentElement.classList.toggle("mm-full", on);
-    $(".mmb-fs").hidden = on; $(".mmb-back").hidden = !on;
-    const b = screen.getBoundingClientRect();
-    if(screen.animate) screen.animate([
-      { transformOrigin:"0 0", transform:`translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})` },
-      { transformOrigin:"0 0", transform:"none" }], { duration:420, easing:"steps(9, end)" });   // stepped = slow old machine
-    (on ? $(".mmb-back") : $(".mmb-fs")).focus({ preventScroll:true });
+    if(busy || on === screen.classList.contains("full")) return;
+    busy = true; const done = () => { busy = false; };
+    if(on){
+      const a = screen.getBoundingClientRect(), keys = zoomKeys();
+      home = [screen.parentNode, screen.nextSibling]; document.body.appendChild(screen);
+      screen.classList.add("full"); document.documentElement.classList.add("mm-full");
+      $(".mmb-fs").hidden = true; $(".mmb-back").hidden = false;
+      const b = screen.getBoundingClientRect();
+      if(screen.animate){
+        box.animate(keys, { duration:DUR, easing:"cubic-bezier(.45,0,.55,1)", fill:"forwards" });
+        veil.animate([{ opacity:0 }, { opacity:0, offset:.45 }, { opacity:1 }], { duration:DUR, fill:"forwards" });
+        screen.animate([
+          { transformOrigin:"0 0", transform:`translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})` },
+          { transformOrigin:"0 0", transform:"none" }], { duration:DUR, easing:"steps(10, end)" }).onfinish = done;   // stepped = slow old machine
+      } else done();
+      $(".mmb-back").focus({ preventScroll:true });
+    } else {
+      const a = screen.getBoundingClientRect();
+      box.getAnimations().forEach(x => x.cancel());   // measure the monitor un-zoomed…
+      const keys = zoomKeys(), g = glass.getBoundingClientRect();
+      if(box.animate) box.animate([keys[1], keys[0]], { duration:DUR, easing:"cubic-bezier(.45,0,.55,1)" });   // …then play the zoom backwards
+      screen.classList.remove("full"); screen.classList.add("leaving"); document.documentElement.classList.remove("mm-full");
+      Object.assign(screen.style, { left:g.left + "px", top:g.top + "px", width:g.width + "px", height:g.height + "px" });
+      $(".mmb-fs").hidden = false; $(".mmb-back").hidden = true;
+      const b = screen.getBoundingClientRect();
+      const land = () => { screen.classList.remove("leaving"); ["left", "top", "width", "height"].forEach(k => screen.style[k] = "");
+        home[0].insertBefore(screen, home[1]); veil.getAnimations().forEach(x => x.cancel()); done(); $(".mmb-fs").focus({ preventScroll:true }); };
+      if(screen.animate){
+        veil.getAnimations().forEach(x => x.cancel());
+        veil.animate([{ opacity:1 }, { opacity:0, offset:.55 }, { opacity:0 }], { duration:DUR, fill:"forwards" });
+        screen.animate([
+          { transformOrigin:"0 0", transform:`translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})` },
+          { transformOrigin:"0 0", transform:"none" }], { duration:DUR, easing:"steps(10, end)" }).onfinish = land;
+      } else land();
+    }
   }
   $(".mmb-fs").addEventListener("click", () => setFull(true));
   $(".mmb-back").addEventListener("click", () => setFull(false));
@@ -311,7 +349,44 @@
     })();
   }
   // reveal once the intro clip is done
-  const ready = () => { if(boot){ boot.remove(); boot = null; } screen.classList.add("on", "printing"); view(); setTimeout(() => screen.classList.remove("printing"), 1200); };
+  // LOGO HANDOFF: the intro clip ends on the big MEET ME AT Society logo; just before the clip blanks it, a copy of the logo
+  // takes its place on the screen and slides up and shrinks, in steps, into its spot in the inbox header (.mmb-mark), then
+  // the inbox prints. VIS = where the clip draws the logo (fraction of the glass, measured from the clips).
+  let fly = null;
+  (function handoff(){
+    const v = box.querySelector(".mm-v-intro"), idle = box.querySelector(".mm-v-idle"), html = document.documentElement;
+    if(!v || matchMedia("(prefers-reduced-motion: reduce)").matches || html.classList.contains("mm-ready")) return;
+    const VIS = box.classList.contains("mm-computer") ? { x0:.2408, x1:.7488, y0:.2325, y1:.7006 } : { x0:.1171, x1:.8671, y0:.076, y1:.3034 };
+    const AT = 3.86;   // clip time (s) just before the logo goes off
+    const go = () => {
+      const mark = $(".mmb-mark"), m = warpMap;
+      if(!mark || !m || isCompose()) return;   // no map yet / on the post screen: the page's normal ending takes over
+      const r = screen.getBoundingClientRect(), w = r.width, h = r.height, S = m.range * w;
+      const unbend = (fx, fy) => { const x = fx * w, y = fy * h, mx = Math.min(m.w - 1, Math.max(0, Math.round(fx * m.w - .5))),
+        my = Math.min(m.h - 1, Math.max(0, Math.round(fy * m.h - .5))), k = (my * m.w + mx) * 4;
+        return [x + S * (m.px[k] / 255 - .5), y + S * (m.px[k + 1] / 255 - .5)]; };   // seen spot → layout spot (what the filter samples)
+      const cx = (VIS.x0 + VIS.x1) / 2, cy = (VIS.y0 + VIS.y1) / 2;
+      const a = { l:unbend(VIS.x0, cy)[0], r:unbend(VIS.x1, cy)[0], t:unbend(cx, VIS.y0)[1], b:unbend(cx, VIS.y1)[1] };
+      screen.scrollTop = 0;
+      const mr = mark.getBoundingClientRect(), z = { l:mr.left - r.left, t:mr.top - r.top, w:mr.width, h:mr.height };
+      fly = new Image(); fly.src = mark.src; fly.alt = ""; fly.className = "mmb-fly";
+      const put = (l, t, fw, fh) => Object.assign(fly.style, { left:l + "px", top:t + "px", width:fw + "px", height:fh + "px" });
+      put(a.l, a.t, a.r - a.l, a.b - a.t); screen.appendChild(fly);
+      v.pause(); v.classList.add("done"); if(idle) idle.play().catch(() => {});
+      const N = 14, ease = x => 1 - Math.pow(1 - x, 3);   // 14 visible steps over ~1.1s: smooth enough to read, jerky enough to feel old
+      let i = 0;
+      const step = () => { if(!fly) return; i++; const e = ease(i / N);
+        put(a.l + (z.l - a.l) * e, a.t + (z.t - a.t) * e, (a.r - a.l) + (z.w - (a.r - a.l)) * e, (a.b - a.t) + (z.h - (a.b - a.t)) * e);
+        if(i < N) setTimeout(step, 80);
+        else setTimeout(() => { html.classList.add("mm-ready"); document.dispatchEvent(new Event("mm:ready")); }, 120); };
+      setTimeout(step, 250);   // a beat on the full-size logo first
+    };
+    const watch = () => { if(html.classList.contains("mm-ready")) return; if(v.currentTime >= AT) go(); else requestAnimationFrame(watch); };
+    v.addEventListener("playing", () => requestAnimationFrame(watch), { once:true });
+  })();
+
+  const ready = () => { if(fly){ const f = fly; fly = null; requestAnimationFrame(() => f.remove()); }
+    if(boot){ boot.remove(); boot = null; } screen.classList.add("on", "printing"); view(); setTimeout(() => screen.classList.remove("printing"), 1200); };
   if(document.documentElement.classList.contains("mm-ready")) ready(); else document.addEventListener("mm:ready", ready, { once:true });
 
   // CALIBRATION (?calib): a grid of green crosses drawn on the bent screen, plus (unbent, on top) where Chrome's maths says
