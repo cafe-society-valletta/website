@@ -1139,12 +1139,9 @@ body.mm-body{ background:var(--black); }
    Terminal type (VT323) in phosphor green with a glow, sized from the screen's width (container units), so it reads the
    same on the phone and the desktop monitor. Appears once the intro clip is done. */
 .mm-screen{ container-type:inline-size; }
-/* iPhone/iPad (WebKit): the bend can push the board's right edge off the glass, so the screen also scrolls sideways
-   (an invisible marker 30% past the right edge gives it room). Chrome/desktop unchanged. */
-@supports (-webkit-touch-callout:none){
-  .mm-screen:not(.full){ overflow-x:auto; overscroll-behavior-x:contain; }
-  .mm-screen:not(.full)::after{ content:""; position:absolute; top:0; left:calc(100% + 30cqw); width:1px; height:1px; pointer-events:none; }
-}
+/* Safari/WebKit: no native scroller (its layer escapes the CRT filter); meetme.js scrolls the screen by hand */
+html.mm-wk .mm-screen:not(.full){ overflow:hidden; }
+
 .mmb{ opacity:0; transition:opacity .25s steps(3); padding:7cqw 10cqw 12cqw;   /* wide margins: the CRT warp magnifies the middle and pulls the edges in */
   font-family:'VT323', ui-monospace, monospace; color:#7dff7d;
   font-size:max(13px, 2.2cqw); line-height:1.15; text-shadow:0 0 .1em rgba(110,255,110,.5), 0 0 .45em rgba(40,200,40,.18); }   /* low glow = crisper, easier on the eyes (Chef) */
