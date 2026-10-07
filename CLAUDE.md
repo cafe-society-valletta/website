@@ -45,8 +45,9 @@ netlify/functions/events.js  Netlify Function (zero-dependency, no build step): 
                         cafesocietyvalletta gallery URL → "Photos"; several links allowed. Feed starts 1 Oct 2026 (FIRST_DAY)
                         and keeps all past events (no lifespan yet); past days show faded, kicker "Past event:".
                         Photo Lab deep link: gallery.html#<data-slug> opens that roll (e.g. #qlv-pride).
-assets/js/grain.js     Film-grain layer on every page (8 tiles in assets/img/grain/, 12 fps, mix-blend screen so only
-                        dark areas get grain). Strength = .cs-grain opacity in style.css.
+assets/js/grain.js     Film-grain layer (8 tiles in assets/img/grain/, 12 fps, mix-blend screen so only dark areas get grain).
+                        REMOVED from all pages on Chef's request (Oct 2026); file kept in case it comes back — re-add
+                        <script src="assets/js/grain.js" defer></script> to a page to turn it on.
 assets/js/chars.js     Home "Characters" parade frame clock — keeps the line's step and every
                         figure's pose change on the same 1.5 fps frame (one jump per frame).
 assets/js/meetme.js    Meet Me at Society board on the green screen: "WRITE A POST>" prompt (subject → NAME> → Enter posts)
