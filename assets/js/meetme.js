@@ -629,3 +629,28 @@
     const wait = () => warpMap ? draw() : setTimeout(wait, 100); wait(); addEventListener("resize", () => setTimeout(draw, 100));
   }
 })();
+
+/* Meet Me page only: the site menu bar stays hidden until it's wanted — the mouse comes near the top, the top edge is
+   tapped, a finger swipes down from the top, or keyboard focus reaches it. It slides away again when no longer needed. */
+(function(){
+  const bar = document.querySelector(".mm-bar"); if(!bar) return;
+  const root = document.documentElement, ZONE = 44;   // px below the bar's bottom edge that count as "the top"
+  let hideT = 0, touchY = null;
+  const edge = () => { const r = bar.getBoundingClientRect(), on = root.classList.contains("mm-bar-on");
+    return Math.max(ZONE, r.bottom + (on ? 0 : 1.3 * r.height) + ZONE); };   // where the bar's bottom is when shown (+ margin)
+  const show = ms => { clearTimeout(hideT); hideT = 0; root.classList.add("mm-bar-on"); if(ms) hideT = setTimeout(hide, ms); };
+  const hide = () => { hideT = 0; if(bar.contains(document.activeElement)) return; root.classList.remove("mm-bar-on"); };
+  // mouse / trackpad: near the top shows it; moving away (or leaving the window) hides it after a beat
+  addEventListener("pointermove", e => { if(e.pointerType !== "mouse") return;
+    if(e.clientY < edge()) show(); else if(root.classList.contains("mm-bar-on") && !hideT) hideT = setTimeout(hide, 500); }, { passive:true });
+  root.addEventListener("mouseleave", () => { if(!hideT) hideT = setTimeout(hide, 500); });
+  // touch: tap the top strip, or start a swipe at the top and pull down; it hides after a few seconds or a tap elsewhere
+  addEventListener("touchstart", e => { const y = e.touches[0].clientY; touchY = y < edge() ? y : null;
+    if(root.classList.contains("mm-bar-on") && !bar.contains(e.target)) hide(); }, { passive:true });
+  addEventListener("touchmove", e => { if(touchY !== null && e.touches[0].clientY - touchY > 24){ touchY = null; show(4000); } }, { passive:true });
+  addEventListener("touchend", e => { if(touchY !== null && e.changedTouches[0].clientY < edge()) show(4000); touchY = null; }, { passive:true });
+  // clicking the top strip (any pointer) and keyboard focus also bring it in
+  addEventListener("click", e => { if(e.clientY < edge() && !bar.contains(e.target)) show(e.pointerType === "mouse" ? 0 : 4000); });
+  bar.addEventListener("focusin", () => show());
+  bar.addEventListener("focusout", () => setTimeout(() => { if(!bar.contains(document.activeElement)) hide(); }, 50));
+})();
