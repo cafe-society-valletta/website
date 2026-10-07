@@ -82,6 +82,13 @@
       .finally(() => { $in.disabled = false; $in.focus({ preventScroll:true }); });
   });
   screen.addEventListener("click", e => { if(!e.target.closest("a")) $in.focus({ preventScroll:true }); });
+  // type anywhere on the page: the keystroke goes straight to the prompt (nothing gets lost while focus is elsewhere)
+  addEventListener("keydown", e => {
+    if(document.activeElement === $in || e.metaKey || e.ctrlKey || e.altKey) return;
+    if(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+    if(e.key.length !== 1) return;
+    e.preventDefault(); $in.focus({ preventScroll:true }); $in.value += e.key; $typed.textContent = $in.value;
+  });
 
   // CRT curve: everything on the screen is bent with the same barrel distortion as the intro clip (ffmpeg lenscorrection
   // k1 .32 / k2 .06 on the scaled frame, centre magnified ~1.22× so the corners land on the corners, as in the clips). An SVG displacement map (assets/img/mm-warp-*.png; R = x shift, G = y shift,
