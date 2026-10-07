@@ -151,7 +151,7 @@
       return "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${Math.max(...rows.map(r => r.length))} ${rows.length}" shape-rendering="crispEdges">${r}</svg>`); };
     const arrow = svg(ARROW, true), beam = svg(BEAM, false);   // arrow: green fill, dark pixel outline
     const ptr = document.createElement("i"); ptr.className = "mmb-ptr"; ptr.setAttribute("aria-hidden", "true"); ptr.hidden = true;
-    document.body.appendChild(ptr);
+    box.appendChild(ptr);   // inside the monitor, above the glass and below the screen shadow; moves to <body> in fullscreen
     let kind = "", frame = 0, last = null;
     const lin = b => b / 255;   // map byte → 0..1 (0.5 = no shift)
     const bend = (x, y, w, h) => {   // un-bent screen point → where the filter draws it
@@ -167,7 +167,9 @@
       if(k !== kind){ kind = k; ptr.style.backgroundImage = `url("${k === "beam" ? beam : arrow}")`; ptr.style.aspectRatio = k === "beam" ? "7 / 13" : "11 / 17"; ptr.classList.toggle("beam", k === "beam"); }
       const full = screen.classList.contains("full"), wpx = full ? (k === "beam" ? 10 : 16) : Math.max(k === "beam" ? 10 : 16, r.width * (k === "beam" ? .0125 : .02));
       const ox = k === "beam" ? wpx / 2 : 0, oy = k === "beam" ? wpx * 13 / 14 : 0;   // arrow: tip on the spot; I-beam: centred
-      ptr.style.width = wpx + "px"; ptr.style.transform = `translate3d(${r.left + qx - ox}px, ${r.top + qy - oy}px, 0)`; };
+      const host = full ? document.body : box; if(ptr.parentNode !== host) host.appendChild(ptr);
+      ptr.classList.toggle("fixed", full); const b = full ? { left:0, top:0 } : box.getBoundingClientRect();
+      ptr.style.width = wpx + "px"; ptr.style.transform = `translate3d(${r.left - b.left + qx - ox}px, ${r.top - b.top + qy - oy}px, 0)`; };
     screen.classList.add("mm-ptr-on");
     screen.addEventListener("pointermove", e => { if(e.pointerType !== "mouse") return;
       last = { x:e.clientX, y:e.clientY, t:e.target }; ptr.hidden = false; if(!frame) frame = requestAnimationFrame(place); });
@@ -246,7 +248,19 @@
       .then(data => { img.setAttribute("href", data); size(); warp = `url(#${id})`; glass.style.filter = warp; new ResizeObserver(size).observe(glass);
         const im = new Image(); im.onload = () => { const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight;
           const g = c.getContext("2d"); g.drawImage(im, 0, 0); warpMap = { w:c.width, h:c.height, px:g.getImageData(0, 0, c.width, c.height).data, range:RANGE }; };
-        im.src = data; })
+        im.src = data;
+        // Safari/WebKit only re-filters the small patch that changed (one typed letter, one printed line, a hover), but
+        // the bend moves pixels further than that patch, so bits of text went missing. After any change on the screen,
+        // nudge the filter so WebKit redraws the whole glass (once per frame at most).
+        if(/AppleWebKit/.test(navigator.userAgent) && !/Chrome\/|Chromium|Edg\/|Firefox|OPR\//.test(navigator.userAgent)){
+          let queued = 0, flip = false;
+          const redraw = () => { if(queued) return; queued = requestAnimationFrame(() => { queued = 0; flip = !flip;
+            dm.setAttribute("scale", (RANGE * glass.clientWidth + (flip ? .01 : 0)).toFixed(2)); }); };
+          new MutationObserver(redraw).observe(glass, { subtree:true, childList:true, characterData:true, attributes:true });
+          for(const ev of ["scroll", "animationend", "animationstart", "transitionend", "transitionrun", "pointerover", "pointerout", "focusin", "focusout", "input"])
+            glass.addEventListener(ev, redraw, { capture:true, passive:true });
+          redraw();
+        } })
       .catch(() => {});
   })();
 
