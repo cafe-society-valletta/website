@@ -71,6 +71,7 @@ button{ font-family:inherit; }
 .char{ transform-origin:50% 100%; --rock:2.45deg; animation:chars-rock calc(var(--beat) * 2) steps(1,end) infinite; }
 .char:nth-child(even){ animation-delay:calc(var(--beat) * -1); }
 .char-dj{ --rock:1.05deg; }
+.char-link{ display:block; line-height:0; cursor:inherit; -webkit-tap-highlight-color:transparent; }   /* EASTER EGG: the three bartenders (p-char-05, -10, -15) open the Barney Book — no hint they're links (Chef) */
 @keyframes chars-rock{ 0%{ transform:rotate(calc(var(--rock) * -1)); } 50%{ transform:rotate(var(--rock)); } 100%{ transform:rotate(calc(var(--rock) * -1)); } }
 .home-chars-track{ display:flex; width:max-content; height:100%; animation:chars-parade 70s steps(105) infinite; }
 .home-chars-set{ display:flex; align-items:flex-start; gap:var(--char-gap); margin:0; padding:0 var(--char-gap) 0 0; list-style:none; height:100%; }
@@ -154,11 +155,13 @@ button{ font-family:inherit; }
 .home-nav{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; height:163px; padding:14px 24px 0; }
 .home-nav a, .home-nav span{ font-family:var(--font-display); font-size:15px; font-weight:700; letter-spacing:-.02em; line-height:18px; text-transform:uppercase; color:var(--white); }
 .home-nav a:hover{ opacity:.7; }
+.home-nav .two br{ display:none; }   /* phone/tablet: one line; desktop row: two lines */
 .home-sub{ display:flex; flex-direction:column; align-items:center; gap:25px; padding:10px 24px 64px; }
 .home-sub-item{ display:block; line-height:0; }
 .home-sub-item img{ object-fit:cover; }
 .home-sub-lostsouls img{ width:91px; height:26px; }
 .home-sub-shop img{ width:94px; height:23px; }
+.home-sub-meetme img{ width:65px; height:34px; }
 .home-sub-item:hover{ opacity:.7; }
 .home-sub-board .title{ font-family:var(--font-display); font-size:19px; font-weight:700; letter-spacing:.02em; line-height:24px; text-transform:uppercase; }
 
@@ -210,6 +213,7 @@ button{ font-family:inherit; }
   .home-sub{ flex-direction:row; flex-wrap:wrap; justify-content:center; align-items:center; gap:64px; padding:72px 32px 100px; }
   .home-sub-lostsouls img{ width:160px; height:46px; }
   .home-sub-shop img{ width:165px; height:40px; }
+  .home-sub-meetme img{ width:100px; height:52px; }
 }
 @media (min-width:1100px){
   .home-logo-row{ padding-top:96px; }
@@ -223,6 +227,7 @@ button{ font-family:inherit; }
   .home-sub{ gap:88px; padding:88px 32px 128px; }
   .home-sub-lostsouls img{ width:200px; height:57px; }
   .home-sub-shop img{ width:206px; height:50px; }
+  .home-sub-meetme img{ width:115px; height:60px; }
 }
 
 
@@ -240,12 +245,26 @@ button{ font-family:inherit; }
 @media (min-width:700px) and (max-width:899.98px){ .page.v2{ zoom:1.45; min-height:calc(100vh / 1.45); } }
 
 /* ---------- menu bar (pages 2–6) — always visible, sticky ---------- */
-.site-bar{ position:sticky; top:0; z-index:60; height:35px; display:flex; align-items:center; justify-content:space-between; padding:0 32px; transition:background-color .2s; color:var(--white); }
+.site-bar{ position:sticky; top:0; z-index:60; height:35px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; transition:background-color .2s; color:var(--white); }
 .site-bar > a, .site-bar > span{ font-family:var(--font-display); font-size:9px; font-weight:700; letter-spacing:-.02em; line-height:11px; text-transform:uppercase; white-space:nowrap; }
 .site-bar .two{ line-height:9.5px; text-align:center; }
 .site-bar .logo{ line-height:0; flex-shrink:0; }
-.site-bar .logo-lsc img{ width:53px; height:15px; }
-.site-bar .logo-col img{ width:58px; height:14px; }
+.site-bar .logo-home img{ width:32px; height:11.7px; }   /* Café Society logo in place of HOME (Chef) */
+.site-bar .logo-lsc img{ width:48px; height:13.5px; }
+.site-bar .logo-col img{ width:52px; height:12.6px; }
+.site-bar .logo-mm img{ width:28px; height:14.5px; }
+/* phones: the bar spreads out to 12px from each side (Chef) — wider than the 32px page edges, so its 8 items have room */
+/* Meet Me logo in the other pages' bars: hover / keyboard focus / tap = it flashes on in phosphor green with a slight glow */
+.site-bar .logo-mm:not(.tab){ position:relative; -webkit-tap-highlight-color:transparent; }
+.site-bar .logo-mm:not(.tab)::after{ content:""; position:absolute; inset:0; pointer-events:none; opacity:0;
+  background:url("../img/p-nav-meetme-green.png") center/contain no-repeat;
+  filter:drop-shadow(0 0 1px rgba(125,255,125,.8)) drop-shadow(0 0 4px rgba(60,255,90,.45)); }
+.site-bar .logo-mm:not(.tab):hover, .site-bar .logo-mm:not(.tab):focus-visible, .site-bar .logo-mm:not(.tab).flash{ opacity:1; }
+.site-bar .logo-mm:not(.tab):is(:hover, :focus-visible, :active, .flash) img{ opacity:0; }
+.site-bar .logo-mm:not(.tab):is(:hover, :focus-visible, :active, .flash)::after{ opacity:1; animation:mm-flash .32s steps(1) both; }
+.bar-light .logo-mm:not(.tab)::after{ filter:drop-shadow(0 0 .6px #0a4a17) drop-shadow(0 0 .6px #0a4a17) drop-shadow(0 0 4px rgba(60,255,90,.55)); }   /* white bar: a dark green edge keeps it readable */
+@keyframes mm-flash{ 0%{ opacity:1; } 20%{ opacity:.25; } 40%{ opacity:1; } 60%{ opacity:.5; } 80%, 100%{ opacity:1; } }   /* a quick CRT flicker, then it stays lit */
+@media (prefers-reduced-motion:reduce){ .site-bar .logo-mm:not(.tab)::after{ animation:none !important; } }
 .site-bar a:hover{ opacity:.7; }
 .site-bar .tab{ align-self:stretch; padding:0 8px; display:flex; align-items:center; justify-content:center; border-radius:0 0 6px 6px; background:var(--white); color:var(--black); }
 .site-bar .tab:hover{ opacity:1; }
@@ -654,9 +673,10 @@ body.menu-body{ background:var(--black); }
   /* menu bar */
   .site-bar{ height:56px; padding:0 var(--gut); }
   .site-bar > a, .site-bar > span{ font-size:15px; letter-spacing:-.02em; line-height:18px; }
-  .site-bar .two{ line-height:18px; }
-  .site-bar .two br{ display:none; }
+  .site-bar .two{ line-height:15px; }   /* two-word items stay on two lines on desktop too (Chef) */
+  .site-bar .logo-home img{ width:98px; height:36px; }   /* desktop: bigger again (Chef) */
   .site-bar .logo-lsc img{ width:96px; height:27px; }
+  .site-bar .logo-mm img{ width:54px; height:28px; }
   .site-bar .logo-col img, .bar-collection .tab img{ width:104px; height:25px; }
   .site-bar .tab, .bar-collection .tab{ padding:0 18px; border-radius:0 0 8px 8px; }
 
@@ -795,14 +815,17 @@ body.menu-body{ background:var(--black); }
 /* HOME desktop (≥900px) — Paper D01: the whole menu on one centred line,
    scaled up: About · Menu · Event Calendar · Photo Lab · LSC · Collection */
 @media (min-width:900px){
-  /* the row is ~1206px wide at full size; below that it scales down with the window */
-  .home-menu{ --u:calc((100vw - 128px) / 1206); display:flex; justify-content:center; align-items:center; gap:min(48px, calc(48 * var(--u))); padding:56px 64px 128px; }
+  /* the row is ~1188px wide at full size (Events Calendar + Photo Lab on two lines, Meet Me at the end; Paper D01); below that it scales down with the window */
+  .home-menu{ --u:calc((100vw - 128px) / 1188); display:flex; justify-content:center; align-items:center; gap:min(48px, calc(48 * var(--u))); padding:56px 64px 128px; }
   .home-menu .home-nav{ flex-direction:row; flex-wrap:nowrap; height:auto; gap:min(48px, calc(48 * var(--u))); padding:0; }
   .home-menu .home-nav a, .home-menu .home-nav span{ font-size:min(28px, calc(28 * var(--u))); line-height:1.15; letter-spacing:-.02em; white-space:nowrap; }
+  .home-menu .home-nav .two{ text-align:center; line-height:1; }
+  .home-menu .home-nav .two br{ display:inline; }
   .home-menu .home-sub{ flex-wrap:nowrap; gap:min(48px, calc(48 * var(--u))); padding:0; }
   .home-menu .home-sub-item img{ flex-shrink:0; }
   .home-menu .home-sub-lostsouls img{ width:min(182px, calc(182 * var(--u))); height:auto; }
   .home-menu .home-sub-shop img{ width:min(198px, calc(198 * var(--u))); height:auto; }
+  .home-menu .home-sub-meetme img{ width:min(100px, calc(100 * var(--u))); height:auto; }
   .home-chars{ margin-bottom:0; }
 }
 
@@ -1085,7 +1108,7 @@ textarea.bb-in{ resize:vertical; min-height:72px; }
 .cs-grain{ position:fixed; inset:0; z-index:2147483647; pointer-events:none; mix-blend-mode:screen; opacity:.3; background:0 0 / 256px 256px repeat; }
 @media print{ .cs-grain{ display:none; } }
 
-/* ---------- Meet Me at Society (unlisted, /meetmeatsociety) — Paper 09 / D09 ----------
+/* ---------- Meet Me at Society (unlisted, /meetme) — Paper 09 / D09 ----------
    The beige computer fills the first screen: its monitor's top edge runs just off the top so the (black) menu sits on the
    casing. The canvas runs a little past the first screen, so the footer only appears when the PAGE is scrolled; the green
    screen (.mm-screen) is its own scroll area (overscroll contained), so scrolling on it scrolls the screen content and
@@ -1101,6 +1124,9 @@ body.mm-body{ background:var(--black); }
 .mm-bar, .mm .site-footer{ position:absolute; left:0; right:0; z-index:3; background:transparent; }
 .mm-bar{ top:0; color:var(--black); }
 .mm-bar .logo img{ filter:invert(1); }
+.mm-bar .tab{ position:relative; overflow:hidden; background:#06140a; }   /* active Meet Me tab = the monitor's green-black (Chef) */
+.mm-bar .tab img{ position:relative; filter:drop-shadow(0 0 1px rgba(125,255,125,.8)) drop-shadow(0 0 4px rgba(60,255,90,.45)) drop-shadow(0 0 9px rgba(40,200,40,.2)); }   /* phosphor-green logo + glow */
+.mm-bar .tab::after{ content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -0.2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/60px 60px; mix-blend-mode:overlay; opacity:.55; }   /* grain over the glow */
 /* Meet Me only: the menu bar hides until the pointer comes near the top, the top is tapped, or swiped down from (meetme.js) */
 .mm-bar{ translate:0 -130%; opacity:0; pointer-events:none; transition:translate .35s ease, opacity .35s ease; }
 html.mm-bar-on .mm-bar{ translate:0 0; opacity:1; pointer-events:auto; }
@@ -1142,6 +1168,9 @@ html.mm-bar-on .mm-bar{ translate:0 0; opacity:1; pointer-events:auto; }
   .mm-phone{ display:none; }
   .mm-computer{ display:block; width:min(125vw, 200vh); }
   .mm-bar{ top:calc(min(125vw, 200vh) * .01); }   /* sit in the casing band, clear of the top bevel (18px at 1440×900) */   /* 1800px at 1440×900; follows width, but never so big the screen leaves the first view */
+  .mm-bar .tab{ align-self:flex-start; margin-top:calc(min(125vw, 200vh) * -.01); height:max(calc(min(125vw, 200vh) * .0362), calc(min(125vw, 200vh) * .01 + 50px)); align-items:flex-start; padding-top:calc(min(125vw, 200vh) * .01 + 14px); }
+  .mm-bar .tab{ --edge:calc(min(125vw, 200vh) * .0147);   /* the casing's top corner line, measured from the window top */
+    background:linear-gradient(#15291b var(--edge), #06140a var(--edge)); }   /* desktop: follows the casing — a little lighter above its top corner line, the monitor's near-black below (Chef) */
 }
 
 /* ---------- Meet Me at Society: the board on the green screen (assets/js/meetme.js) ----------
