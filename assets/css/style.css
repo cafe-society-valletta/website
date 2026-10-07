@@ -1163,19 +1163,23 @@ body.mm-body{ background:var(--black); }
 .mmb-fs{ font-size:.7em; }
 /* 8-bit pointer: its own layer on <body>, placed along the CRT curve by meetme.js; system cursor hidden over the screen */
 .mm-screen.mm-ptr-on, .mm-screen.mm-ptr-on *{ cursor:none !important; }
+.mm-screen.mm-ptr-on.mm-ptr-out, .mm-screen.mm-ptr-on.mm-ptr-out *{ cursor:auto !important; }   /* off the curved glass: normal cursor */
 .mmb-ptr{ position:absolute; left:0; top:0; z-index:2; background:0 0 / 100% 100% no-repeat; image-rendering:pixelated; pointer-events:none;
   will-change:transform; filter:drop-shadow(0 0 2px rgba(90,255,90,.35)); }
 .mmb-ptr.fixed{ position:fixed; z-index:60; }
 /* screen shadow (Chef's overlay): darkens the glass toward its edges and corners, on top of the text and the pointer */
 .mm-shade{ position:absolute; z-index:3; pointer-events:none; display:block; }
-.mm-computer .mm-shade{ left:21.25%; top:11.448%; width:54.25%; height:44.31%; }
+.mm-computer .mm-shade{ left:18.75%; top:8.7542%; width:59.25%; height:49.697%; }   /* glass box + 40px margin: the shadow is warped to the real glass edge */
 /* FULLSCREEN: flat full-window terminal like the SYSOP console — no casing, menu, footer or CRT curve */
 html.mm-full, html.mm-full body{ overflow:hidden; }
 html.mm-full .mm-bar, html.mm-full .site-footer{ visibility:hidden; }
 .mm-screen.full{ position:fixed; inset:0; width:auto; height:auto; z-index:50; background:#06140a; }
 .mm-screen.full .mmb{ position:relative; max-width:880px; margin:0 auto; padding:64px 16px 64px; font-size:20px; }
 .mmb-back{ position:absolute; top:18px; left:16px; font-size:.85em; }
-@media (max-width:600px){ .mm-screen.full .mmb{ font-size:17px; padding-top:56px; } }
+.mm-screen .mmb-logo{ display:none; }
+.mm-screen.full .mmb-logo{ display:block; position:absolute; top:16px; right:16px; width:132px; height:auto; filter:drop-shadow(0 0 .12em rgba(110,255,110,.45)); }   /* fullscreen only (Chef) */
+.mm-screen.full .mmb{ padding-top:124px; }
+@media (max-width:600px){ .mm-screen.full .mmb{ font-size:17px; padding-top:84px; } .mm-screen.full .mmb-logo{ width:86px; top:12px; } }
 .mmb-caret{ display:inline-block; width:.6em; height:1em; margin-left:.15em; transform:translateY(.15em); background:currentColor; box-shadow:0 0 .2em rgba(90,255,90,.4); animation:mmb-blink 1s steps(1) infinite; }
 @keyframes mmb-blink{ 50%{ opacity:0; } }
 .mmb-hp{ position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
