@@ -261,7 +261,7 @@
     screen.appendChild(boot);
     const bt = boot.querySelector(".mmb-bt"), word = "stayhuman.exe", wait = ms => new Promise(ok => setTimeout(ok, ms));
     (async () => {
-      await wait(500); boot.classList.add("on");
+      await wait(500); if(!boot) return; boot.classList.add("on");
       await wait(450);
       for(const ch of word){ if(!boot) return; bt.textContent += ch; await wait(45 + Math.random() * 50); }   // uneven keystrokes = old-machine lag
       await wait(600); if(!boot) return;
@@ -272,4 +272,33 @@
   // reveal once the intro clip is done
   const ready = () => { if(boot){ boot.remove(); boot = null; } screen.classList.add("on", "printing"); view(); setTimeout(() => screen.classList.remove("printing"), 1200); };
   if(document.documentElement.classList.contains("mm-ready")) ready(); else document.addEventListener("mm:ready", ready, { once:true });
+
+  // CALIBRATION (?calib): a grid of green crosses drawn on the bent screen, plus (unbent, on top) where Chrome's maths says
+  // each cross should land (cyan ring) and where it sits unbent (red dot). A phone screenshot shows how Safari's bend differs.
+  if(/[?&]calib\b/.test(location.search)){
+    if(boot){ boot.remove(); boot = null; }
+    document.querySelectorAll(".mm-v").forEach(v => { v.pause(); v.removeAttribute("src"); });
+    const cols = [.1, .3, .5, .7, .9], rows = [.08, .22, .36, .5, .64, .78, .92], pts = [];
+    rows.forEach(fy => cols.forEach(fx => pts.push([fx, fy])));
+    screen.querySelectorAll(":scope > *").forEach(e => e.style.display = "none");
+    screen.insertAdjacentHTML("beforeend", pts.map(([fx, fy]) => `<b class="mmc" style="left:${fx * 100}%;top:${fy * 100}%"></b>`).join(""));
+    screen.scrollTop = 0; screen.style.overflow = "hidden";
+    const st = document.createElement("style");
+    st.textContent = `.mmc{position:absolute;width:24px;height:24px;margin:-12px 0 0 -12px;background:linear-gradient(#7dff7d,#7dff7d) 50% 0/2px 100% no-repeat,linear-gradient(#7dff7d,#7dff7d) 0 50%/100% 2px no-repeat}
+      .mmc-o{position:fixed;z-index:99;pointer-events:none;border-radius:50%}.mmc-r{width:6px;height:6px;margin:-3px 0 0 -3px;background:#f33}
+      .mmc-e{width:14px;height:14px;margin:-7px 0 0 -7px;border:2px solid #0ff;box-sizing:border-box}
+      .mmc-i{position:fixed;left:8px;right:8px;bottom:8px;z-index:99;font:12px/1.3 monospace;color:#fff;background:rgba(0,0,0,.75);padding:6px}`;
+    document.head.appendChild(st);
+    const lin = b => { const c = b / 255; return c <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); };
+    const draw = () => { document.querySelectorAll(".mmc-o,.mmc-i").forEach(e => e.remove());
+      const r = screen.getBoundingClientRect(), m = warpMap, w = r.width, h = r.height;
+      pts.forEach(([fx, fy]) => { const x = fx * w, y = fy * h; let qx = x, qy = y;
+        if(m){ const S = m.range * w; for(let n = 0; n < 6; n++){ const mx = Math.min(m.w - 1, Math.max(0, Math.round(qx / w * m.w - .5))), my = Math.min(m.h - 1, Math.max(0, Math.round(qy / h * m.h - .5))), k = (my * m.w + mx) * 4;
+          qx = x - S * (lin(m.px[k]) - .5); qy = y - S * (lin(m.px[k + 1]) - .5); } }
+        for(const [c, px, py] of [["mmc-r", x, y], ["mmc-e", qx, qy]]){ const o = document.createElement("i"); o.className = "mmc-o " + c; o.style.left = (r.left + px) + "px"; o.style.top = (r.top + py) + "px"; document.body.appendChild(o); } });
+      const i = document.createElement("div"); i.className = "mmc-i";
+      i.textContent = `CALIB  dpr ${devicePixelRatio}  vw ${innerWidth}x${innerHeight}  screen ${w.toFixed(1)}x${h.toFixed(1)} @ ${r.left.toFixed(1)},${r.top.toFixed(1)}  map ${m ? "ok" : "none"}  ${navigator.userAgent.replace(/^.*?\) /, "")}`;
+      document.body.appendChild(i); };
+    const wait = () => warpMap ? draw() : setTimeout(wait, 100); wait(); addEventListener("resize", () => setTimeout(draw, 100));
+  }
 })();
