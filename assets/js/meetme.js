@@ -8,12 +8,10 @@
    Only exception: the attached photos themselves (shown as normal photos).
    The screen appears once the intro clip has finished (document event "mm:ready"); typing during the intro skips it.
    STORAGE: netlify/functions/meetme.mjs (Netlify Blobs). New posts wait for approval (mmadmin.html); until then the
-   poster sees their own post marked "[PENDING]" (localStorage "mm-mine"). SEED = example post(s).
+   poster sees their own post marked "[PENDING]" (localStorage "mm-mine"). SEED = local example posts (none now).
    Limits must match the function: LIM below. */
 (function(){
-  const SEED = [
-    { id:"jake-photo-safari", at:"2026-01-16T00:12", author:"Jake Page", subject:"Photo safari Hastings Garden Sunday B4 LSC?" },
-  ];
+  const SEED = [];   // the example post now lives on the server board (deletable from the SYSOP console)
   const LIM = { author:24, subject:44, body:5000, photos:4, photoBytes:1000 * 1024, comment:1000 };
   const box = document.querySelector(matchMedia("(max-width: 899.98px)").matches ? ".mm-phone" : ".mm-computer");
   const screen = box && box.querySelector(".mm-screen"), glass = screen && screen.parentNode;   // glass = the filtered box
