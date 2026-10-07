@@ -1136,17 +1136,65 @@ body.mm-body{ background:var(--black); }
 .mm-screen{ container-type:inline-size; }
 .mmb{ opacity:0; transition:opacity .25s steps(3); padding:7cqw 10cqw 12cqw;   /* wide margins: the CRT warp magnifies the middle and pulls the edges in */
   font-family:'VT323', ui-monospace, monospace; color:#7dff7d;
-  font-size:max(13px, 2.2cqw); line-height:1.15; text-shadow:0 0 .25em rgba(90,255,90,.75), 0 0 .8em rgba(40,200,40,.35); }
-.mm-screen.on .mmb{ opacity:1; }
-.mmb-prompt{ display:flex; flex-wrap:wrap; align-items:baseline; gap:0 .5ch; font-size:1.25em; cursor:text; }
-.mmb-typed{ white-space:pre-wrap; word-break:break-word; }
-.mmb-caret{ display:inline-block; width:.6em; height:1em; margin-left:-.4ch; transform:translateY(.15em); background:currentColor; box-shadow:0 0 .4em rgba(90,255,90,.7); animation:mmb-blink 1s steps(1) infinite; }
+  font-size:max(13px, 2.2cqw); line-height:1.15; text-shadow:0 0 .1em rgba(110,255,110,.5), 0 0 .45em rgba(40,200,40,.18); }   /* low glow = crisper, easier on the eyes (Chef) */
+.mm-screen.on .mmb, .mmb-boot.on{ opacity:1; }
+/* the inbox "prints" line by line when it first appears — a touch of slow-machine lag */
+.mm-screen.printing .mmb-home > *, .mm-screen.printing .mmb-inbox > *, .mm-screen.printing .mmb-list > li{ animation:mmb-print .01s steps(1) both; }
+.mm-screen.printing .mmb-home > :nth-child(2){ animation-delay:.06s; }
+.mm-screen.printing .mmb-inbox > :nth-child(1){ animation-delay:.12s; } .mm-screen.printing .mmb-inbox > :nth-child(2){ animation-delay:.18s; }
+.mm-screen.printing .mmb-inbox > :nth-child(3){ animation-delay:.24s; } .mm-screen.printing .mmb-inbox > :nth-child(4){ animation-delay:.30s; }
+.mm-screen.printing .mmb-inbox > :nth-child(5){ animation-delay:.36s; } .mm-screen.printing .mmb-inbox > :nth-child(n+6){ animation-delay:.42s; }
+.mm-screen.printing .mmb-list > li:nth-child(1){ animation-delay:.48s; } .mm-screen.printing .mmb-list > li:nth-child(2){ animation-delay:.54s; }
+.mm-screen.printing .mmb-list > li:nth-child(3){ animation-delay:.60s; } .mm-screen.printing .mmb-list > li:nth-child(4){ animation-delay:.66s; }
+.mm-screen.printing .mmb-list > li:nth-child(5){ animation-delay:.72s; } .mm-screen.printing .mmb-list > li:nth-child(n+6){ animation-delay:.78s; }
+@keyframes mmb-print{ from{ visibility:hidden; } }
+.mmb-boot{ position:absolute; inset:0; transition:none; }   /* desktop boot prompt, typed live before the logo clip */
+.mmb-boot p{ margin:0; font-size:1.25em; }
+.mmb-boot.wipe{ animation:mmb-wipe .26s steps(8) forwards; }   /* screen wipe: erased top to bottom */
+@keyframes mmb-wipe{ to{ clip-path:inset(100% 0 0 0); } }
+.mmb-write-row{ display:flex; justify-content:space-between; align-items:center; gap:1em; margin:1.2em 0 .4em; font-size:1.25em; }   /* more air above and below the button (Chef) */
+.mmb-write{ background:#7dff7d; color:#06200b; text-shadow:none; text-decoration:none; padding:.12em .45em; box-shadow:0 0 .35em rgba(90,255,90,.35); }   /* a real button: green box, dark letters (Chef) */
+.mmb-write:hover, .mmb-write:focus-visible{ background:none; color:#7dff7d; box-shadow:inset 0 0 0 1px #7dff7d; outline:none; }
+.mmb-fs{ font-size:.7em; }
+/* 8-bit pointer drawn inside the screen (bent by the CRT filter with everything else); system cursor hidden there */
+.mm-screen.mm-ptr-on, .mm-screen.mm-ptr-on *{ cursor:none !important; }
+.mmb-ptr{ position:absolute; z-index:5; width:max(16px, 2cqw); background:0 0 / 100% 100% no-repeat; image-rendering:pixelated; pointer-events:none;
+  filter:drop-shadow(0 0 2px rgba(90,255,90,.35)); }
+.mmb-ptr.beam{ width:max(10px, 1.25cqw); transform:translate(-50%, -50%); }
+.mm-screen.full .mmb-ptr{ width:16px; } .mm-screen.full .mmb-ptr.beam{ width:10px; }
+/* FULLSCREEN: flat full-window terminal like the SYSOP console — no casing, menu, footer or CRT curve */
+html.mm-full, html.mm-full body{ overflow:hidden; }
+html.mm-full .mm-bar, html.mm-full .site-footer{ visibility:hidden; }
+.mm-screen.full{ position:fixed; inset:0; width:auto; height:auto; z-index:50; background:#06140a; }
+.mm-screen.full .mmb{ position:relative; max-width:880px; margin:0 auto; padding:64px 16px 64px; font-size:20px; }
+.mmb-back{ position:absolute; top:18px; left:16px; font-size:.85em; }
+@media (max-width:600px){ .mm-screen.full .mmb{ font-size:17px; padding-top:56px; } }
+.mmb-caret{ display:inline-block; width:.6em; height:1em; margin-left:.15em; transform:translateY(.15em); background:currentColor; box-shadow:0 0 .2em rgba(90,255,90,.4); animation:mmb-blink 1s steps(1) infinite; }
 @keyframes mmb-blink{ 50%{ opacity:0; } }
-.mmb-in{ position:absolute; left:0; top:0; width:1px; height:1px; opacity:0; border:0; padding:0; font-size:16px; }   /* real input, visually replaced (16px stops iOS zoom) */
 .mmb-hp{ position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
 .mmb-wait{ opacity:.6; }
 .mmb-wait em{ font-style:normal; }
-.mmb-hint{ margin:.2em 0 0; min-height:1.15em; font-size:.85em; opacity:.8; }
+.mmb-hint{ margin:0 0 1.6em; min-height:1.15em; font-size:.85em; opacity:.85; }
+.mmb-send-hint{ margin:.6em 0 0; }
+/* compose screen: terminal fields — no boxes, a dotted baseline, green caret */
+.mmb-compose{ margin-top:1.2em; }
+.mmb-compose .mmb-title{ margin:.15em 0; }
+.mmb-field{ display:flex; align-items:baseline; gap:.6em; margin:.9em 0 0; }
+.mmb-k{ flex:0 0 5.2em; }
+.mmb-field input, .mmb-field textarea{ flex:1; min-width:0; background:none; border:0; border-bottom:1px dashed rgba(125,255,125,.55); border-radius:0;
+  padding:.05em .1em; color:inherit; font:inherit; font-size:max(16px, 1em); line-height:1.2; text-shadow:inherit; caret-color:#7dff7d; outline:none; }
+.mmb-field input:focus, .mmb-field textarea:focus{ background:rgba(125,255,125,.1); border-bottom-style:solid; }
+.mmb-tall{ align-items:flex-start; }
+.mmb-field textarea{ resize:vertical; min-height:7.5em; border:1px dashed rgba(125,255,125,.55); }
+.mmb-n{ flex:0 0 auto; font-size:.75em; opacity:.7; }
+.mmb-btn{ background:none; border:0; padding:.05em .2em; color:inherit; font:inherit; text-shadow:inherit; cursor:pointer; }
+.mmb-btn:hover:not(:disabled), .mmb-btn:focus-visible{ background:#7dff7d; color:#06200b; text-shadow:none; outline:none; }
+.mmb-btn:disabled{ opacity:.45; cursor:default; }
+.mmb-thumbs{ list-style:none; margin:.6em 0 0 5.8em; padding:0; display:flex; flex-wrap:wrap; gap:.6em; }
+.mmb-thumbs li{ position:relative; }
+.mmb-thumbs img{ display:block; width:6em; height:6em; object-fit:cover; border:1px solid rgba(125,255,125,.6); }   /* photos stay photos (Chef's one exception) */
+.mmb-x{ position:absolute; top:0; right:0; background:rgba(6,32,11,.85); font-size:.8em; }
+.mmb-actions{ display:flex; gap:1.2em; margin:.6em 0 0; }
 .mmb-inbox{ margin-top:1.4em; }
 .mmb-rule{ overflow:hidden; white-space:nowrap; line-height:.7; letter-spacing:-.02em; }
 .mmb-thin{ line-height:.6; margin:.15em 0 .5em; }
@@ -1161,5 +1209,9 @@ a.mmb-row:hover, a.mmb-row:focus-visible{ background:rgba(125,255,125,.16); outl
   .mmb-row{ grid-template-columns:auto auto 1fr; gap:0 .8em; padding:.4em 0; }
   .mmb-row > span:last-child{ grid-column:1 / -1; }
   .mmb-head > span:last-child{ display:none; }
+  .mmb-field{ flex-wrap:wrap; }
+  .mmb-k{ flex-basis:100%; }
+  .mmb-thumbs{ margin-left:0; }
+  .mmb-thumbs img{ width:5em; height:5em; }
 }
 @media (prefers-reduced-motion:reduce){ .mmb-caret{ animation:none; } .mmb{ transition:none; } }
