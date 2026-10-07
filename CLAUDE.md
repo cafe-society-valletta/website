@@ -61,8 +61,9 @@ assets/js/meetme.js    Meet Me at Society board on the green screen. Home: [ WRI
                         flat full-window terminal (screen moved to <body>), <- GO BACK returns.
                         All screen copy is written as the 8-bit terminal would print it (Chef's rule; only exception: photo
                         attachments on posts). Screen content is bent with the same CRT barrel as the clips: SVG
-                        feDisplacementMap with assets/img/mm-warp2-{phone,desk}.png (sRGB-encoded, read in linearRGB so Safari bends like Chrome;
-                        mm-warp-*.png = old, unused).
+                        feDisplacementMap with assets/img/mm-warp-{phone,desk}.png (sRGB). WebKit (Safari, all iPhone browsers) puts the
+                        filter origin at the monitor corner, so meetme.js offsets the map by the screen offset there (found with
+                        /meetmeatsociety?calib). mm-warp2-*.png = abandoned linearRGB attempt, unused.
 assets/img/            Photos. Files prefixed `p-` were pulled directly from the Paper
                         design file's asset URLs; the rest (gallery-*.jpg) are pre-existing
                         site photos used for content the Paper mockups didn't specify
