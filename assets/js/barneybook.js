@@ -282,6 +282,8 @@
     if(go){ e.preventDefault(); show(R[go.dataset.go], true); return; }
     const more = e.target.closest(".bb-more");
     if(more){ const x=more.nextElementSibling, on=x.hidden; x.hidden=!on; more.setAttribute("aria-expanded", String(on)); more.querySelector("i").textContent = on ? "−" : "+"; return; }
+    const big = e.target.closest(".bb-big");
+    if(big && open && !e.metaKey && !e.ctrlKey && !e.shiftKey){ e.preventDefault(); lb.open(big); return; }
     const arw = e.target.closest("[data-shot]");
     if(arw){ shot += +arw.dataset.shot; rerenderPhoto(); return; }
     if(e.target.closest(".bb-up")){ startUpload(); return; }
@@ -291,6 +293,73 @@
     const name = e.target.closest(".bb-name");
     if(name){ const r=R[name.parentElement.dataset.k]; show(open===r ? null : r, false); }
   });
+
+  /* ---------- photo detail pop-up: same look as the About gallery photos (main.js) — the photo zooms out of its thumbnail,
+     slightly askew, arrows / swipe / ← → step through the recipe's photos, × or Esc or a click outside closes ---------- */
+  const lb = (() => {
+    const still = matchMedia("(prefers-reduced-motion: reduce)"), EASE = "cubic-bezier(.2,.8,.2,1)";
+    let el, card, img, count, list = [], i = 0, isOpen = false;
+    const svg = d => `<svg width="14" height="24" viewBox="0 0 14 24"><path d="${d}" fill="none" stroke="#FFFFFF" stroke-width="1.6"/></svg>`;
+    function build(){
+      el = document.createElement("div"); el.className = "gv-photo bb-lb"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+      el.innerHTML = '<div class="gp-card"><img alt=""></div>' +
+        '<button class="gp-x" type="button" aria-label="Close photo"><svg width="16" height="16" viewBox="0 0 14 14"><path d="M1 1 L13 13 M13 1 L1 13" fill="none" stroke="#FFFFFF" stroke-width="1.6"/></svg></button>' +
+        `<button class="gp-prev" type="button" aria-label="Previous photo">${svg("M12 2 L2 12 L12 22")}</button>` +
+        `<button class="gp-next" type="button" aria-label="Next photo">${svg("M2 2 L12 12 L2 22")}</button><span class="gp-count"></span>`;
+      document.body.appendChild(el);
+      card = el.querySelector(".gp-card"); img = el.querySelector("img"); count = el.querySelector(".gp-count");
+      el.querySelector(".gp-x").addEventListener("click", () => close());
+      el.querySelector(".gp-prev").addEventListener("click", e => { e.stopPropagation(); step(-1); });
+      el.querySelector(".gp-next").addEventListener("click", e => { e.stopPropagation(); step(1); });
+      el.addEventListener("click", e => { if(e.target === el) close(); });
+      let x0 = null, y0 = 0;
+      el.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive:true });
+      el.addEventListener("touchend", e => { if(x0 === null) return; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+        if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1); });
+      document.addEventListener("keydown", e => { if(!isOpen) return;
+        if(e.key === "Escape") close(); else if(e.key === "ArrowLeft") step(-1); else if(e.key === "ArrowRight") step(1); });
+    }
+    const rest = (w, h) => { const ph = innerWidth < 900, k = Math.min((innerWidth - (ph ? 32 : 200)) / w, (innerHeight - 150) / h);
+      const W = Math.round(w * k), H = Math.round(h * k); return { left:(innerWidth - W) / 2, top:(innerHeight - H) / 2 - (ph ? 10 : 0), width:W, height:H }; };
+    const tilt = () => (Math.random() < .5 ? -1 : 1) * (1.2 + Math.random() * 2.6);
+    const sizeOf = src => new Promise(res => { const im = new Image(); im.onload = () => res([im.naturalWidth, im.naturalHeight]); im.onerror = () => res([1, 1]); im.src = src; });
+    const box = (R, rot) => ({ left:R.left + "px", top:R.top + "px", width:R.width + "px", height:R.height + "px", transform:`rotate(${rot}deg)` });
+    const visibleThumb = () => [...$list.querySelectorAll(".bb-item.open .bb-big img")].find(t => t.getClientRects().length && t.getBoundingClientRect().width) || null;
+    function show(){                                    // thumb first (already loaded), the full-size photo swaps in
+      const m = list[i]; img.src = m.src; img.alt = open ? open.n : "";
+      if(m.big && m.big !== m.src){ const im = new Image(); im.onload = () => { if(isOpen && list[i] === m) img.src = m.big; }; im.src = m.big; }
+      count.textContent = list.length > 1 ? `${i + 1} / ${list.length}` : ""; el.classList.toggle("single", list.length < 2);
+    }
+    async function openIt(a){
+      if(isOpen || !open) return; if(!el) build();
+      list = mediaFor(open).filter(m => !m.video); const src = a.querySelector("img").getAttribute("src");
+      i = Math.max(0, list.findIndex(m => m.src === src)); if(!list.length) return;
+      const [w, h] = await sizeOf(list[i].src), R = rest(w, h), rot = tilt(), F = a.getBoundingClientRect();
+      isOpen = true; show(); Object.assign(card.style, box(R, rot));
+      el.classList.add("open", "flying"); document.body.classList.add("bb-lb-on"); a.style.visibility = "hidden";
+      requestAnimationFrame(() => el.classList.add("dim"));
+      if(!still.matches) await card.animate([box(F, 0), box(R, rot)], { duration:460, easing:EASE }).finished.catch(() => {});
+      a.style.visibility = ""; el.classList.remove("flying"); el.querySelector(".gp-x").focus({ preventScroll:true });
+    }
+    async function step(d){
+      if(!isOpen || list.length < 2) return;
+      i = (i + d + list.length) % list.length; const [w, h] = await sizeOf(list[i].src), R = rest(w, h), rot = tilt();
+      if(!still.matches) await card.animate([{ transform:card.style.transform, opacity:1 }, { transform:`translateX(${-d * 60}px) ${card.style.transform}`, opacity:0 }], { duration:140, easing:"ease-in" }).finished.catch(() => {});
+      show(); Object.assign(card.style, box(R, rot));
+      if(!still.matches) card.animate([{ transform:`translateX(${d * 60}px) rotate(${rot - d * 6}deg) scale(1.04)`, opacity:0 }, { transform:`rotate(${rot}deg)`, opacity:1 }], { duration:280, easing:EASE });
+    }
+    function close(){
+      if(!isOpen) return; isOpen = false;
+      const all = mediaFor(open || { id:"" }), k = all.indexOf(list[i]); if(k >= 0 && k !== ((shot % all.length) + all.length) % all.length){ shot = k; rerenderPhoto(); }   // the card now shows the photo you ended on
+      const done = () => { el.classList.remove("open", "flying"); document.body.classList.remove("bb-lb-on"); card.getAnimations().forEach(x => x.cancel()); };
+      el.classList.remove("dim"); const t = visibleThumb();
+      if(still.matches || !t){ done(); return; }
+      el.classList.add("flying"); const c = card.style, F = t.getBoundingClientRect(); t.style.visibility = "hidden";
+      card.animate([{ left:c.left, top:c.top, width:c.width, height:c.height, transform:c.transform }, box(F, 0)], { duration:360, easing:EASE, fill:"forwards" })
+        .finished.then(() => { done(); t.style.visibility = ""; }, () => { done(); t.style.visibility = ""; });
+    }
+    return { open:openIt };
+  })();
 
   $list.addEventListener("submit", e => { const f = e.target.closest(".bb-form"); if(f){ e.preventDefault(); submit(f); } });
 
