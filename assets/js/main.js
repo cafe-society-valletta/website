@@ -371,3 +371,14 @@
     set(); desk.addEventListener ? desk.addEventListener("change", set) : desk.addListener(set);
   });
 })();
+
+/* Menu bar: tapping the Meet Me logo flashes it green for a moment before the page changes (desktop hover does it in CSS) */
+(function(){
+  document.querySelectorAll(".site-bar .logo-mm:not(.tab)").forEach(a => a.addEventListener("click", e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button || a.classList.contains("flash")) return;
+    e.preventDefault(); a.classList.add("flash");
+    setTimeout(() => { location.href = a.href; }, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 340);
+  }));
+  addEventListener("pageshow", () => document.querySelectorAll(".logo-mm.flash").forEach(a => a.classList.remove("flash")));   // back button
+})();
+
