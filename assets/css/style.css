@@ -1156,12 +1156,10 @@ body.mm-body{ background:var(--black); }
 .mmb-write{ background:#7dff7d; color:#06200b; text-shadow:none; text-decoration:none; padding:.12em .45em; box-shadow:0 0 .35em rgba(90,255,90,.35); }   /* a real button: green box, dark letters (Chef) */
 .mmb-write:hover, .mmb-write:focus-visible{ background:none; color:#7dff7d; box-shadow:inset 0 0 0 1px #7dff7d; outline:none; }
 .mmb-fs{ font-size:.7em; }
-/* 8-bit pointer drawn inside the screen (bent by the CRT filter with everything else); system cursor hidden there */
+/* 8-bit pointer: its own layer on <body>, placed along the CRT curve by meetme.js; system cursor hidden over the screen */
 .mm-screen.mm-ptr-on, .mm-screen.mm-ptr-on *{ cursor:none !important; }
-.mmb-ptr{ position:absolute; z-index:5; width:max(16px, 2cqw); background:0 0 / 100% 100% no-repeat; image-rendering:pixelated; pointer-events:none;
-  filter:drop-shadow(0 0 2px rgba(90,255,90,.35)); }
-.mmb-ptr.beam{ width:max(10px, 1.25cqw); transform:translate(-50%, -50%); }
-.mm-screen.full .mmb-ptr{ width:16px; } .mm-screen.full .mmb-ptr.beam{ width:10px; }
+.mmb-ptr{ position:fixed; left:0; top:0; z-index:60; background:0 0 / 100% 100% no-repeat; image-rendering:pixelated; pointer-events:none;
+  will-change:transform; filter:drop-shadow(0 0 2px rgba(90,255,90,.35)); }
 /* FULLSCREEN: flat full-window terminal like the SYSOP console — no casing, menu, footer or CRT curve */
 html.mm-full, html.mm-full body{ overflow:hidden; }
 html.mm-full .mm-bar, html.mm-full .site-footer{ visibility:hidden; }
