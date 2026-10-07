@@ -51,7 +51,7 @@ assets/js/chars.js     Home "Characters" parade frame clock — keeps the line's
                         figure's pose change on the same 1.5 fps frame (one jump per frame).
 assets/js/meetme.js    Meet Me at Society board on the green screen: "WRITE A POST>" prompt (subject → NAME> → Enter posts)
                         + MESSAGE INBOX (newest first, rows link to #p/<id>; post pages not built yet). VT323 font.
-                        Posts are shared via netlify/functions/meetme.js (Netlify Blobs); new posts wait in a queue until
+                        Posts are shared via netlify/functions/meetme.mjs (Netlify Blobs); new posts wait in a queue until
                         approved on mmadmin.html ("SYSOP CONSOLE", unlisted, key = Netlify env MEETME_ADMIN_KEY).
                         All screen copy is written as the 8-bit terminal would print it (Chef's rule; only exception: photo
                         attachments on posts). Screen content is bent with the same CRT barrel as the clips: SVG
@@ -64,7 +64,7 @@ assets/img/            Photos. Files prefixed `p-` were pulled directly from the
 
 `index.html` must stay at the repository root — Netlify serves it as-is with no build command.
 
-No build tooling. package.json exists ONLY so Netlify installs @netlify/blobs for netlify/functions/meetme.js
+No build tooling. package.json exists ONLY so Netlify installs @netlify/blobs for netlify/functions/meetme.mjs
 (still no build command). Don't add other dependencies without a reason that requires it.
 
 ## Publishing workflow

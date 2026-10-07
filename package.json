@@ -1,7 +1,7 @@
 {
   "name": "cafe-society-website",
   "private": true,
-  "description": "Static site. This file only exists so Netlify installs the one dependency of netlify/functions/meetme.js (Netlify Blobs). No build step.",
+  "description": "Static site. This file only exists so Netlify installs the one dependency of netlify/functions/meetme.mjs (Netlify Blobs). No build step.",
   "dependencies": {
     "@netlify/blobs": "^11.1.3"
   }
