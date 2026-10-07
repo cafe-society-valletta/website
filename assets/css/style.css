@@ -1171,8 +1171,9 @@ body.mm-body{ background:var(--black); }
 .mm-screen.full .mmb-mark{ display:none; }
 .mmb-fly{ position:absolute; z-index:4; display:block; pointer-events:none; filter:drop-shadow(0 0 .1em rgba(110,255,110,.45)); }   /* the logo flying from the intro clip into the header */
 /* 8-bit pointer: its own layer on <body>, placed along the CRT curve by meetme.js; system cursor hidden over the screen */
-.mm-screen.mm-ptr-on, .mm-screen.mm-ptr-on *{ cursor:none !important; }
-.mm-screen.mm-ptr-on.mm-ptr-out, .mm-screen.mm-ptr-on.mm-ptr-out *{ cursor:auto !important; }   /* off the curved glass: normal cursor */
+html.mm-cur-hide, html.mm-cur-hide *{ cursor:none !important; }   /* near/on the glass the system cursor is replaced by drawn ones */
+.mm-sysptr{ position:fixed; left:0; top:0; z-index:70; width:13px; height:21px; margin:-1px 0 0 -1px; pointer-events:none; will-change:transform, opacity;
+  background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2013%2021%22%3E%3Cpath%20d%3D%22M1%201v16.2l3.9-3.8%202.5%206%202.6-1.1-2.5-5.9H13z%22%20fill%3D%22%23000%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat; }   /* drawn copy of the normal arrow, fades out toward the glass edge */
 .mmb-ptr{ position:absolute; left:0; top:0; z-index:2; background:0 0 / 100% 100% no-repeat; image-rendering:pixelated; pointer-events:none;
   will-change:transform; filter:drop-shadow(0 0 2px rgba(90,255,90,.35)); }
 .mmb-ptr.fixed{ position:fixed; z-index:60; }
