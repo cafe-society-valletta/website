@@ -1160,7 +1160,16 @@ body.mm-body{ background:var(--black); }
 .mmb-write-row{ display:flex; justify-content:space-between; align-items:center; gap:1em; margin:1.2em 0 .4em; font-size:1.25em; }   /* more air above and below the button (Chef) */
 .mmb-write{ background:#7dff7d; color:#06200b; text-shadow:none; text-decoration:none; padding:.12em .45em; box-shadow:0 0 .35em rgba(90,255,90,.35); }   /* a real button: green box, dark letters (Chef) */
 .mmb-write:hover, .mmb-write:focus-visible{ background:none; color:#7dff7d; box-shadow:inset 0 0 0 1px #7dff7d; outline:none; }
-.mmb-fs{ font-size:.7em; }
+.mmb-fs{ font-size:.7em; position:relative; }
+.mm-screen:not(.full) .mmb-fs::before{ content:""; position:absolute; top:-4em; right:-4em; bottom:-1.6em; left:-2.2em; }   /* big invisible hit area: the whole top-right corner wakes the button (Chef) */
+/* logo between the two buttons on the monitor (Chef): centred, same vertical centre as the buttons; fullscreen uses .mmb-logo */
+.mmb-write-row .mmb-mark{ display:block; flex:0 1 auto; min-width:0; height:3.5em; width:auto; filter:drop-shadow(0 0 .1em rgba(110,255,110,.45)); }
+.mm-screen:not(.full) .mmb-write-row{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; }   /* logo dead centre whatever the button widths */
+.mm-screen:not(.full) .mmb-write-row .mmb-write{ justify-self:start; } .mm-screen:not(.full) .mmb-write-row .mmb-fs{ justify-self:end; }
+.mm-screen:not(.full) .mmb-write-row{ margin-top:0; }   /* space above the logo ≈ space below it to the rule */
+.mmb-write-row .mmb-write, .mmb-write-row .mmb-fs{ white-space:nowrap; }
+.mm-screen.full .mmb-mark{ display:none; }
+.mmb-fly{ position:absolute; z-index:4; display:block; pointer-events:none; filter:drop-shadow(0 0 .1em rgba(110,255,110,.45)); }   /* the logo flying from the intro clip into the header */
 /* 8-bit pointer: its own layer on <body>, placed along the CRT curve by meetme.js; system cursor hidden over the screen */
 .mm-screen.mm-ptr-on, .mm-screen.mm-ptr-on *{ cursor:none !important; }
 .mm-screen.mm-ptr-on.mm-ptr-out, .mm-screen.mm-ptr-on.mm-ptr-out *{ cursor:auto !important; }   /* off the curved glass: normal cursor */
@@ -1173,7 +1182,9 @@ body.mm-body{ background:var(--black); }
 /* FULLSCREEN: flat full-window terminal like the SYSOP console — no casing, menu, footer or CRT curve */
 html.mm-full, html.mm-full body{ overflow:hidden; }
 html.mm-full .mm-bar, html.mm-full .site-footer{ visibility:hidden; }
-.mm-screen.full{ position:fixed; inset:0; width:auto; height:auto; z-index:50; background:#06140a; }
+.mm-screen.full{ position:fixed; inset:0; width:auto; height:auto; z-index:50; }   /* background comes from .mm-veil */
+.mm-screen.leaving{ position:fixed; z-index:50; }   /* on its way back into the monitor (JS sets the glass box) */
+.mm-veil{ position:fixed; inset:0; z-index:49; background:#06140a; opacity:0; pointer-events:none; }
 .mm-screen.full .mmb{ position:relative; max-width:880px; margin:0 auto; padding:64px 16px 64px; font-size:20px; }
 .mmb-back{ position:absolute; top:18px; left:16px; font-size:.85em; }
 .mm-screen .mmb-logo{ display:none; }
@@ -1222,6 +1233,9 @@ a.mmb-row:hover, a.mmb-row:focus-visible{ background:rgba(125,255,125,.16); outl
   .mmb-field{ flex-wrap:wrap; }
   .mmb-k{ flex-basis:100%; }
   .mmb-thumbs{ margin-left:0; }
+  .mm-screen:not(.full) .mmb-write-row{ grid-template-columns:1fr 1fr; row-gap:1.6em; margin-top:.6em; }   /* phone: logo centred above the two buttons */
+  .mm-screen:not(.full) .mmb-home-hint{ margin-bottom:.5em; } .mm-screen:not(.full) .mmb-inbox{ margin-top:.52em; }   /* buttons equidistant between the logo and the rule (Chef) */
+  .mm-screen:not(.full) .mmb-write-row .mmb-mark{ grid-column:1 / -1; order:-1; justify-self:center; height:3.6em; }
   .mmb-thumbs img{ width:5em; height:5em; }
 }
 @media (prefers-reduced-motion:reduce){ .mmb-caret{ animation:none; } .mmb{ transition:none; } }
