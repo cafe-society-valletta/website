@@ -153,7 +153,7 @@
     const ptr = document.createElement("i"); ptr.className = "mmb-ptr"; ptr.setAttribute("aria-hidden", "true"); ptr.hidden = true;
     document.body.appendChild(ptr);
     let kind = "", frame = 0, last = null;
-    const lin = b => { const c = b / 255; return c <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); };   // map bytes are sRGB-encoded linear values
+    const lin = b => b / 255;   // map byte → 0..1 (0.5 = no shift)
     const bend = (x, y, w, h) => {   // un-bent screen point → where the filter draws it
       const m = warpMap; if(!m || screen.classList.contains("full")) return [x, y];
       const S = m.range * w, d = (qx, qy) => { const mx = Math.min(m.w - 1, Math.max(0, Math.round(qx / w * m.w - .5))),
@@ -225,23 +225,27 @@
 
   // CRT curve: everything on the screen is bent with the same barrel distortion as the intro clip (ffmpeg lenscorrection
   // k1 .32 / k2 .06 on the scaled frame, centre magnified ~1.22× so the corners land on the corners, as in the clips). An SVG displacement map (assets/img/mm-warp-*.png; R = x shift, G = y shift,
-  // 0.5 = none, stored sRGB-encoded and read in linearRGB — Safari always reads displacement maps in linearRGB, so this is the only
-  // setting that bends the same in Safari and Chrome; old sRGB maps mm-warp-*.png shifted everything right on iPhones) is applied as a CSS filter to the screen, sized in px to the screen and re-sized with it.
+  // 0.5 = none)) is applied as a CSS filter to the screen, sized in px to the screen and re-sized with it.
   // WARP_SCALE = the map's full range in screen-box px at the size the map was made for (phone 933 px wide, desktop 868).
   let warp = "";   // the CRT filter (set once its map has loaded); dropped in fullscreen
   var warpMap = null;   // the map's pixels, for bending the pointer in JS: { w, h, px, range }
   (function curve(){
-    const desk = box.classList.contains("mm-computer"), url = desk ? "assets/img/mm-warp2-desk.png" : "assets/img/mm-warp2-phone.png";
+    const desk = box.classList.contains("mm-computer"), url = desk ? "assets/img/mm-warp-desk.png" : "assets/img/mm-warp-phone.png";
     const RANGE = desk ? 81 / 868 : 151 / 933;   // displacement range as a fraction of the screen width
     const NS = "http://www.w3.org/2000/svg", id = "mm-crt";
     const svg = document.createElementNS(NS, "svg"); svg.setAttribute("width", "0"); svg.setAttribute("height", "0");
     svg.setAttribute("aria-hidden", "true"); svg.style.position = "absolute";
-    svg.innerHTML = `<filter id="${id}" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" color-interpolation-filters="linearRGB">
+    svg.innerHTML = `<filter id="${id}" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feImage preserveAspectRatio="none" result="map"/><feDisplacementMap in="SourceGraphic" in2="map" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation="0.35"/></filter>`;
     document.body.appendChild(svg);
     const f = svg.querySelector("filter"), img = svg.querySelector("feImage"), dm = svg.querySelector("feDisplacementMap");
+    // Safari / every iPhone browser (WebKit) puts the filter's user space at the monitor's corner, not the screen's, so
+    // the map and filter region must be moved by the screen's offset inside the monitor (measured with ?calib, Chef's
+    // iPhone: the whole bend was shifted by exactly that offset and the right-hand strip was cut off).
+    const webkit = /AppleWebKit/.test(navigator.userAgent) && !/Chrome\/|Chromium|Edg\/|Firefox|OPR\//.test(navigator.userAgent);
     const size = () => { const w = screen.clientWidth, h = screen.clientHeight; if(!w || !h) return;
-      for(const [el, a] of [[f, { x:0, y:0, width:w, height:h }], [img, { x:0, y:0, width:w, height:h }]]) for(const k in a) el.setAttribute(k, a[k]);
+      const x = webkit && !screen.classList.contains("full") ? screen.offsetLeft : 0, y = webkit && !screen.classList.contains("full") ? screen.offsetTop : 0;
+      for(const [el, a] of [[f, { x, y, width:w, height:h }], [img, { x, y, width:w, height:h }]]) for(const k in a) el.setAttribute(k, a[k]);
       dm.setAttribute("scale", (RANGE * w).toFixed(1)); };
     // the page preloads the map (<link rel=preload>), so this is normally instant
     fetch(url).then(r => r.blob()).then(b => new Promise(ok => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); }))
@@ -261,10 +265,11 @@
     screen.appendChild(boot);
     const bt = boot.querySelector(".mmb-bt"), word = "stayhuman.exe", wait = ms => new Promise(ok => setTimeout(ok, ms));
     (async () => {
-      await wait(500); for(let n = 0; n < 15 && !warp; n++) await wait(100);   // let the CRT curve arrive first (max 1.5s more)
+      await wait(500); for(let n = 0; n < 40 && !warp; n++) await wait(100);   // nothing shows until the CRT curve is on (max 4s)
+      await new Promise(ok => requestAnimationFrame(() => requestAnimationFrame(ok)));
       if(!boot) return; boot.classList.add("on");
       await wait(450);
-      for(const ch of word){ if(!boot) return; bt.textContent += ch; await wait(45 + Math.random() * 50); }   // uneven keystrokes = old-machine lag
+      for(const ch of word){ if(!boot) return; bt.textContent += ch; await wait(75 + Math.random() * 60); }   // uneven keystrokes = old-machine lag
       await wait(600); if(!boot) return;
       boot.classList.add("wipe"); await wait(260);
       if(boot){ boot.remove(); boot = null; document.dispatchEvent(new Event("mm:booted")); }
@@ -290,7 +295,7 @@
       .mmc-e{width:14px;height:14px;margin:-7px 0 0 -7px;border:2px solid #0ff;box-sizing:border-box}
       .mmc-i{position:fixed;left:8px;right:8px;bottom:8px;z-index:99;font:12px/1.3 monospace;color:#fff;background:rgba(0,0,0,.75);padding:6px}`;
     document.head.appendChild(st);
-    const lin = b => { const c = b / 255; return c <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); };
+    const lin = b => b / 255;
     const draw = () => { document.querySelectorAll(".mmc-o,.mmc-i").forEach(e => e.remove());
       const r = screen.getBoundingClientRect(), m = warpMap, w = r.width, h = r.height;
       pts.forEach(([fx, fy]) => { const x = fx * w, y = fy * h; let qx = x, qy = y;
