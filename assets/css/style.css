@@ -1106,13 +1106,11 @@ body.mm-body{ background:var(--black); }
 /* .mm-glass = the green screen's box; it carries the CRT filter and has its own (2D) transform, so every browser
    measures the filter from the glass's own corner (Safari otherwise used the monitor's corner, and a scrolling
    .mm-screen changed it again). .mm-screen inside it is the scroll area. */
-.mm-glass{ position:absolute; inset:0; transform:translate(0, 0); pointer-events:none; }   /* covers the whole monitor box: its origin = the monitor's, so
-   Safari (which measures the filter from the monitor's layer) and Chrome (from the glass) agree; the filter region is set to the slot */
-.mm-glass > .mm-screen{ pointer-events:auto; }
-.mm-slot{ position:absolute; visibility:hidden; pointer-events:none; }   /* marks the green glass rectangle inside .mm-glass */
+.mm-glass{ position:absolute; transform:translate(0, 0); }
+.mm-glass > .mm-screen{ inset:0; }
 .mm-phone{ position:absolute; left:50%; top:0; width:var(--mmw); aspect-ratio:1202 / 2622; transform:translateX(-50%); }
 .mm-phone img{ display:block; width:100%; height:100%; }
-.mm-phone .mm-slot, .mm-phone .mm-glass > .mm-screen{ left:11.98%; top:14.99%; width:77.62%; height:70.82%; }
+.mm-phone .mm-glass{ left:11.98%; top:14.99%; width:77.62%; height:70.82%; }
 .mm-tube{ position:absolute; left:11.98%; top:14.99%; width:77.62%; height:70.82%; pointer-events:none; }
 .mm-computer .mm-tube{ left:21.25%; top:11.448%; width:54.25%; height:44.31%; }   /* desktop glass, 868×658 of the 1600×1485 image */
 .mm-computer .mm-glass{ z-index:1; }
@@ -1129,7 +1127,7 @@ body.mm-body{ background:var(--black); }
 }
 .mm-computer{ display:none; position:absolute; left:50%; top:0; transform:translate(-48.78%, -0.52%); }   /* Chef's Paper D09: image 1800×1671 at (−158, −9) in 1440×900 */
 .mm-computer img{ display:block; width:100%; height:auto; }
-.mm-computer .mm-slot, .mm-computer .mm-glass > .mm-screen{ left:21.25%; top:11.448%; width:54.25%; height:44.31%; }   /* = the glass box the clips and the CRT warp map are made for */
+.mm-computer .mm-glass{ left:21.25%; top:11.448%; width:54.25%; height:44.31%; }   /* = the glass box the clips and the CRT warp map are made for */
 @media (min-width:900px){
   .page.v2.mm{ height:calc(100vh + 120px); }   /* desktop: one screen of monitor, then 120px more (keyboard + footer) on scroll */
   .mm-phone{ display:none; }
@@ -1141,6 +1139,12 @@ body.mm-body{ background:var(--black); }
    Terminal type (VT323) in phosphor green with a glow, sized from the screen's width (container units), so it reads the
    same on the phone and the desktop monitor. Appears once the intro clip is done. */
 .mm-screen{ container-type:inline-size; }
+/* iPhone/iPad (WebKit): the bend can push the board's right edge off the glass, so the screen also scrolls sideways
+   (an invisible marker 30% past the right edge gives it room). Chrome/desktop unchanged. */
+@supports (-webkit-touch-callout:none){
+  .mm-screen:not(.full){ overflow-x:auto; overscroll-behavior-x:contain; }
+  .mm-screen:not(.full)::after{ content:""; position:absolute; top:0; left:calc(100% + 30cqw); width:1px; height:1px; pointer-events:none; }
+}
 .mmb{ opacity:0; transition:opacity .25s steps(3); padding:7cqw 10cqw 12cqw;   /* wide margins: the CRT warp magnifies the middle and pulls the edges in */
   font-family:'VT323', ui-monospace, monospace; color:#7dff7d;
   font-size:max(13px, 2.2cqw); line-height:1.15; text-shadow:0 0 .1em rgba(110,255,110,.5), 0 0 .45em rgba(40,200,40,.18); }   /* low glow = crisper, easier on the eyes (Chef) */
@@ -1175,8 +1179,8 @@ body.mm-body{ background:var(--black); }
 /* POST WINDOW (#p/<id>): a terminal window over the inbox, laid out like an email */
 .mmb{ position:relative; }
 .mmb-post{ position:absolute; z-index:3; top:7cqw; left:10cqw; right:10cqw; }   /* same safe margins as the board: the CRT bend pushes anything nearer the edge off the glass */
-.mmb-post::before{ content:none; }   /* dims the inbox behind (fixed = the whole glass, since .mm-glass is transformed; adds no scroll) */
-.mmb-win{ background:#06200b; border:4px double #7dff7d; box-shadow:0 0 0 2px #06200b, 0 0 1.2em rgba(60,255,90,.25), 0 0 0 300vmax rgba(3,14,6,.78); }   /* last shadow dims the inbox behind (no extra scroll) */
+.mmb-post::before{ content:""; position:fixed; z-index:-1; inset:0; background:rgba(3,14,6,.78); }   /* dims the inbox behind (fixed = the whole glass, since .mm-glass is transformed; adds no scroll) */
+.mmb-win{ background:#06200b; border:4px double #7dff7d; box-shadow:0 0 0 2px #06200b, 0 0 1.2em rgba(60,255,90,.25); }
 .mmb-win-bar{ display:flex; justify-content:space-between; align-items:center; gap:1em; padding:.15em .3em .15em .6em; background:#7dff7d; color:#06200b; text-shadow:none; }
 .mmb-win-bar .mmb-btn{ color:#06200b; }
 .mmb-win-bar .mmb-btn:hover, .mmb-win-bar .mmb-btn:focus-visible{ background:#06200b; color:#7dff7d; }
