@@ -14,7 +14,7 @@
   const SEED = [
     { id:"jake-photo-safari", at:"2026-01-16T00:12", author:"Jake Page", subject:"Photo safari Hastings Garden Sunday B4 LSC?" },
   ];
-  const LIM = { author:24, subject:44, body:5000, photos:4, photoBytes:1000 * 1024 };
+  const LIM = { author:24, subject:44, body:5000, photos:4, photoBytes:1000 * 1024, comment:1000 };
   const box = document.querySelector(matchMedia("(max-width: 899.98px)").matches ? ".mm-phone" : ".mm-computer");
   const screen = box && box.querySelector(".mm-screen"), glass = screen && screen.parentNode;   // glass = the filtered box
   if(!screen) return;
@@ -62,6 +62,12 @@
         <p class="mmb-hint mmb-send-hint" aria-live="polite"></p>
         <p class="mmb-actions"><button type="submit" class="mmb-btn">[ SEND ]</button><button type="button" class="mmb-btn mmb-cancel">[ CANCEL ]</button></p>
       </form>
+      <section class="mmb-post" hidden role="dialog" aria-modal="true" aria-label="Message">
+        <div class="mmb-win">
+          <div class="mmb-win-bar"><span class="mmb-win-t">MESSAGE</span><button type="button" class="mmb-btn mmb-close" aria-label="Close message">[X]</button></div>
+          <div class="mmb-post-in"></div>
+        </div>
+      </section>
     </div>`;
   const $ = s => screen.querySelector(s);
   const $home = $(".mmb-home"), $form = $(".mmb-compose"), $list = $(".mmb-list"), $homeHint = $(".mmb-home-hint"), $hint = $(".mmb-send-hint");
@@ -121,6 +127,7 @@
   const isCompose = () => location.hash === "#new";
   function view(){
     const c = isCompose(); $home.hidden = c; $form.hidden = !c; screen.scrollTop = 0;
+    const pid = (location.hash.match(/^#p\/(.+)$/) || [])[1]; openPost(pid ? decodeURIComponent(pid) : null);
     if(c){ if(!$author.value) $author.value = store.get("mm-name", ""); counts(); $hint.textContent = "";
       if(matchMedia("(hover: hover)").matches) ($author.value ? $subject : $author).focus({ preventScroll:true }); }
   }
@@ -133,7 +140,7 @@
 
   // start typing on the home screen = start a post (the key lands in the first empty field)
   addEventListener("keydown", e => {
-    if(isCompose() || e.metaKey || e.ctrlKey || e.altKey || e.key.length !== 1) return;
+    if(isCompose() || !$post.hidden || document.querySelector(".mm-lightbox") || e.metaKey || e.ctrlKey || e.altKey || e.key.length !== 1) return;
     if(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
     e.preventDefault(); openCompose();
     const f = $author.value ? $subject : $author; f.focus({ preventScroll:true }); f.value += e.key; counts();
@@ -265,6 +272,180 @@
   $(".mmb-back").addEventListener("click", () => setFull(false));
   addEventListener("keydown", e => { if(e.key === "Escape" && !isCompose()) setFull(false); });
 
+  // ---- POST WINDOW (#p/<id>): a terminal "window" over the inbox, laid out like an email — FROM / SENT / SUBJ, the
+  // message, then the attached photos one after another. Photos keep their real colours (Chef's one exception) and a click
+  // opens the LIGHTBOX: a second window on top, outside the bent glass, with the photo as big as the browser allows, at the
+  // stored upload resolution. Esc / [X] closes the top window first.
+  const $post = $(".mmb-post"), $postIn = $(".mmb-post-in"), $postT = $(".mmb-win-t");
+  let postReq = 0, postShots = [], curPost = null;
+  const photoURL = (id, n) => `${API}?photo=${encodeURIComponent(id)}-${n}`;
+  function fitPost(){ const mmb = $(".mmb"); mmb.style.minHeight = $post.hidden ? "" : ($post.offsetTop + $post.offsetHeight + 24) + "px"; }
+  function drawPost(p, note, comments){
+    const [d, t] = fmt(p.at), n = p.photos || 0; curPost = p;
+    postShots = Array.from({ length:n }, (_, i) => photoURL(p.id, i));
+    $postT.textContent = `MESSAGE  ${d}  ${t}`;
+    $postIn.innerHTML = `
+      <p class="mmb-hdr"><span>FROM:</span> &lt;${esc(p.author)}&gt;</p>
+      <p class="mmb-hdr"><span>SENT:</span> ${d} ${t}</p>
+      <p class="mmb-hdr"><span>SUBJ:</span> ${esc(p.subject)}</p>
+      ${rule("-", 200)}
+      ${note ? `<p class="mmb-note">${note}</p>` : ""}
+      ${store.get("mm-keys", {})[p.id] ? `<p class="mmb-own"><button type="button" class="mmb-btn mmb-edit">[ EDIT POST ]</button><button type="button" class="mmb-btn mmb-del">[ DELETE ]</button></p>` : ""}
+      <div class="mmb-text">${p.body ? esc(p.body) : (note ? "" : "(NO MESSAGE TEXT)")}</div>
+      ${n && note ? `${rule("-", 200)}<p class="mmb-hdr"><span>ATTACHED:</span> ${n} PHOTO${n > 1 ? "S" : ""} (SHOWN ONCE APPROVED)</p>` : ""}
+      ${n && !note ? `${rule("-", 200)}<p class="mmb-hdr"><span>ATTACHED:</span> ${n} PHOTO${n > 1 ? "S" : ""}</p>
+        <div class="mmb-photos">${postShots.map((u, i) => `<button type="button" class="mmb-photo" data-i="${i}" aria-label="Open photo ${i + 1} of ${n}"><img src="${u}" alt="Photo ${i + 1} of ${n}" loading="lazy"><span>[ PHOTO ${i + 1}/${n} &middot; CLICK TO ENLARGE ]</span></button>`).join("")}</div>` : ""}
+      ${rule("=", 200)}
+      <h3 class="mmb-ch">C O M M E N T S</h3>
+      ${comments ? `<div class="mmb-thread"></div>
+      <form class="mmb-cform" novalidate>
+        <p class="mmb-rto" hidden></p>
+        <label class="mmb-field mmb-tall"><span class="mmb-k">COMMENT&gt;</span><textarea name="body" maxlength="${LIM.comment}" rows="3" autocapitalize="sentences"></textarea></label>
+        <label class="mmb-field"><span class="mmb-k">NAME&gt;</span><input name="author" maxlength="${LIM.author}" autocomplete="nickname" spellcheck="false"></label>
+        <input class="mmb-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="mmb-hint mmb-chint" aria-live="polite"></p>
+        <p class="mmb-actions"><button type="submit" class="mmb-btn">[ SEND COMMENT ]</button></p>
+      </form>` : `<p class="mmb-note">${note ? "COMMENTS OPEN ONCE THIS MESSAGE IS APPROVED." : "COMMENTS ARE OFF ON THIS EXAMPLE MESSAGE."}</p>`}
+      ${rule("-", 200)}
+      <p class="mmb-actions"><button type="button" class="mmb-btn mmb-close2">[ BACK TO INBOX ]</button></p>`;
+    $postIn.querySelectorAll("img").forEach(im => im.addEventListener("load", fitPost));
+    if(comments){ postComments = comments; postId = p.id; drawThread(); const f = $postIn.querySelector(".mmb-cform"); f.elements.author.value = store.get("mm-name", ""); }
+    fitPost();
+  }
+  // COMMENTS: a reddit-style thread under the post. Anyone can comment on the post or reply to a comment; every comment
+  // waits for the sysop like posts do (the commenter sees their own as [PENDING]). Replies indent under their parent.
+  let postComments = [], postId = null, replyTo = null;
+  function drawThread(){
+    const th = $postIn.querySelector(".mmb-thread"); if(!th) return;
+    const ids = new Set(postComments.map(c => c.id));
+    const mine = store.get("mm-mine-c", []).filter(c => c.post === postId && !ids.has(c.id)).map(c => ({ ...c, waiting:true }));
+    const all = [...postComments, ...mine], kids = {};
+    all.forEach(c => { const k = c.parent && all.some(x => x.id === c.parent) ? c.parent : "_"; (kids[k] = kids[k] || []).push(c); });
+    const one = (c, d) => { const [dd, tt] = fmt(c.at);
+      return `<div class="mmb-c${c.waiting ? " mmb-wait" : ""}" style="--d:${Math.min(d, 6)}">
+        <p class="mmb-c-h">${c.deleted ? "[DELETED]" : `&lt;${esc(c.author)}&gt;`} <span>${dd} ${tt}</span>${c.waiting ? " <em>[PENDING]</em>" : ""}</p>
+        ${c.deleted ? "" : `<div class="mmb-c-b">${esc(c.body)}</div>`}
+        ${c.waiting || c.deleted ? "" : `<button type="button" class="mmb-btn mmb-reply" data-id="${esc(c.id)}" data-a="${esc(c.author)}">[REPLY]</button>`}
+        ${(kids[c.id] || []).map(k => one(k, d + 1)).join("")}</div>`; };
+    const top = kids._ || [];
+    th.innerHTML = top.length ? top.map(c => one(c, 0)).join("") : `<p class="mmb-note">NO COMMENTS YET. BE THE FIRST.</p>`;
+    const h = $postIn.querySelector(".mmb-ch"); if(h) h.textContent = `C O M M E N T S   (${all.length})`;
+    fitPost();
+  }
+  function setReply(id, who){
+    const f = $postIn.querySelector(".mmb-cform"), rto = f.querySelector(".mmb-rto"); replyTo = id || null;
+    if(replyTo){ rto.hidden = false; rto.innerHTML = `REPLYING TO &lt;${esc(who)}&gt; <button type="button" class="mmb-btn mmb-rcancel">[CANCEL]</button>`;
+      const host = $postIn.querySelector(`.mmb-reply[data-id="${CSS.escape(replyTo)}"]`); if(host) host.after(f); }
+    else { rto.hidden = true; $postIn.querySelector(".mmb-thread").after(f); }
+    f.elements.body.focus({ preventScroll:true }); fitPost();
+  }
+  $postIn.addEventListener("click", e => {
+    const r = e.target.closest(".mmb-reply"); if(r) return setReply(r.dataset.id, r.dataset.a);
+    if(e.target.closest(".mmb-rcancel")) setReply(null);
+  });
+  $postIn.addEventListener("submit", e => {
+    const ef = e.target.closest(".mmb-eform");
+    if(ef){ e.preventDefault(); const subject = ef.elements.subject.value.trim(), body = ef.elements.body.value.trim(), h = ef.querySelector(".mmb-ehint");
+      if(subject.length < 2){ h.textContent = "?ERROR: SUBJECT REQUIRED."; return; }
+      h.textContent = "TRANSMITTING..."; ef.querySelectorAll("button").forEach(b => b.disabled = true);
+      ownCall("own-edit", { subject, body }).then(() => ownDone("EDIT SENT. AWAITING SYSOP APPROVAL.", { subject, body }))
+        .catch(() => { h.textContent = "NO CARRIER. PRESS [ SAVE ] TO RETRY."; ef.querySelectorAll("button").forEach(b => b.disabled = false); });
+      return; }
+    const f = e.target.closest(".mmb-cform"); if(!f) return; e.preventDefault();
+    const hint = f.querySelector(".mmb-chint"), author = f.elements.author.value.trim(), body = f.elements.body.value.trim();
+    if(!body){ hint.textContent = "?ERROR: COMMENT IS EMPTY."; f.elements.body.focus(); return; }
+    if(!author){ hint.textContent = "?ERROR: NAME REQUIRED."; f.elements.author.focus(); return; }
+    store.set("mm-name", author);
+    const btn = f.querySelector("button[type=submit]"); btn.disabled = true; hint.textContent = "TRANSMITTING...";
+    fetch(API, { method:"POST", headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ kind:"comment", post:postId, parent:replyTo, author, body, website:f.elements.website.value }) })
+      .then(r => r.json().then(d => ({ ok:r.ok, status:r.status, d })))
+      .then(({ ok, status, d }) => {
+        if(!ok) throw status;
+        const at = new Date(), iso = `${at.getFullYear()}-${two(at.getMonth()+1)}-${two(at.getDate())}T${two(at.getHours())}:${two(at.getMinutes())}`;
+        const mine = store.get("mm-mine-c", []).filter(c => Date.now() - Date.parse(c.at) < 7 * 864e5);
+        mine.push({ id:d.id, post:postId, parent:replyTo, at:iso, author, body }); store.set("mm-mine-c", mine);
+        f.elements.body.value = ""; setReply(null); drawThread();
+        f.querySelector(".mmb-chint").textContent = "COMMENT QUEUED. AWAITING SYSOP APPROVAL."; })
+      .catch(st => { hint.textContent = st === 429 ? "?ERROR: TOO MANY MESSAGES. WAIT 10 MIN." : "NO CARRIER. PRESS [ SEND COMMENT ] TO RETRY."; })
+      .finally(() => { btn.disabled = false; fitPost(); });
+  });
+  function openPost(id){
+    if(!id){ if(!$post.hidden){ $post.hidden = true; closeLightbox(); fitPost(); } return; }
+    $post.hidden = false; screen.scrollTop = 0;
+    const known = posts().find(p => p.id === id);
+    if(known && (known.waiting || !live.some(p => p.id === id))){   // seed or own post still waiting for the sysop
+      drawPost(known, known.waiting ? "THIS MESSAGE IS WAITING FOR SYSOP APPROVAL." : ""); return; }
+    $postT.textContent = "MESSAGE"; $postIn.innerHTML = `<p class="mmb-note">LOADING MESSAGE...</p>`; fitPost();
+    const my = ++postReq;
+    fetch(`${API}?post=${encodeURIComponent(id)}`, { cache:"no-store" }).then(r => r.ok ? r.json() : null)
+      .then(d => { if(my !== postReq) return;
+        if(d && d.post) drawPost(d.post, "", d.comments || []); else { $postIn.innerHTML = `<p class="mmb-note">?ERROR: MESSAGE NOT FOUND.</p>`; fitPost(); } })
+      .catch(() => { if(my === postReq){ $postIn.innerHTML = `<p class="mmb-note">NO CARRIER. CLOSE AND TRY AGAIN.</p>`; fitPost(); } });
+  }
+  const closePost = () => { if(history.state && history.state.mmPost) history.back();
+    else { history.pushState(null, "", location.pathname + location.search); view(); } };
+  $list.addEventListener("click", e => { const a = e.target.closest("a.mmb-row"); if(!a || e.metaKey || e.ctrlKey) return;
+    e.preventDefault(); history.pushState({ mmPost:true }, "", a.getAttribute("href")); view(); });
+  // OWNER CONTROLS: only the browser that made the post holds its key (localStorage "mm-keys"), so only the poster sees
+  // [ EDIT POST ] / [ DELETE ]. Edits go back to the sysop queue; delete is immediate (photos and comments go too).
+  const ownKey = id => store.get("mm-keys", {})[id];
+  const ownCall = (action, extra) => fetch(API, { method:"POST", headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ action, id:curPost.id, key:ownKey(curPost.id), ...extra }) }).then(r => { if(!r.ok) throw r.status; return r.json(); });
+  function ownDone(msg, keep){
+    const mine = store.get("mm-mine", []).filter(m => m.id !== curPost.id);
+    if(keep) mine.push({ ...keep, id:curPost.id, at:curPost.at, author:curPost.author, photos:curPost.photos || 0 });
+    store.set("mm-mine", mine); live = live.filter(x => x.id !== curPost.id);
+    if(!keep){ const k = store.get("mm-keys", {}); delete k[curPost.id]; store.set("mm-keys", k); }
+    render(); load(); $homeHint.textContent = msg; closePost();
+  }
+  $post.addEventListener("click", e => {
+    if(e.target.closest(".mmb-edit")){
+      const box = $postIn.querySelector(".mmb-text"), own = $postIn.querySelector(".mmb-own"); own.hidden = true;
+      box.outerHTML = `<form class="mmb-eform" novalidate>
+        <label class="mmb-field"><span class="mmb-k">SUBJECT&gt;</span><input name="subject" maxlength="${LIM.subject}" value="${esc(curPost.subject)}"></label>
+        <label class="mmb-field mmb-tall"><span class="mmb-k">MESSAGE&gt;</span><textarea name="body" maxlength="${LIM.body}" rows="7">${esc(curPost.body || "")}</textarea></label>
+        <p class="mmb-hint mmb-ehint">SAVING SENDS YOUR POST BACK TO THE SYSOP FOR APPROVAL.</p>
+        <p class="mmb-actions"><button type="submit" class="mmb-btn">[ SAVE ]</button><button type="button" class="mmb-btn mmb-ecancel">[ CANCEL ]</button></p></form>`;
+      $postIn.querySelector(".mmb-eform textarea").focus({ preventScroll:true }); return fitPost();
+    }
+    if(e.target.closest(".mmb-ecancel")) return openPost(curPost.id);
+    const del = e.target.closest(".mmb-del");
+    if(del){
+      if(!del.dataset.sure){ del.dataset.sure = "1"; del.textContent = "[ REALLY DELETE? Y ]";
+        setTimeout(() => { if(del.isConnected){ delete del.dataset.sure; del.textContent = "[ DELETE ]"; } }, 4000); return; }
+      del.disabled = true; del.textContent = "DELETING...";
+      return ownCall("own-delete").then(() => ownDone("MESSAGE DELETED.")).catch(() => { del.disabled = false; del.textContent = "?ERROR. [ DELETE ]"; });
+    }
+    if(e.target.closest(".mmb-close, .mmb-close2")) return closePost();
+    const ph = e.target.closest(".mmb-photo"); if(ph) openLightbox(+ph.dataset.i);
+  });
+
+  let lb = null, lbAt = 0;
+  function lbShow(){ const n = postShots.length;
+    lb.querySelector(".mm-lb-t").textContent = `ATTACHMENT ${lbAt + 1}/${n}`;
+    lb.querySelector(".mm-lb-img").src = postShots[lbAt];
+    lb.querySelectorAll(".mm-lb-nav").forEach(b => b.hidden = n < 2); }
+  function openLightbox(i){
+    closeLightbox(); lbAt = i;
+    lb = document.createElement("div"); lb.className = "mm-lightbox"; lb.setAttribute("role", "dialog"); lb.setAttribute("aria-modal", "true");
+    lb.innerHTML = `<div class="mm-lb-win"><div class="mm-lb-bar"><span class="mm-lb-t"></span>
+      <span><button type="button" class="mm-lb-btn mm-lb-nav" data-d="-1" aria-label="Previous photo">[&lt;]</button><button type="button" class="mm-lb-btn mm-lb-nav" data-d="1" aria-label="Next photo">[&gt;]</button><button type="button" class="mm-lb-btn mm-lb-x" aria-label="Close photo">[X]</button></span></div>
+      <img class="mm-lb-img" alt=""></div>`;
+    document.body.appendChild(lb); lbShow();
+    lb.addEventListener("click", e => {
+      const nav = e.target.closest(".mm-lb-nav"); if(nav){ lbAt = (lbAt + +nav.dataset.d + postShots.length) % postShots.length; return lbShow(); }
+      if(e.target.closest(".mm-lb-x") || e.target === lb) closeLightbox(); });
+    lb.querySelector(".mm-lb-x").focus({ preventScroll:true });
+  }
+  function closeLightbox(){ if(lb){ lb.remove(); lb = null; } }
+  addEventListener("keydown", e => {
+    if(lb){ if(e.key === "Escape"){ e.stopImmediatePropagation(); closeLightbox(); }
+      else if(e.key === "ArrowRight" || e.key === "ArrowLeft"){ lbAt = (lbAt + (e.key === "ArrowRight" ? 1 : -1) + postShots.length) % postShots.length; lbShow(); }
+      return; }
+    if(!$post.hidden && e.key === "Escape"){ e.stopImmediatePropagation(); closePost(); }
+  }, true);
+
   // ---- send ----
   $form.addEventListener("submit", e => {
     e.preventDefault();
@@ -280,7 +461,8 @@
       .then(({ ok, d }) => {
         if(!ok || !d.ok) throw new Error((d && d.error) || "net");
         const n = new Date(), at = `${n.getFullYear()}-${two(n.getMonth()+1)}-${two(n.getDate())}T${two(n.getHours())}:${two(n.getMinutes())}`;
-        const mine = store.get("mm-mine", []); mine.push({ id:d.id, at, author, subject }); store.set("mm-mine", mine);
+        const mine = store.get("mm-mine", []); mine.push({ id:d.id, at, author, subject, body, photos:shots.length }); store.set("mm-mine", mine);
+        if(d.ownerKey){ const keys = store.get("mm-keys", {}); keys[d.id] = d.ownerKey; store.set("mm-keys", keys); }   // lets this browser edit/delete it
         $subject.value = ""; $body.value = ""; shots.forEach(s => URL.revokeObjectURL(s.url)); shots = []; drawThumbs();
         $homeHint.textContent = "MESSAGE QUEUED. AWAITING SYSOP APPROVAL.";
         render(); toHome();
