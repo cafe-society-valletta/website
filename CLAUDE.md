@@ -20,7 +20,7 @@ shop.html         The Society Collection — categories open inline in place (pr
                   bleeds right); product view = full-bleed swipe photos + info (assets/js/shop.js). Products in
                   assets/js/shop-data.js (PLACEHOLDERS, Shopify-shaped). Plan: Paper/site own the look, Shopify only
                   does bag/checkout + stock. Deep links: shop.html#apparel, shop.html#p/<handle> (e.g. #p/apparel-test-1).
-meetmeatsociety.html  Meet Me at Society — UNLISTED (noindex, not in nav), served at /meetmeatsociety. Background = the beige
+meetme.html       Meet Me at Society — UNLISTED (noindex, not in nav), served at /meetme (_redirects sends the old /meetmeatsociety there). Background = the beige
                   computer (assets/img/p-meetme-computer.webp/.png); .mm-screen sits exactly over its green screen for content.
                   The tube plays assets/video/mm-intro[-desk] (once) then mm-idle[-desk] (loop), .mp4 H.264 or .webm VP9, pre-rendered
                   with the glass curve/mask/shading as drop-ins for the screen rectangle.
@@ -66,7 +66,7 @@ assets/js/meetme.js    Meet Me at Society board on the green screen. Home: [ WRI
                         attachments on posts). Screen content is bent with the same CRT barrel as the clips: SVG
                         feDisplacementMap with assets/img/mm-warp-{phone,desk}.png (sRGB). WebKit (Safari, all iPhone browsers) puts the
                         filter origin at the monitor corner, so meetme.js offsets the map by the screen offset there (found with
-                        /meetmeatsociety?calib). mm-warp2-*.png = abandoned linearRGB attempt, unused.
+                        /meetme?calib). mm-warp2-*.png = abandoned linearRGB attempt, unused.
 assets/img/            Photos. Files prefixed `p-` were pulled directly from the Paper
                         design file's asset URLs; the rest (gallery-*.jpg) are pre-existing
                         site photos used for content the Paper mockups didn't specify
