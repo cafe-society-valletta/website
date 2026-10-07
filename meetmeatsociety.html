@@ -80,7 +80,11 @@
     document.documentElement.classList.add("mm-boot");
     document.addEventListener("mm:booted", play, { once:true });
     setTimeout(play, 5000);   // safety net if the board script never loads
-    addEventListener("keydown", e => { if(e.key.length === 1 || e.key === "Enter") toIdle(); });   // also cancels the desktop boot prompt   // start typing = skip the intro
+    addEventListener("keydown", e => { if(e.key.length === 1 || e.key === "Enter") toIdle(); });
+    // click or tap on the monitor during the intro = skip straight to the inbox (Chef); that click does nothing else
+    box.addEventListener("pointerdown", e => { if(done) return; toIdle();
+      const eat = ev => { ev.preventDefault(); ev.stopPropagation(); }; box.addEventListener("click", eat, { capture:true, once:true });
+      setTimeout(() => box.removeEventListener("click", eat, true), 600); }, true);   // also cancels the desktop boot prompt   // start typing = skip the intro
   })();
 </script>
 <script src="assets/js/meetme.js" defer></script>
