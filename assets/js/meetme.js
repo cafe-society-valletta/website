@@ -17,6 +17,29 @@
   const screen = box && box.querySelector(".mm-screen"), glass = screen && screen.parentNode;   // glass = the filtered box
   if(!screen) return;
 
+  // Safari/WebKit (every iPhone browser): a finger-scrollable box gets its own layer that the CRT filter can't follow,
+  // which is what threw the bent text out of place and cropped it. So there the screen is overflow:hidden (no layer)
+  // and these handlers scroll it by hand (drag with a little coast, plus the mouse wheel).
+  if(/AppleWebKit/.test(navigator.userAgent) && !/Chrome\/|Chromium|Edg\/|Firefox|OPR\//.test(navigator.userAgent) || /[?&]wkscroll\b/.test(location.search)){
+    document.documentElement.classList.add("mm-wk");
+    let y0 = 0, top0 = 0, last = 0, lastT = 0, v = 0, coast = 0, moved = false;
+    const on = () => !screen.classList.contains("full");
+    screen.addEventListener("touchstart", e => { if(!on() || e.touches.length > 1) return; cancelAnimationFrame(coast);
+      y0 = last = e.touches[0].clientY; top0 = screen.scrollTop; lastT = performance.now(); v = 0; moved = false; }, { passive:true });
+    screen.addEventListener("touchmove", e => { if(!on() || e.touches.length > 1) return; const y = e.touches[0].clientY, t = performance.now();
+      if(!moved && Math.abs(y - y0) < 6) return; moved = true;
+      v = (last - y) / Math.max(1, t - lastT); last = y; lastT = t;
+      const max = screen.scrollHeight - screen.clientHeight, next = top0 + (y0 - y);
+      if(max > 0 && (next > 0 || screen.scrollTop > 0) && (next < max || screen.scrollTop < max)) e.preventDefault();   // at an end, let the page move
+      screen.scrollTop = next; }, { passive:false });
+    screen.addEventListener("touchend", () => { if(!on() || !moved) return; let prev = performance.now();
+      const step = t => { const dt = t - prev; prev = t; v *= Math.pow(.995, dt); if(Math.abs(v) < .02) return;
+        const before = screen.scrollTop; screen.scrollTop += v * dt; if(screen.scrollTop === before) return; coast = requestAnimationFrame(step); };
+      coast = requestAnimationFrame(step); }, { passive:true });
+    screen.addEventListener("wheel", e => { if(!on()) return; const before = screen.scrollTop; screen.scrollTop += e.deltaY;
+      if(screen.scrollTop !== before) e.preventDefault(); }, { passive:false });
+  }
+
   const store = { get(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } },
                   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} } };
   const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
