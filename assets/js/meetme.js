@@ -176,6 +176,24 @@
     screen.addEventListener("pointerleave", () => { ptr.hidden = true; last = null; });
   }
 
+  // ---- taps on a touch screen land where the content really is: the CRT bend moves what you SEE away from where the
+  // browser thinks it is (up to ~20px near the edges), so a tap on a drawn button could miss it. A tap at a seen point v
+  // shows the content from v + d(v) (exactly what the filter samples), so the tap is re-aimed there. (Mouse users get the
+  // 8-bit pointer, which is already drawn over what a click hits.)
+  let lastPtr = "mouse";
+  glass.addEventListener("pointerdown", e => { lastPtr = e.pointerType; }, true);
+  glass.addEventListener("click", e => {
+    const m = warpMap; if(!e.isTrusted || !m || lastPtr === "mouse" || screen.classList.contains("full")) return;
+    const r = glass.getBoundingClientRect(), w = r.width, h = r.height, x = e.clientX - r.left, y = e.clientY - r.top;
+    const mx = Math.min(m.w - 1, Math.max(0, Math.round(x / w * m.w - .5))), my = Math.min(m.h - 1, Math.max(0, Math.round(y / h * m.h - .5))), k = (my * m.w + mx) * 4;
+    const S = m.range * w, ux = e.clientX + S * (m.px[k] / 255 - .5), uy = e.clientY + S * (m.px[k + 1] / 255 - .5);
+    const hit = document.elementFromPoint(ux, uy), tgt = hit && hit.closest("a, button, input, textarea, select, label, [role=button]");
+    const was = e.target.closest && e.target.closest("a, button, input, textarea, select, label, [role=button]");
+    if(!tgt || tgt === was || !glass.contains(tgt)) return;
+    e.preventDefault(); e.stopPropagation();
+    if(/^(INPUT|TEXTAREA|SELECT)$/.test(tgt.tagName) && tgt.type !== "file") tgt.focus(); else tgt.click();
+  }, true);
+
   // ---- [FULLSCREEN]: the screen zooms out of the monitor into a flat, full-window terminal (no casing, menu or footer,
   // no CRT warp) — the SYSOP-console look. [<- GO BACK] (or Esc on the home screen) zooms it back into the monitor.
   // The screen element is moved to <body> while full (the monitors are transformed, which would trap position:fixed).
@@ -254,8 +272,8 @@
         // nudge the filter so WebKit redraws the whole glass (once per frame at most).
         if(/AppleWebKit/.test(navigator.userAgent) && !/Chrome\/|Chromium|Edg\/|Firefox|OPR\//.test(navigator.userAgent)){
           let queued = 0, flip = false;
-          const redraw = () => { if(queued) return; queued = requestAnimationFrame(() => { queued = 0; flip = !flip;
-            dm.setAttribute("scale", (RANGE * glass.clientWidth + (flip ? .01 : 0)).toFixed(2)); }); };
+          const redraw = () => { if(queued) return; queued = requestAnimationFrame(() => { queued = 0; flip = !flip;   // a changed CSS filter value repaints the whole layer
+            glass.style.filter = flip ? warp + " brightness(1.0001)" : warp; }); };
           new MutationObserver(redraw).observe(glass, { subtree:true, childList:true, characterData:true, attributes:true });
           for(const ev of ["scroll", "animationend", "animationstart", "transitionend", "transitionrun", "pointerover", "pointerout", "focusin", "focusout", "input"])
             glass.addEventListener(ev, redraw, { capture:true, passive:true });
