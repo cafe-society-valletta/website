@@ -55,6 +55,16 @@ export default async (req, context) => {
   };
   const q = Object.fromEntries(url.searchParams);
 
+  // The example post used to be hard-coded in the page; it now lives on the board like any other post, so the sysop can
+  // delete it from the console. Seeded once (flag "seeded"); deleting it later is permanent.
+  if (!(await store.get("seeded"))) {
+    const live = await get("live");
+    if (!live.some(p => p.id === "jake-photo-safari"))
+      live.push({ id: "jake-photo-safari", at: "2026-01-16T00:12", author: "Jake Page", subject: "Photo safari Hastings Garden Sunday B4 LSC?", body: "", photos: 0 });
+    live.sort((x, y) => y.at.localeCompare(x.at));
+    await store.setJSON("live", live); await store.set("seeded", "1");
+  }
+
   if (req.method === "GET") {
     if (q.photo) {
       const m = /^(p[a-z0-9]+)-(\d)$/.exec(q.photo); if (!m) return out(404, { error: "not-found" });
