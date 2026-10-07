@@ -1103,16 +1103,21 @@ body.mm-body{ background:var(--black); }
 .mm-stage{ position:absolute; inset:0; overflow:hidden; }
 .mm-screen{ position:absolute; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
 .mm-screen::-webkit-scrollbar{ display:none; }
+/* .mm-glass = the green screen's box; it carries the CRT filter and has its own (2D) transform, so every browser
+   measures the filter from the glass's own corner (Safari otherwise used the monitor's corner, and a scrolling
+   .mm-screen changed it again). .mm-screen inside it is the scroll area. */
+.mm-glass{ position:absolute; transform:translate(0, 0); }
+.mm-glass > .mm-screen{ inset:0; }
 .mm-phone{ position:absolute; left:50%; top:0; width:var(--mmw); aspect-ratio:1202 / 2622; transform:translateX(-50%); }
 .mm-phone img{ display:block; width:100%; height:100%; }
-.mm-phone .mm-screen{ left:11.98%; top:14.99%; width:77.62%; height:70.82%; }
+.mm-phone .mm-glass{ left:11.98%; top:14.99%; width:77.62%; height:70.82%; }
 .mm-tube{ position:absolute; left:11.98%; top:14.99%; width:77.62%; height:70.82%; pointer-events:none; }
 .mm-computer .mm-tube{ left:21.25%; top:11.448%; width:54.25%; height:44.31%; }   /* desktop glass, 868×658 of the 1600×1485 image */
-.mm-computer .mm-screen{ z-index:1; }
+.mm-computer .mm-glass{ z-index:1; }
 .mm-v{ position:absolute; inset:0; width:100%; height:100%; object-fit:fill; display:block; }
 .mm-v-intro{ transition:opacity .15s linear; }
 .mm-v-intro.done{ opacity:0; }
-.mm-phone .mm-screen{ z-index:1; }
+.mm-phone .mm-glass{ z-index:1; }
 /* <900px the menu bar and footer keep the 402px Paper layout, scaled to the screen width (--mmk = width / 402, set by a tiny
    script on the page) */
 @media (max-width:899.98px){
@@ -1122,7 +1127,7 @@ body.mm-body{ background:var(--black); }
 }
 .mm-computer{ display:none; position:absolute; left:50%; top:0; transform:translate(-48.78%, -0.52%); }   /* Chef's Paper D09: image 1800×1671 at (−158, −9) in 1440×900 */
 .mm-computer img{ display:block; width:100%; height:auto; }
-.mm-computer .mm-screen{ left:21.25%; top:11.448%; width:54.25%; height:44.31%; }   /* = the glass box the clips and the CRT warp map are made for */
+.mm-computer .mm-glass{ left:21.25%; top:11.448%; width:54.25%; height:44.31%; }   /* = the glass box the clips and the CRT warp map are made for */
 @media (min-width:900px){
   .page.v2.mm{ height:calc(100vh + 120px); }   /* desktop: one screen of monitor, then 120px more (keyboard + footer) on scroll */
   .mm-phone{ display:none; }
