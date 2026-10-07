@@ -14,7 +14,7 @@
   const SEED = [];   // the example post now lives on the server board (deletable from the SYSOP console)
   const LIM = { author:24, subject:44, body:5000, photos:4, photoBytes:1000 * 1024, comment:1000 };
   const box = document.querySelector(matchMedia("(max-width: 899.98px)").matches ? ".mm-phone" : ".mm-computer");
-  const screen = box && box.querySelector(".mm-screen"), glass = screen && screen.parentNode;   // glass = the filtered box
+  const screen = box && box.querySelector(".mm-screen"), glass = screen && screen.parentNode, slot = glass && glass.querySelector(".mm-slot");   // glass = the filtered layer (whole monitor), slot = the green glass rect
   if(!screen) return;
 
   const store = { get(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } },
@@ -201,7 +201,7 @@
   glass.addEventListener("pointerdown", e => { lastPtr = e.pointerType; }, true);
   glass.addEventListener("click", e => {
     const m = warpMap; if(!e.isTrusted || !m || screen.classList.contains("full")) return;
-    const r = glass.getBoundingClientRect(), w = r.width, h = r.height, x = e.clientX - r.left, y = e.clientY - r.top;
+    const r = slot.getBoundingClientRect(), w = r.width, h = r.height, x = e.clientX - r.left, y = e.clientY - r.top;
     const mx = Math.min(m.w - 1, Math.max(0, Math.round(x / w * m.w - .5))), my = Math.min(m.h - 1, Math.max(0, Math.round(y / h * m.h - .5))), k = (my * m.w + mx) * 4;
     const S = m.range * w, ux = e.clientX + S * (m.px[k] / 255 - .5), uy = e.clientY + S * (m.px[k + 1] / 255 - .5);
     const hit = document.elementFromPoint(ux, uy), tgt = hit && hit.closest("a, button, input, textarea, select, label, [role=button]");
@@ -221,7 +221,7 @@
   const DUR = 650, veil = document.createElement("div"); veil.className = "mm-veil"; document.body.appendChild(veil);
   let busy = false;
   const zoomKeys = () => {   // box keyframes: [flat, zoomed in on the glass]
-    const g = glass.getBoundingClientRect(), br = box.getBoundingClientRect(), vw = innerWidth, vh = innerHeight;
+    const g = slot.getBoundingClientRect(), br = box.getBoundingClientRect(), vw = innerWidth, vh = innerHeight;
     const k = Math.max(vw / g.width, vh / g.height) * 1.3, ox = g.left + g.width / 2, oy = g.top + g.height / 2;
     const origin = `${ox - br.left}px ${oy - br.top}px`;
     const t = new DOMMatrix(getComputedStyle(box).transform);   // the box's own CSS translate also gets scaled by k: take it back out
@@ -249,7 +249,7 @@
     } else {
       const a = screen.getBoundingClientRect();
       box.getAnimations().forEach(x => x.cancel());   // measure the monitor un-zoomed…
-      const keys = zoomKeys(), g = glass.getBoundingClientRect();
+      const keys = zoomKeys(), g = slot.getBoundingClientRect();
       if(box.animate) box.animate([keys[1], keys[0]], { duration:DUR, easing:"cubic-bezier(.45,0,.55,1)" });   // …then play the zoom backwards
       screen.classList.remove("full"); screen.classList.add("leaving"); document.documentElement.classList.remove("mm-full");
       Object.assign(screen.style, { left:g.left + "px", top:g.top + "px", width:g.width + "px", height:g.height + "px" });
@@ -489,12 +489,12 @@
     const twin = svg.querySelector("filter").cloneNode(true); twin.id = id + "-b"; svg.appendChild(twin);   // identical copy: Safari redraw switches between the two
     document.body.appendChild(svg);
     const fs = [...svg.querySelectorAll("filter")], img = svg.querySelector("feImage");
-    const size = () => { const w = glass.clientWidth, h = glass.clientHeight; if(!w || !h) return;
-      for(const f of fs){ for(const el of [f, f.querySelector("feImage")]) for(const [k, v] of Object.entries({ x:0, y:0, width:w, height:h })) el.setAttribute(k, v);
+    const size = () => { const w = slot.offsetWidth, h = slot.offsetHeight, x = slot.offsetLeft, y = slot.offsetTop; if(!w || !h) return;
+      for(const f of fs){ for(const el of [f, f.querySelector("feImage")]) for(const [k, v] of Object.entries({ x, y, width:w, height:h })) el.setAttribute(k, v);
         f.querySelector("feDisplacementMap").setAttribute("scale", (RANGE * w).toFixed(1)); } };
     // the page preloads the map (<link rel=preload>), so this is normally instant
     fetch(url).then(r => r.blob()).then(b => new Promise(ok => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); }))
-      .then(data => { fs.forEach(f => f.querySelector("feImage").setAttribute("href", data)); size(); warp = `url(#${id})`; glass.style.filter = warp; new ResizeObserver(size).observe(glass);
+      .then(data => { fs.forEach(f => f.querySelector("feImage").setAttribute("href", data)); size(); warp = `url(#${id})`; glass.style.filter = warp; new ResizeObserver(size).observe(slot);
         const im = new Image(); im.onload = () => { const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight;
           const g = c.getContext("2d"); g.drawImage(im, 0, 0); warpMap = { w:c.width, h:c.height, px:g.getImageData(0, 0, c.width, c.height).data, range:RANGE }; };
         im.src = data;
@@ -502,9 +502,6 @@
         // the bend moves pixels further than that patch, so bits of text went missing. After any change on the screen,
         // nudge the filter so WebKit redraws the whole glass (once per frame at most).
         if(/AppleWebKit/.test(navigator.userAgent) && !/Chrome\/|Chromium|Edg\/|Firefox|OPR\//.test(navigator.userAgent)){
-          // WebKit measures the filter from the nearest compositing layer; on some screens (NEW POST on iPhone) the glass
-          // stopped being one and the bend shifted by the glass's offset in the monitor. Force it to be its own layer.
-          glass.style.transform = "translate3d(0,0,0)"; glass.style.willChange = "transform";
           let queued = 0, flip = false;
           const redraw = () => { if(queued) return; queued = requestAnimationFrame(() => { queued = 0; flip = !flip;   // switching to the twin filter repaints the whole layer
             glass.style.filter = flip ? `url(#${id}-b)` : warp; }); };   // (adding a CSS filter function moved Safari's origin again)
