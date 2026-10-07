@@ -869,13 +869,18 @@ body.gv-dim .gal-view{ background:rgba(10,10,10,.35); }
 .gv-photo .gp-x{ top:16px; right:16px; width:40px; height:40px; }
 .gv-photo .gp-prev, .gv-photo .gp-next{ top:50%; width:48px; height:72px; margin-top:-36px; }
 .gv-photo .gp-prev{ left:16px; } .gv-photo .gp-next{ right:16px; }
-.gv-photo .gp-count{ position:fixed; left:0; right:0; bottom:22px; text-align:center; color:rgba(255,255,255,.8); font-size:11px; font-weight:700; letter-spacing:.2em; transition:opacity .15s; }
+.gv-photo .gp-count{ pointer-events:none; position:fixed; left:0; right:0; bottom:22px; text-align:center; color:rgba(255,255,255,.8); font-size:11px; font-weight:700; letter-spacing:.2em; transition:opacity .15s; }
 .gv-photo .gp-dl{ position:fixed; right:24px; bottom:14px; display:flex; align-items:center; gap:8px; height:32px; padding:0 14px; border:1px solid rgba(255,255,255,.55);
   background:rgba(8,8,8,.6); color:#fff; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; text-decoration:none; transition:opacity .15s, background-color .15s; }
 .gv-photo .gp-dl:hover{ background:rgba(255,255,255,.14); }
 .gv-photo .gp-dl[hidden]{ display:none; }
 .gv-photo .gp-credit{ position:fixed; left:24px; bottom:22px; color:rgba(255,255,255,.8); font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; transition:opacity .15s; }
 .gv-photo .gp-credit[hidden]{ display:none; }
+/* Barney Book photo pop-up: same viewer, with its own dark backdrop (the About gallery dims its own view instead) */
+.gv-photo.bb-lb{ background:rgba(10,10,10,0); transition:background-color .35s; }
+.gv-photo.bb-lb.dim{ background:rgba(10,10,10,.9); }
+.gv-photo.bb-lb.single .gp-prev, .gv-photo.bb-lb.single .gp-next{ display:none; }
+body.bb-lb-on{ overflow:hidden; }
 .gv-photo.flying button, .gv-photo.flying .gp-count, .gv-photo.flying .gp-dl, .gv-photo.flying .gp-credit{ opacity:0; }
 @media (max-width:899px){
   .gv-photo .gp-prev, .gv-photo .gp-next{ top:auto; bottom:6px; margin-top:0; height:48px; }
