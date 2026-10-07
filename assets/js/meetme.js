@@ -168,7 +168,7 @@
     // Crossing the glass edge: within BAND px of the edge both cursors fade — the 8-bit one inside, a drawn copy of the normal
     // arrow outside — to nothing exactly on the edge (the real system cursor is hidden across the band, and comes back once
     // the drawn arrow is fully opaque, BAND px out).
-    const BAND = 50, html = document.documentElement;
+    const BAND = 75, html = document.documentElement;
     const sys = document.createElement("i"); sys.className = "mm-sysptr"; sys.setAttribute("aria-hidden", "true"); sys.hidden = true; document.body.appendChild(sys);
     const edgeDist = (px, py, w, h) => {   // signed distance (px) to the glass edge: + inside, − outside
       if(!EDGE) return (px >= 0 && py >= 0 && px <= w && py <= h) ? Math.min(px, py, w - px, h - py) : -1e9;
