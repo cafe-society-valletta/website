@@ -257,11 +257,12 @@
   let boot = null;
   if(document.documentElement.classList.contains("mm-boot") && !document.documentElement.classList.contains("mm-ready")){
     boot = document.createElement("div"); boot.className = "mmb mmb-boot"; boot.setAttribute("aria-hidden", "true");
-    boot.innerHTML = `<p><span class="mmb-bt">C:\\&gt;</span><span class="mmb-caret"></span></p>`;
+    boot.innerHTML = `<p><span class="mmb-bt">C:\\&gt;</span></p>`;   // no cursor (Chef)
     screen.appendChild(boot);
     const bt = boot.querySelector(".mmb-bt"), word = "stayhuman.exe", wait = ms => new Promise(ok => setTimeout(ok, ms));
     (async () => {
-      await wait(500); if(!boot) return; boot.classList.add("on");
+      await wait(500); for(let n = 0; n < 15 && !warp; n++) await wait(100);   // let the CRT curve arrive first (max 1.5s more)
+      if(!boot) return; boot.classList.add("on");
       await wait(450);
       for(const ch of word){ if(!boot) return; bt.textContent += ch; await wait(45 + Math.random() * 50); }   // uneven keystrokes = old-machine lag
       await wait(600); if(!boot) return;
