@@ -518,7 +518,7 @@
   let boot = null;
   if(document.documentElement.classList.contains("mm-boot") && !document.documentElement.classList.contains("mm-ready")){
     boot = document.createElement("div"); boot.className = "mmb mmb-boot"; boot.setAttribute("aria-hidden", "true");
-    boot.innerHTML = `<p><span class="mmb-bt">C:\\&gt;</span></p>`;   // no cursor (Chef)
+    boot.innerHTML = `<p><span class="mmb-bt">C:\\&gt;</span>_</p>`;   // text-style "_" cursor trails the typing (Chef)
     screen.appendChild(boot);
     const bt = boot.querySelector(".mmb-bt"), word = "stayhuman.exe", wait = ms => new Promise(ok => setTimeout(ok, ms));
     (async () => {
