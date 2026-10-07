@@ -56,7 +56,10 @@ assets/js/meetme.js    Meet Me at Society board on the green screen. Home: [ WRI
                         (max 4; shrunk in the browser to a JPEG <= 1 MB, long side <= 1600 px). VT323 font.
                         Posts are shared via netlify/functions/meetme.mjs (Netlify Blobs; photos stored as img/<id>-<n>); new posts
                         wait in a queue until approved on mmadmin.html ("SYSOP CONSOLE", unlisted, key = Netlify env MEETME_ADMIN_KEY;
-                        shows body + photos; reject/delete also deletes the photos). Intro: boot prompt typed live, wipe, logo clip.
+                        shows body + photos; reject/delete also deletes the photos). #p/<id> = POST WINDOW over the inbox (email
+                        layout FROM/SENT/SUBJ, body, photos in real colour; click a photo = lightbox outside the bent glass), then a
+                        reddit-style COMMENTS thread (replies nest; every comment vetted in the SYSOP CONSOLE). The poster's browser
+                        keeps an owner key (localStorage "mm-keys") → [ EDIT POST ] (back to the queue) / [ DELETE ] (immediate). Intro: boot prompt typed live, wipe, logo clip.
                         Mouse over the screen = 8-bit green pointer drawn inside the screen (bent by the CRT filter). [FULLSCREEN] =
                         flat full-window terminal (screen moved to <body>), <- GO BACK returns.
                         All screen copy is written as the 8-bit terminal would print it (Chef's rule; only exception: photo

@@ -38,7 +38,9 @@
   <form id="login"><p><label>ENTER SYSOP KEY&gt; <input id="key" type="password" autocomplete="current-password"></label> <button>[LOGIN]</button></p><p id="msg" class="muted"></p></form>
   <section id="lists" hidden>
     <h2>QUEUE: <span id="np">0</span> MESSAGE(S) AWAITING APPROVAL</h2><ol id="pending"></ol>
+    <h2>COMMENT QUEUE: <span id="nc">0</span> AWAITING APPROVAL</h2><ol id="cpending"></ol>
     <h2>BOARD: <span id="nl">0</span> MESSAGE(S) LIVE</h2><ol id="live"></ol>
+    <h2>LATEST LIVE COMMENTS</h2><ol id="comments"></ol>
     <p class="muted">AUTO-REFRESH EVERY 20 SEC. <button type="button" id="out" class="no">[LOGOFF]</button></p>
   </section>
 </main>
@@ -51,7 +53,7 @@
   const pics = {};   // photo id -> object URL (photos need the key header, so they are fetched, not linked)
   const photo = id => { if(pics[id]) return Promise.resolve(pics[id]);
     return fetch(API + "?photo=" + encodeURIComponent(id), { headers:{ "x-mm-key":key } }).then(r => r.ok ? r.blob() : null).then(b => b ? (pics[id] = URL.createObjectURL(b)) : ""); };
-  const row = (p, btns) => `<li><span>${esc(when(p.at))}</span><span>&lt;${esc(p.author)}&gt;</span><span>${btns}</span><span class="s">SUBJ: ${esc(p.subject)}</span>`
+  const row = (p, btns) => `<li><span>${esc(when(p.at))}</span><span>&lt;${esc(p.author)}&gt;</span><span>${btns}</span><span class="s">SUBJ: ${esc(p.subject)}${p.edited ? " (EDITED BY POSTER)" : ""}</span>`
     + (p.body ? `<p class="b">${esc(p.body)}</p>` : "")
     + (p.photos ? `<span class="ph">${Array.from({ length:p.photos }, (_, n) => `<a target="_blank" data-ph="${esc(p.id)}-${n}"><img alt="PHOTO ${n+1}"></a>`).join("")}</span>` : "")
     + `</li>`;
@@ -61,6 +63,10 @@
     $("np").textContent = d.pending.length; $("nl").textContent = d.live.length;
     $("pending").innerHTML = d.pending.map(p => row(p, `<button data-a="approve" data-id="${esc(p.id)}">[APPROVE]</button><button class="no" data-a="reject" data-id="${esc(p.id)}">[REJECT]</button>`)).join("") || "<li class='muted'>QUEUE EMPTY.</li>";
     $("live").innerHTML = d.live.map(p => row(p, `<button class="no" data-a="delete" data-id="${esc(p.id)}">[DELETE]</button>`)).join("") || "<li class='muted'>NO MESSAGES.</li>";
+    const crow = (c, btns) => `<li><span>${esc(when(c.at))}</span><span>&lt;${esc(c.author || "[DELETED]")}&gt;</span><span>${btns}</span><span class="s">ON: ${esc(c.subject || "?")}${c.parent ? " (REPLY)" : ""}</span>${c.body ? `<p class="b">${esc(c.body)}</p>` : ""}</li>`;
+    $("nc").textContent = (d.cpending || []).length;
+    $("cpending").innerHTML = (d.cpending || []).map(c => crow(c, `<button data-a="capprove" data-id="${esc(c.id)}">[APPROVE]</button><button class="no" data-a="creject" data-id="${esc(c.id)}">[REJECT]</button>`)).join("") || "<li class='muted'>QUEUE EMPTY.</li>";
+    $("comments").innerHTML = (d.comments || []).filter(c => !c.deleted).map(c => crow(c, `<button class="no" data-a="cdelete" data-id="${esc(c.id)}" data-post="${esc(c.post)}">[DELETE]</button>`)).join("") || "<li class='muted'>NO COMMENTS.</li>";
     fillPhotos();
   }
   function fail(r){ if(r.status === 401){ key = ""; try{ sessionStorage.removeItem("mm-key"); }catch(e){} $("login").hidden = false; $("lists").hidden = true; $("msg").textContent = "ACCESS DENIED. (SYSOP KEY WRONG, OR MEETME_ADMIN_KEY NOT SET IN NETLIFY.)"; } else $("msg").textContent = "NO CARRIER. TRY AGAIN."; }
@@ -69,13 +75,14 @@
   }
   $("login").addEventListener("submit", e => { e.preventDefault(); key = $("key").value.trim(); try{ sessionStorage.setItem("mm-key", key); }catch(e){} load(); });
   document.addEventListener("click", e => { const b = e.target.closest("button[data-a]"); if(!b) return;
-    if(b.dataset.a !== "approve" && !b.dataset.sure){   // terminal-style confirm, no browser pop-up
-      b.dataset.sure = "1"; b.textContent = b.dataset.a === "delete" ? "[REALLY DELETE? Y]" : "[REALLY REJECT? Y]";
-      setTimeout(() => { if(b.isConnected){ delete b.dataset.sure; b.textContent = b.dataset.a === "delete" ? "[DELETE]" : "[REJECT]"; } }, 4000);
+    const del = /delete$/.test(b.dataset.a);
+    if(!/approve$/.test(b.dataset.a) && !b.dataset.sure){   // terminal-style confirm, no browser pop-up
+      b.dataset.sure = "1"; b.textContent = del ? "[REALLY DELETE? Y]" : "[REALLY REJECT? Y]";
+      setTimeout(() => { if(b.isConnected){ delete b.dataset.sure; b.textContent = del ? "[DELETE]" : "[REJECT]"; } }, 4000);
       return; }
     b.disabled = true;
-    fetch(API, { method:"POST", headers:{ "Content-Type":"application/json", "x-mm-key":key }, body:JSON.stringify({ action:b.dataset.a, id:b.dataset.id }) })
-      .then(r => r.ok ? r.json().then(show) : fail(r)).catch(() => fail({}));
+    fetch(API, { method:"POST", headers:{ "Content-Type":"application/json", "x-mm-key":key }, body:JSON.stringify({ action:b.dataset.a, id:b.dataset.id, post:b.dataset.post }) })
+      .then(r => r.ok ? load() : fail(r)).catch(() => fail({}));
   });
   $("out").addEventListener("click", () => { key = ""; try{ sessionStorage.removeItem("mm-key"); }catch(e){} location.reload(); });
   load(); setInterval(() => { if(!document.hidden) load(); }, 20e3);
