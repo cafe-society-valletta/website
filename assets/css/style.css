@@ -1177,9 +1177,9 @@ html.mm-full .mm-bar, html.mm-full .site-footer{ visibility:hidden; }
 .mm-screen.full .mmb{ position:relative; max-width:880px; margin:0 auto; padding:64px 16px 64px; font-size:20px; }
 .mmb-back{ position:absolute; top:18px; left:16px; font-size:.85em; }
 .mm-screen .mmb-logo{ display:none; }
-.mm-screen.full .mmb-logo{ display:block; position:absolute; top:16px; right:16px; width:132px; height:auto; filter:drop-shadow(0 0 .12em rgba(110,255,110,.45)); }   /* fullscreen only (Chef) */
-.mm-screen.full .mmb{ padding-top:124px; }
-@media (max-width:600px){ .mm-screen.full .mmb{ font-size:17px; padding-top:84px; } .mm-screen.full .mmb-logo{ width:86px; top:12px; } }
+.mm-screen.full .mmb-logo{ display:block; position:absolute; top:45px; right:67px; width:174px; height:107px; filter:drop-shadow(0 0 .12em rgba(110,255,110,.45)); }   /* fullscreen only; placed by Chef on Paper (3Z6-0): beside [ WRITE A POST ] */
+.mm-screen.full .mmb{ padding-top:64px; }
+@media (max-width:600px){ .mm-screen.full .mmb{ font-size:17px; padding-top:56px; } .mm-screen.full .mmb-logo{ width:112px; height:69px; top:45px; right:26px; }   /* equal space above (to the top) and below (to the rule) */ }
 .mmb-caret{ display:inline-block; width:.6em; height:1em; margin-left:.15em; transform:translateY(.15em); background:currentColor; box-shadow:0 0 .2em rgba(90,255,90,.4); animation:mmb-blink 1s steps(1) infinite; }
 @keyframes mmb-blink{ 50%{ opacity:0; } }
 .mmb-hp{ position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
@@ -1214,12 +1214,11 @@ html.mm-full .mm-bar, html.mm-full .site-footer{ visibility:hidden; }
 .mmb-row{ display:grid; grid-template-columns:4.4em 3em 7.5em 1fr; gap:1.2em; padding:.25em 0; color:inherit; text-decoration:none; }
 .mmb-head{ padding-top:.3em; }
 a.mmb-row:hover, a.mmb-row:focus-visible{ background:rgba(125,255,125,.16); outline:none; }
-@container (max-width:420px){   /* phone screen: date · time · author on one line, subject under it */
+@container (max-width:420px){   /* phone screen: four narrow columns; author and subject wrap onto extra lines (Chef) */
   .mmb{ font-size:max(13px, 4.2cqw); padding:9cqw 12cqw 16cqw; }
   .mmb-title{ font-size:1.35em; letter-spacing:0; }
-  .mmb-row{ grid-template-columns:auto auto 1fr; gap:0 .8em; padding:.4em 0; }
-  .mmb-row > span:last-child{ grid-column:1 / -1; }
-  .mmb-head > span:last-child{ display:none; }
+  .mmb-row{ grid-template-columns:auto auto minmax(0, .8fr) minmax(0, 1.2fr); gap:0 .7em; padding:.35em 0; align-items:start; }
+  .mmb-row > span{ overflow-wrap:anywhere; }
   .mmb-field{ flex-wrap:wrap; }
   .mmb-k{ flex-basis:100%; }
   .mmb-thumbs{ margin-left:0; }
