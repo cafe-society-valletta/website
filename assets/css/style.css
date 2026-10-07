@@ -269,10 +269,10 @@ button{ font-family:inherit; }
 .site-bar .tab{ align-self:stretch; padding:0 8px; display:flex; align-items:center; justify-content:center; border-radius:0 0 6px 6px; --tab-bg:var(--white); background:none; position:relative; isolation:isolate; overflow:hidden; color:var(--black); }
 .site-bar .tab:hover{ opacity:1; }
 /* the tab's background is its own layer: it slides down from the top of the screen when a page opens, and back up when you
-   leave for another page (main.js adds html.tab-leaving and waits for it) — Chef */
+   leave for another page (main.js adds html.tab-leaving; the page change is never held up for it) — Chef */
 .site-bar .tab::before{ content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit; background:var(--tab-bg);
-  animation:tab-drop .55s cubic-bezier(.22,.9,.3,1) .05s both; }
-html.tab-leaving .site-bar .tab::before{ animation:tab-lift .28s cubic-bezier(.55,0,.8,.35) both; }
+  animation:tab-drop .3s cubic-bezier(.22,.9,.3,1) both; }
+html.tab-leaving .site-bar .tab::before{ animation:tab-lift .16s cubic-bezier(.55,0,.8,.35) both; }
 @keyframes tab-drop{ from{ transform:translateY(-101%); } to{ transform:none; } }
 @keyframes tab-lift{ from{ transform:none; } to{ transform:translateY(-101%); } }
 @media (prefers-reduced-motion:reduce){ .site-bar .tab::before, html.tab-leaving .site-bar .tab::before{ animation:none; } }
