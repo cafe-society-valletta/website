@@ -16,7 +16,7 @@
   ];
   const LIM = { author:24, subject:44, body:5000, photos:4, photoBytes:1000 * 1024 };
   const box = document.querySelector(matchMedia("(max-width: 899.98px)").matches ? ".mm-phone" : ".mm-computer");
-  const screen = box && box.querySelector(".mm-screen");
+  const screen = box && box.querySelector(".mm-screen"), glass = screen && screen.parentNode;   // glass = the filtered box
   if(!screen) return;
 
   const store = { get(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } },
@@ -184,7 +184,6 @@
     if(on){ home = [screen.parentNode, screen.nextSibling]; document.body.appendChild(screen); }
     else home[0].insertBefore(screen, home[1]);
     screen.classList.toggle("full", on); document.documentElement.classList.toggle("mm-full", on);
-    screen.style.filter = on ? "none" : warp;
     $(".mmb-fs").hidden = on; $(".mmb-back").hidden = !on;
     const b = screen.getBoundingClientRect();
     if(screen.animate) screen.animate([
@@ -239,17 +238,12 @@
       <feImage preserveAspectRatio="none" result="map"/><feDisplacementMap in="SourceGraphic" in2="map" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation="0.35"/></filter>`;
     document.body.appendChild(svg);
     const f = svg.querySelector("filter"), img = svg.querySelector("feImage"), dm = svg.querySelector("feDisplacementMap");
-    // Safari / every iPhone browser (WebKit) puts the filter's user space at the monitor's corner, not the screen's, so
-    // the map and filter region must be moved by the screen's offset inside the monitor (measured with ?calib, Chef's
-    // iPhone: the whole bend was shifted by exactly that offset and the right-hand strip was cut off).
-    const webkit = /AppleWebKit/.test(navigator.userAgent) && !/Chrome\/|Chromium|Edg\/|Firefox|OPR\//.test(navigator.userAgent);
-    const size = () => { const w = screen.clientWidth, h = screen.clientHeight; if(!w || !h) return;
-      const x = webkit && !screen.classList.contains("full") ? screen.offsetLeft : 0, y = webkit && !screen.classList.contains("full") ? screen.offsetTop : 0;
-      for(const [el, a] of [[f, { x, y, width:w, height:h }], [img, { x, y, width:w, height:h }]]) for(const k in a) el.setAttribute(k, a[k]);
+    const size = () => { const w = glass.clientWidth, h = glass.clientHeight; if(!w || !h) return;
+      for(const [el, a] of [[f, { x:0, y:0, width:w, height:h }], [img, { x:0, y:0, width:w, height:h }]]) for(const k in a) el.setAttribute(k, a[k]);
       dm.setAttribute("scale", (RANGE * w).toFixed(1)); };
     // the page preloads the map (<link rel=preload>), so this is normally instant
     fetch(url).then(r => r.blob()).then(b => new Promise(ok => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); }))
-      .then(data => { img.setAttribute("href", data); size(); warp = `url(#${id})`; if(!screen.classList.contains("full")) screen.style.filter = warp; new ResizeObserver(size).observe(screen);
+      .then(data => { img.setAttribute("href", data); size(); warp = `url(#${id})`; glass.style.filter = warp; new ResizeObserver(size).observe(glass);
         const im = new Image(); im.onload = () => { const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight;
           const g = c.getContext("2d"); g.drawImage(im, 0, 0); warpMap = { w:c.width, h:c.height, px:g.getImageData(0, 0, c.width, c.height).data, range:RANGE }; };
         im.src = data; })
@@ -288,7 +282,8 @@
     rows.forEach(fy => cols.forEach(fx => pts.push([fx, fy])));
     screen.querySelectorAll(":scope > *").forEach(e => e.style.display = "none");
     screen.insertAdjacentHTML("beforeend", pts.map(([fx, fy]) => `<b class="mmc" style="left:${fx * 100}%;top:${fy * 100}%"></b>`).join(""));
-    screen.scrollTop = 0; screen.style.overflow = "hidden";
+    screen.insertAdjacentHTML("beforeend", `<div style="height:300%"></div>`);   // overflowing, like the real board (scrolling screens behave differently in Safari)
+    screen.scrollTop = 0;
     const st = document.createElement("style");
     st.textContent = `.mmc{position:absolute;width:24px;height:24px;margin:-12px 0 0 -12px;background:linear-gradient(#7dff7d,#7dff7d) 50% 0/2px 100% no-repeat,linear-gradient(#7dff7d,#7dff7d) 0 50%/100% 2px no-repeat}
       .mmc-o{position:fixed;z-index:99;pointer-events:none;border-radius:50%}.mmc-r{width:6px;height:6px;margin:-3px 0 0 -3px;background:#f33}
