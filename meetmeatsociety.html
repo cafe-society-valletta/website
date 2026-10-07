@@ -69,10 +69,14 @@
     const pick = v => v.dataset.src.replace(/\.mp4$/, ext);
     intro.src = pick(intro); idle.src = pick(idle); idle.preload = "auto";
     let done = false;
-    const toIdle = () => { if(done) return; done = true; idle.play().catch(() => {}); intro.pause(); intro.classList.add("done"); ready(); };
-    intro.addEventListener("ended", toIdle);
-    intro.play().catch(toIdle);   // autoplay blocked (e.g. low-power mode) → straight to the idle screen
-    addEventListener("keydown", e => { if(e.key.length === 1 || e.key === "Enter") toIdle(); });   // start typing = skip the intro
+    const toIdle = pause => { if(done) return; done = true; idle.play().catch(() => {}); intro.pause(); intro.classList.add("done"); setTimeout(ready, pause || 0); };
+    intro.addEventListener("ended", () => toIdle(900));   // a beat of empty screen before the inbox prints (Chef)
+    const play = () => { if(!done) intro.play().catch(() => toIdle()); };   // autoplay blocked (e.g. low-power mode) → straight to the idle screen
+    // meetme.js types the C:\> prompt live in the board font, wipes the screen, then the logo clip plays
+    document.documentElement.classList.add("mm-boot");
+    document.addEventListener("mm:booted", play, { once:true });
+    setTimeout(play, 5000);   // safety net if the board script never loads
+    addEventListener("keydown", e => { if(e.key.length === 1 || e.key === "Enter") toIdle(); });   // also cancels the desktop boot prompt   // start typing = skip the intro
   })();
 </script>
 <script src="assets/js/meetme.js" defer></script>

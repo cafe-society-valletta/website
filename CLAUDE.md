@@ -50,10 +50,15 @@ assets/js/grain.js     Film-grain layer (8 tiles in assets/img/grain/, 12 fps, m
                         <script src="assets/js/grain.js" defer></script> to a page to turn it on.
 assets/js/chars.js     Home "Characters" parade frame clock — keeps the line's step and every
                         figure's pose change on the same 1.5 fps frame (one jump per frame).
-assets/js/meetme.js    Meet Me at Society board on the green screen: "WRITE A POST>" prompt (subject → NAME> → Enter posts)
-                        + MESSAGE INBOX (newest first, rows link to #p/<id>; post pages not built yet). VT323 font.
-                        Posts are shared via netlify/functions/meetme.mjs (Netlify Blobs); new posts wait in a queue until
-                        approved on mmadmin.html ("SYSOP CONSOLE", unlisted, key = Netlify env MEETME_ADMIN_KEY).
+assets/js/meetme.js    Meet Me at Society board on the green screen. Home: [ WRITE A POST ] button (typing anywhere also opens it)
+                        + MESSAGE INBOX (newest first, rows link to #p/<id>; post pages not built yet). #new = NEW POST screen:
+                        NAME (remembered in localStorage "mm-name"), SUBJECT (44 chars = one inbox line), MESSAGE (5000), PHOTOS
+                        (max 4; shrunk in the browser to a JPEG <= 1 MB, long side <= 1600 px). VT323 font.
+                        Posts are shared via netlify/functions/meetme.mjs (Netlify Blobs; photos stored as img/<id>-<n>); new posts
+                        wait in a queue until approved on mmadmin.html ("SYSOP CONSOLE", unlisted, key = Netlify env MEETME_ADMIN_KEY;
+                        shows body + photos; reject/delete also deletes the photos). Intro: boot prompt typed live, wipe, logo clip.
+                        Mouse over the screen = 8-bit green pointer drawn inside the screen (bent by the CRT filter). [FULLSCREEN] =
+                        flat full-window terminal (screen moved to <body>), <- GO BACK returns.
                         All screen copy is written as the 8-bit terminal would print it (Chef's rule; only exception: photo
                         attachments on posts). Screen content is bent with the same CRT barrel as the clips: SVG
                         feDisplacementMap with assets/img/mm-warp-{phone,desk}.png.

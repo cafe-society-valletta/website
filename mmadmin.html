@@ -22,8 +22,12 @@
   button.no{ background:transparent; color:#ff8a8a; border:1px solid #ff8a8a; }
   ol{ list-style:none; margin:0; padding:0; }
   li{ display:grid; grid-template-columns:8.5em 1fr auto; gap:6px 14px; padding:8px 0; border-bottom:1px dotted #2b6b2b; align-items:baseline; }
-  li .s{ grid-column:2; }
-  @media (max-width:600px){ li{ grid-template-columns:1fr; } li .s{ grid-column:1; } }
+  li .s, li .b, li .ph{ grid-column:2 / -1; }
+  li .b{ white-space:pre-wrap; opacity:.85; margin:2px 0 0; }
+  li .ph{ display:flex; gap:8px; flex-wrap:wrap; }
+  li .ph a{ display:block; width:96px; height:96px; border:1px solid #3c8f3c; background:#0c2412; }
+  li .ph img{ width:100%; height:100%; object-fit:cover; display:block; }
+  @media (max-width:600px){ li{ grid-template-columns:1fr; } li .s, li .b, li .ph{ grid-column:1; } }
 </style>
 </head>
 <body>
@@ -44,12 +48,20 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const when = at => at.replace("T", " ");
   let key = ""; try{ key = sessionStorage.getItem("mm-key") || ""; }catch(e){}
-  const row = (p, btns) => `<li><span>${esc(when(p.at))}</span><span>&lt;${esc(p.author)}&gt;</span><span>${btns}</span><span class="s">${esc(p.subject)}</span></li>`;
+  const pics = {};   // photo id -> object URL (photos need the key header, so they are fetched, not linked)
+  const photo = id => { if(pics[id]) return Promise.resolve(pics[id]);
+    return fetch(API + "?photo=" + encodeURIComponent(id), { headers:{ "x-mm-key":key } }).then(r => r.ok ? r.blob() : null).then(b => b ? (pics[id] = URL.createObjectURL(b)) : ""); };
+  const row = (p, btns) => `<li><span>${esc(when(p.at))}</span><span>&lt;${esc(p.author)}&gt;</span><span>${btns}</span><span class="s">SUBJ: ${esc(p.subject)}</span>`
+    + (p.body ? `<p class="b">${esc(p.body)}</p>` : "")
+    + (p.photos ? `<span class="ph">${Array.from({ length:p.photos }, (_, n) => `<a target="_blank" data-ph="${esc(p.id)}-${n}"><img alt="PHOTO ${n+1}"></a>`).join("")}</span>` : "")
+    + `</li>`;
+  const fillPhotos = () => document.querySelectorAll("a[data-ph]").forEach(a => photo(a.dataset.ph).then(u => { if(u){ a.href = u; a.firstChild.src = u; } }));
   function show(d){
     $("login").hidden = true; $("lists").hidden = false;
     $("np").textContent = d.pending.length; $("nl").textContent = d.live.length;
     $("pending").innerHTML = d.pending.map(p => row(p, `<button data-a="approve" data-id="${esc(p.id)}">[APPROVE]</button><button class="no" data-a="reject" data-id="${esc(p.id)}">[REJECT]</button>`)).join("") || "<li class='muted'>QUEUE EMPTY.</li>";
     $("live").innerHTML = d.live.map(p => row(p, `<button class="no" data-a="delete" data-id="${esc(p.id)}">[DELETE]</button>`)).join("") || "<li class='muted'>NO MESSAGES.</li>";
+    fillPhotos();
   }
   function fail(r){ if(r.status === 401){ key = ""; try{ sessionStorage.removeItem("mm-key"); }catch(e){} $("login").hidden = false; $("lists").hidden = true; $("msg").textContent = "ACCESS DENIED. (SYSOP KEY WRONG, OR MEETME_ADMIN_KEY NOT SET IN NETLIFY.)"; } else $("msg").textContent = "NO CARRIER. TRY AGAIN."; }
   function load(){ if(!key) return;
