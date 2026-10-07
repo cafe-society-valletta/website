@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meet Me at Society — Café Society Valletta</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🖥️</text></svg>">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="v2-body mm-body">
+
+<div class="page v2 mm">
+  <header class="site-bar mm-bar">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="menu.html">Menu</a>
+    <a href="events.html" class="two">Events <br>Calendar</a>
+    <a href="gallery.html" class="two">Photo <br>Lab</a>
+    <a href="lostsouls.html" class="logo logo-lsc"><img src="assets/img/p-nav-lsc.png" alt="Lost Souls Club"></a>
+    <a href="shop.html" class="logo logo-col"><img src="assets/img/p-nav-collection.png" alt="The Society Collection"></a>
+  </header>
+  <main class="mm-stage">
+    <div class="mm-phone">   <!-- phones/tablets (<900px): Chef's portrait monitor, Paper 09 -->
+      <picture><source srcset="assets/img/p-meetme-phone.webp" type="image/webp"><img src="assets/img/p-meetme-phone.jpg" alt="" width="1202" height="2622"></picture>
+      <!-- the tube: intro clip once ("C:\>stay human.exe" → MEET ME AT Society), then the idle flicker loops. Pre-rendered with
+           the glass curve, mask and the monitor's own shading, so each video is a drop-in for the screen rectangle. -->
+      <div class="mm-tube" aria-hidden="true">
+        <video class="mm-v mm-v-idle" muted playsinline loop preload="none" poster="assets/img/mm-idle-poster.jpg" data-src="assets/video/mm-idle.mp4"></video>
+        <video class="mm-v mm-v-intro" muted playsinline preload="none" poster="assets/img/mm-intro-poster.jpg" data-src="assets/video/mm-intro.mp4"></video>
+      </div>
+      <div class="mm-screen" aria-live="polite"></div>
+    </div>
+    <div class="mm-computer">   <!-- desktop -->
+      <picture><source srcset="assets/img/p-meetme-computer.webp" type="image/webp"><img src="assets/img/p-meetme-computer.png" alt="Meet Me at Society" width="1600" height="1485"></picture>
+      <div class="mm-tube" aria-hidden="true">   <!-- same intro → idle sequence, recomposed for the landscape glass -->
+        <video class="mm-v mm-v-idle" muted playsinline loop preload="none" poster="assets/img/mm-idle-desk-poster.jpg" data-src="assets/video/mm-idle-desk.mp4"></video>
+        <video class="mm-v mm-v-intro" muted playsinline preload="none" poster="assets/img/mm-intro-desk-poster.jpg" data-src="assets/video/mm-intro-desk.mp4"></video>
+      </div>
+      <div class="mm-screen" aria-live="polite"></div>   <!-- sits exactly over the green screen (Paper: "Screen · content area") -->
+    </div>
+  </main>
+  <footer class="site-footer footer-dark">
+    <a class="ig" href="https://instagram.com/cafesociety_valletta" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.6" cy="6.4" r="1.2" fill="currentColor" stroke="none"/></svg><span>@cafesociety_valletta</span></a>
+    <i class="sep"></i>
+    <span>13 St John's Street, Valletta</span>
+    <i class="sep"></i>
+    <span>No reservations</span>
+    <i class="sep"></i>
+    <a class="mail" href="mailto:cafesocietyvalletta@gmail.com"><svg viewBox="0 0 24 18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="1" width="22" height="16" rx="2"/><path d="M1.5 2L12 10L22.5 2"/></svg><span>cafesocietyvalletta@gmail.com</span></a>
+  </footer>
+</div>
+
+<script>
+  /* phones: scale the 402px-wide menu bar/footer to the screen width */
+  (function(){ const set = () => document.documentElement.style.setProperty("--mmk", innerWidth / 402);
+    set(); addEventListener("resize", set); })();
+</script>
+<script>
+  /* monitor tube (phone: portrait monitor, desktop: the computer): load the clips only for the monitor that shows;
+     the intro plays once, then the idle loop takes over. Reduced motion: just the idle still. */
+  (function(){
+    const box = document.querySelector(matchMedia("(max-width: 899.98px)").matches ? ".mm-phone" : ".mm-computer");
+    const intro = box && box.querySelector(".mm-v-intro"), idle = box && box.querySelector(".mm-v-idle");
+    const ready = () => { document.documentElement.classList.add("mm-ready"); document.dispatchEvent(new Event("mm:ready")); };
+    if(!intro || !idle){ ready(); return; }
+    if(matchMedia("(prefers-reduced-motion: reduce)").matches){ intro.remove(); ready(); return; }
+    const ext = intro.canPlayType('video/mp4; codecs="avc1.64001f"') ? ".mp4" : ".webm";   // H.264 where supported, else VP9
+    const pick = v => v.dataset.src.replace(/\.mp4$/, ext);
+    intro.src = pick(intro); idle.src = pick(idle); idle.preload = "auto";
+    let done = false;
+    const toIdle = () => { if(done) return; done = true; idle.play().catch(() => {}); intro.pause(); intro.classList.add("done"); ready(); };
+    intro.addEventListener("ended", toIdle);
+    intro.play().catch(toIdle);   // autoplay blocked (e.g. low-power mode) → straight to the idle screen
+    addEventListener("keydown", e => { if(e.key.length === 1 || e.key === "Enter") toIdle(); });   // start typing = skip the intro
+  })();
+</script>
+<script src="assets/js/meetme.js" defer></script>
+<script src="assets/js/main.js" defer></script>
+<script src="assets/js/grain.js" defer></script>
+</body>
+</html>

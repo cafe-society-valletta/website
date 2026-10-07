@@ -20,7 +20,10 @@ shop.html         The Society Collection — categories open inline in place (pr
                   bleeds right); product view = full-bleed swipe photos + info (assets/js/shop.js). Products in
                   assets/js/shop-data.js (PLACEHOLDERS, Shopify-shaped). Plan: Paper/site own the look, Shopify only
                   does bag/checkout + stock. Deep links: shop.html#apparel, shop.html#p/<handle> (e.g. #p/apparel-test-1).
-board.html        Meet Me at Society (message board — login/post, localStorage only)
+meetmeatsociety.html  Meet Me at Society — UNLISTED (noindex, not in nav), served at /meetmeatsociety. Background = the beige
+                  computer (assets/img/p-meetme-computer.webp/.png); .mm-screen sits exactly over its green screen for content.
+                  The tube plays assets/video/mm-intro[-desk] (once) then mm-idle[-desk] (loop), .mp4 H.264 or .webm VP9, pre-rendered
+                  with the glass curve/mask/shading as drop-ins for the screen rectangle.
 
 assets/css/style.css   Single stylesheet for all 7 pages. Pages 2–6: phone (<700px) = Paper phone
                         artboards; 700–899px = phone column zoomed; ≥900px = Paper "Desktop 1440"
@@ -42,10 +45,17 @@ netlify/functions/events.js  Netlify Function (zero-dependency, no build step): 
                         cafesocietyvalletta gallery URL → "Photos"; several links allowed. Feed starts 1 Oct 2026 (FIRST_DAY)
                         and keeps all past events (no lifespan yet); past days show faded, kicker "Past event:".
                         Photo Lab deep link: gallery.html#<data-slug> opens that roll (e.g. #qlv-pride).
+assets/js/grain.js     Film-grain layer on every page (8 tiles in assets/img/grain/, 12 fps, mix-blend screen so only
+                        dark areas get grain). Strength = .cs-grain opacity in style.css.
 assets/js/chars.js     Home "Characters" parade frame clock — keeps the line's step and every
                         figure's pose change on the same 1.5 fps frame (one jump per frame).
-assets/js/board.js     Message board rendering, seed data, login/post (client-side only —
-                        no backend; state is per-browser via localStorage).
+assets/js/meetme.js    Meet Me at Society board on the green screen: "WRITE A POST>" prompt (subject → NAME> → Enter posts)
+                        + MESSAGE INBOX (newest first, rows link to #p/<id>; post pages not built yet). VT323 font.
+                        Posts are shared via netlify/functions/meetme.js (Netlify Blobs); new posts wait in a queue until
+                        approved on mmadmin.html ("SYSOP CONSOLE", unlisted, key = Netlify env MEETME_ADMIN_KEY).
+                        All screen copy is written as the 8-bit terminal would print it (Chef's rule; only exception: photo
+                        attachments on posts). Screen content is bent with the same CRT barrel as the clips: SVG
+                        feDisplacementMap with assets/img/mm-warp-{phone,desk}.png.
 assets/img/            Photos. Files prefixed `p-` were pulled directly from the Paper
                         design file's asset URLs; the rest (gallery-*.jpg) are pre-existing
                         site photos used for content the Paper mockups didn't specify
@@ -54,7 +64,8 @@ assets/img/            Photos. Files prefixed `p-` were pulled directly from the
 
 `index.html` must stay at the repository root — Netlify serves it as-is with no build command.
 
-No package.json, no build tooling. Don't add either without a reason that requires it.
+No build tooling. package.json exists ONLY so Netlify installs @netlify/blobs for netlify/functions/meetme.js
+(still no build command). Don't add other dependencies without a reason that requires it.
 
 ## Publishing workflow
 
