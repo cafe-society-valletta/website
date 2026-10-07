@@ -266,12 +266,20 @@ button{ font-family:inherit; }
 @keyframes mm-flash{ 0%{ opacity:1; } 20%{ opacity:.25; } 40%{ opacity:1; } 60%{ opacity:.5; } 80%, 100%{ opacity:1; } }   /* a quick CRT flicker, then it stays lit */
 @media (prefers-reduced-motion:reduce){ .site-bar .logo-mm:not(.tab)::after{ animation:none !important; } }
 .site-bar a:hover{ opacity:.7; }
-.site-bar .tab{ align-self:stretch; padding:0 8px; display:flex; align-items:center; justify-content:center; border-radius:0 0 6px 6px; background:var(--white); color:var(--black); }
+.site-bar .tab{ align-self:stretch; padding:0 8px; display:flex; align-items:center; justify-content:center; border-radius:0 0 6px 6px; --tab-bg:var(--white); background:none; position:relative; isolation:isolate; overflow:hidden; color:var(--black); }
 .site-bar .tab:hover{ opacity:1; }
+/* the tab's background is its own layer: it slides down from the top of the screen when a page opens, and back up when you
+   leave for another page (main.js adds html.tab-leaving and waits for it) — Chef */
+.site-bar .tab::before{ content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit; background:var(--tab-bg);
+  animation:tab-drop .55s cubic-bezier(.22,.9,.3,1) .05s both; }
+html.tab-leaving .site-bar .tab::before{ animation:tab-lift .28s cubic-bezier(.55,0,.8,.35) both; }
+@keyframes tab-drop{ from{ transform:translateY(-101%); } to{ transform:none; } }
+@keyframes tab-lift{ from{ transform:none; } to{ transform:translateY(-101%); } }
+@media (prefers-reduced-motion:reduce){ .site-bar .tab::before, html.tab-leaving .site-bar .tab::before{ animation:none; } }
 /* light bar (About) */
 .bar-light{ background:var(--white); color:var(--black); }
 .bar-light .logo img{ filter:invert(1); }
-.bar-light .tab{ background:var(--black); color:var(--white); }
+.bar-light .tab{ --tab-bg:var(--black); color:var(--white); }
 /* dark bar (Photo Lab) */
 .bar-dark{ background:var(--black); }
 /* transparent bars (Events, LSC, Collection) — they pick up a backing once the page has scrolled */
@@ -281,7 +289,7 @@ button{ font-family:inherit; }
 .bar-collection .tab{ padding:0 6px; }
 .bar-collection .tab img{ width:50px; height:12px; }
 /* active Collection tab = white tab with the logo knocked out, so the background shows through (Paper 1EX-0 / 1EZ-0) */
-.bar-collection .tab{ background:transparent url('../img/p-tab-collection-mobile.png') 50% 0/100% 100% no-repeat !important; }
+.bar-collection .tab{ --tab-bg:url('../img/p-tab-collection-mobile.png') 50% 0/100% 100% no-repeat; }
 .bar-collection .tab img{ opacity:0; }
 
 /* ---------- footer (every page) ---------- */
@@ -775,7 +783,7 @@ body.menu-body{ background:var(--black); }
 
   /* SOCIETY COLLECTION (D06) */
   .shop{ background-image:url('../img/p-bg-collection-desktop.jpg'); }
-  .bar-collection .tab{ background-image:url('../img/p-tab-collection-desktop.png') !important; }
+  .bar-collection .tab{ --tab-bg:url('../img/p-tab-collection-desktop.png') 50% 0/100% 100% no-repeat; }
   .shop-head{ height:auto; padding-top:56px; }
   .shop-head img{ width:460px; height:133px; }
   .shop-cats{ width:var(--col); margin-inline:auto; padding:40px 0 72px; }
@@ -1124,12 +1132,13 @@ body.mm-body{ background:var(--black); }
 .mm-bar, .mm .site-footer{ position:absolute; left:0; right:0; z-index:3; background:transparent; }
 .mm-bar{ top:0; color:var(--black); }
 .mm-bar .logo img{ filter:invert(1); }
-.mm-bar .tab{ position:relative; overflow:hidden; background:#06140a; }   /* active Meet Me tab = the monitor's green-black (Chef) */
+.mm-bar .tab{ --tab-bg:#06140a; }   /* active Meet Me tab = the monitor's green-black (Chef) */
 .mm-bar .tab img{ position:relative; filter:drop-shadow(0 0 1px rgba(125,255,125,.8)) drop-shadow(0 0 4px rgba(60,255,90,.45)) drop-shadow(0 0 9px rgba(40,200,40,.2)); }   /* phosphor-green logo + glow */
 .mm-bar .tab::after{ content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -0.2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/60px 60px; mix-blend-mode:overlay; opacity:.55; }   /* grain over the glow */
 /* Meet Me only: the menu bar hides until the pointer comes near the top, the top is tapped, or swiped down from (meetme.js) */
 .mm-bar{ translate:0 -130%; opacity:0; pointer-events:none; transition:translate .35s ease, opacity .35s ease; }
 html.mm-bar-on .mm-bar{ translate:0 0; opacity:1; pointer-events:auto; }
+html:not(.mm-bar-on) .mm-bar .tab::before{ animation:none; transform:translateY(-101%); }   /* Meet Me: the tab drops in each time the bar appears */
 @media (prefers-reduced-motion:reduce){ .mm-bar{ transition:opacity .2s; } }
 .mm .site-footer{ bottom:0; margin:0; }
 .mm .site-footer.footer-dark{ text-shadow:0 1px 2px rgba(0,0,0,.9), 0 2px 6px rgba(0,0,0,.7); }   /* white, with a shadow underneath (Chef) */
@@ -1170,7 +1179,7 @@ html.mm-bar-on .mm-bar{ translate:0 0; opacity:1; pointer-events:auto; }
   .mm-bar{ top:calc(min(125vw, 200vh) * .01); }   /* sit in the casing band, clear of the top bevel (18px at 1440×900) */   /* 1800px at 1440×900; follows width, but never so big the screen leaves the first view */
   .mm-bar .tab{ align-self:flex-start; margin-top:calc(min(125vw, 200vh) * -.01); height:max(calc(min(125vw, 200vh) * .0362), calc(min(125vw, 200vh) * .01 + 50px)); align-items:flex-start; padding-top:calc(min(125vw, 200vh) * .01 + 14px); }
   .mm-bar .tab{ --edge:calc(min(125vw, 200vh) * .0147);   /* the casing's top corner line, measured from the window top */
-    background:linear-gradient(#15291b var(--edge), #06140a var(--edge)); }   /* desktop: follows the casing — a little lighter above its top corner line, the monitor's near-black below (Chef) */
+    --tab-bg:linear-gradient(#15291b var(--edge), #06140a var(--edge)); }   /* desktop: follows the casing — a little lighter above its top corner line, the monitor's near-black below (Chef) */
 }
 
 /* ---------- Meet Me at Society: the board on the green screen (assets/js/meetme.js) ----------
