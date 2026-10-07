@@ -489,19 +489,24 @@
     const twin = svg.querySelector("filter").cloneNode(true); twin.id = id + "-b"; svg.appendChild(twin);   // identical copy: Safari redraw switches between the two
     document.body.appendChild(svg);
     const fs = [...svg.querySelectorAll("filter")], img = svg.querySelector("feImage");
+    // Safari/WebKit (every iPhone browser) places feImage relative to the filter region instead of user space, so there the
+    // map goes at 0,0 inside the region (Chrome: at the slot). ?wk=a|b|c on WebKit tries other placements for testing.
+    const wk = /AppleWebKit/.test(navigator.userAgent) && !/Chrome\/|Chromium|Edg\/|Firefox|OPR\//.test(navigator.userAgent),
+      wkMode = wk ? ((location.search.match(/[?&]wk=(\w+)/) || [])[1] || "a") : "";
     const size = () => { const w = slot.offsetWidth, h = slot.offsetHeight, x = slot.offsetLeft, y = slot.offsetTop; if(!w || !h) return;
-      for(const f of fs){ for(const el of [f, f.querySelector("feImage")]) for(const [k, v] of Object.entries({ x, y, width:w, height:h })) el.setAttribute(k, v);
+      const reg = wkMode === "b" ? { x:0, y:0 } : { x, y }, map = wkMode === "a" || wkMode === "b" ? { x:0, y:0 } : { x, y };
+      for(const f of fs){ for(const [el, o] of [[f, reg], [f.querySelector("feImage"), map]]) for(const [k, v] of Object.entries({ x:o.x, y:o.y, width:w, height:h })) el.setAttribute(k, v);
         f.querySelector("feDisplacementMap").setAttribute("scale", (RANGE * w).toFixed(1)); } };
     // the page preloads the map (<link rel=preload>), so this is normally instant
     fetch(url).then(r => r.blob()).then(b => new Promise(ok => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); }))
-      .then(data => { fs.forEach(f => f.querySelector("feImage").setAttribute("href", data)); size(); warp = `url(#${id})`; glass.style.filter = warp; new ResizeObserver(size).observe(slot);
+      .then(data => { if(wkMode === "flat") return; fs.forEach(f => f.querySelector("feImage").setAttribute("href", data)); size(); warp = `url(#${id})`; glass.style.filter = warp; new ResizeObserver(size).observe(slot);
         const im = new Image(); im.onload = () => { const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight;
           const g = c.getContext("2d"); g.drawImage(im, 0, 0); warpMap = { w:c.width, h:c.height, px:g.getImageData(0, 0, c.width, c.height).data, range:RANGE }; };
         im.src = data;
         // Safari/WebKit only re-filters the small patch that changed (one typed letter, one printed line, a hover), but
         // the bend moves pixels further than that patch, so bits of text went missing. After any change on the screen,
         // nudge the filter so WebKit redraws the whole glass (once per frame at most).
-        if(/AppleWebKit/.test(navigator.userAgent) && !/Chrome\/|Chromium|Edg\/|Firefox|OPR\//.test(navigator.userAgent)){
+        if(wk){
           let queued = 0, flip = false;
           const redraw = () => { if(queued) return; queued = requestAnimationFrame(() => { queued = 0; flip = !flip;   // switching to the twin filter repaints the whole layer
             glass.style.filter = flip ? `url(#${id}-b)` : warp; }); };   // (adding a CSS filter function moved Safari's origin again)
