@@ -1163,8 +1163,12 @@ body.mm-body{ background:var(--black); }
 .mmb-fs{ font-size:.7em; }
 /* 8-bit pointer: its own layer on <body>, placed along the CRT curve by meetme.js; system cursor hidden over the screen */
 .mm-screen.mm-ptr-on, .mm-screen.mm-ptr-on *{ cursor:none !important; }
-.mmb-ptr{ position:fixed; left:0; top:0; z-index:60; background:0 0 / 100% 100% no-repeat; image-rendering:pixelated; pointer-events:none;
+.mmb-ptr{ position:absolute; left:0; top:0; z-index:2; background:0 0 / 100% 100% no-repeat; image-rendering:pixelated; pointer-events:none;
   will-change:transform; filter:drop-shadow(0 0 2px rgba(90,255,90,.35)); }
+.mmb-ptr.fixed{ position:fixed; z-index:60; }
+/* screen shadow (Chef's overlay): darkens the glass toward its edges and corners, on top of the text and the pointer */
+.mm-shade{ position:absolute; z-index:3; pointer-events:none; display:block; }
+.mm-computer .mm-shade{ left:21.25%; top:11.448%; width:54.25%; height:44.31%; }
 /* FULLSCREEN: flat full-window terminal like the SYSOP console — no casing, menu, footer or CRT curve */
 html.mm-full, html.mm-full body{ overflow:hidden; }
 html.mm-full .mm-bar, html.mm-full .site-footer{ visibility:hidden; }
