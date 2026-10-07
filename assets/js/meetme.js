@@ -162,26 +162,37 @@
         return [S * (lin(m.px[k]) - .5), S * (lin(m.px[k + 1]) - .5)]; };
       let qx = x, qy = y; for(let n = 0; n < 5; n++){ const [dx, dy] = d(qx, qy); qx = x - dx; qy = y - dy; }
       return [qx, qy]; };
-    // desktop glass outline (fraction of the glass box; quadratic fits of the monitor photo's glass edge): outside it the
-    // normal system cursor comes back
+    // desktop glass outline (fraction of the glass box; quadratic fits of the monitor photo's glass edge)
     const EDGE = box.classList.contains("mm-computer") ? { top:[.09268, -.0883, -.00293], bottom:[-.12059, .13698, .9662], left:[.05491, -.05618, .00466], right:[-.04281, .04188, .99292] } : null;
     const q2 = (c, t) => (c[0] * t + c[1]) * t + c[2];
-    const onGlass = (nx, ny) => !EDGE || (ny > q2(EDGE.top, nx) && ny < q2(EDGE.bottom, nx) && nx > q2(EDGE.left, ny) && nx < q2(EDGE.right, ny));
-    const place = () => { frame = 0; if(!last) return; const r = screen.getBoundingClientRect();
-      const out = !screen.classList.contains("full") && !onGlass((last.x - r.left) / r.width, (last.y - r.top) / r.height);
-      screen.classList.toggle("mm-ptr-out", out); ptr.hidden = out; if(out) return;
+    // Crossing the glass edge: within BAND px of the edge both cursors fade — the 8-bit one inside, a drawn copy of the normal
+    // arrow outside — to nothing exactly on the edge (the real system cursor is hidden across the band, and comes back once
+    // the drawn arrow is fully opaque, BAND px out).
+    const BAND = 50, html = document.documentElement;
+    const sys = document.createElement("i"); sys.className = "mm-sysptr"; sys.setAttribute("aria-hidden", "true"); sys.hidden = true; document.body.appendChild(sys);
+    const edgeDist = (px, py, w, h) => {   // signed distance (px) to the glass edge: + inside, − outside
+      if(!EDGE) return (px >= 0 && py >= 0 && px <= w && py <= h) ? Math.min(px, py, w - px, h - py) : -1e9;
+      const nx = px / w, ny = py / h;
+      const vx = [q2(EDGE.left, ny) * w - px, px - q2(EDGE.right, ny) * w], vy = [q2(EDGE.top, nx) * h - py, py - q2(EDGE.bottom, nx) * h];
+      const ox = Math.max(0, ...vx), oy = Math.max(0, ...vy);
+      return ox || oy ? -Math.hypot(ox, oy) : Math.min(-vx[0], -vx[1], -vy[0], -vy[1]); };
+    const place = () => { frame = 0; if(!last) return; const r = screen.getBoundingClientRect(), full = screen.classList.contains("full");
+      const d = full ? 1e9 : edgeDist(last.x - r.left, last.y - r.top, r.width, r.height);
+      html.classList.toggle("mm-cur-hide", d > -BAND);
+      sys.hidden = !(d < 0 && d > -BAND); if(!sys.hidden){ sys.style.opacity = Math.min(1, -d / BAND); sys.style.transform = `translate3d(${last.x}px, ${last.y}px, 0)`; }
+      ptr.hidden = d <= 0; if(ptr.hidden) return;
+      ptr.style.opacity = Math.min(1, d / BAND);
       const [qx, qy] = bend(last.x - r.left, last.y - r.top, r.width, r.height);
       const k = last.t && last.t.closest && last.t.closest("input:not([type=file]), textarea") ? "beam" : "arrow";
       if(k !== kind){ kind = k; ptr.style.backgroundImage = `url("${k === "beam" ? beam : arrow}")`; ptr.style.aspectRatio = k === "beam" ? "7 / 13" : "11 / 17"; ptr.classList.toggle("beam", k === "beam"); }
-      const full = screen.classList.contains("full"), wpx = full ? (k === "beam" ? 10 : 16) : Math.max(k === "beam" ? 10 : 16, r.width * (k === "beam" ? .0125 : .02));
+      const wpx = full ? (k === "beam" ? 10 : 16) : Math.max(k === "beam" ? 10 : 16, r.width * (k === "beam" ? .0125 : .02));
       const ox = k === "beam" ? wpx / 2 : 0, oy = k === "beam" ? wpx * 13 / 14 : 0;   // arrow: tip on the spot; I-beam: centred
       const host = full ? document.body : box; if(ptr.parentNode !== host) host.appendChild(ptr);
       ptr.classList.toggle("fixed", full); const b = full ? { left:0, top:0 } : box.getBoundingClientRect();
       ptr.style.width = wpx + "px"; ptr.style.transform = `translate3d(${r.left - b.left + qx - ox}px, ${r.top - b.top + qy - oy}px, 0)`; };
-    screen.classList.add("mm-ptr-on");
-    screen.addEventListener("pointermove", e => { if(e.pointerType !== "mouse") return;
-      last = { x:e.clientX, y:e.clientY, t:e.target }; if(!frame) frame = requestAnimationFrame(place); });
-    screen.addEventListener("pointerleave", () => { ptr.hidden = true; last = null; });
+    addEventListener("pointermove", e => { if(e.pointerType !== "mouse") return;
+      last = { x:e.clientX, y:e.clientY, t:e.target }; if(!frame) frame = requestAnimationFrame(place); }, { passive:true });
+    document.documentElement.addEventListener("pointerleave", () => { ptr.hidden = true; sys.hidden = true; last = null; html.classList.remove("mm-cur-hide"); });
   }
 
   // ---- taps on a touch screen land where the content really is: the CRT bend moves what you SEE away from where the
