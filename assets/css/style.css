@@ -249,7 +249,7 @@ button{ font-family:inherit; }
 .site-bar > a, .site-bar > span{ font-family:var(--font-display); font-size:9px; font-weight:700; letter-spacing:-.02em; line-height:11px; text-transform:uppercase; white-space:nowrap; }
 .site-bar .two{ line-height:9.5px; text-align:center; }
 .site-bar .logo{ line-height:0; flex-shrink:0; }
-.site-bar .logo-home img{ width:32px; height:11.7px; }   /* Café Society logo in place of HOME (Chef) */
+.site-bar .logo-home img{ width:40px; height:14.6px; }   /* Café Society logo in place of HOME (Chef) */
 .site-bar .logo-lsc img{ width:48px; height:13.5px; }
 .site-bar .logo-col img{ width:52px; height:12.6px; }
 .site-bar .logo-mm img{ width:28px; height:14.5px; }
