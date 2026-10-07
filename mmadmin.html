@@ -17,6 +17,7 @@
   h2{ font:inherit; font-size:22px; margin:28px 0 6px; border-bottom:1px dashed #3c8f3c; padding-bottom:4px; }
   p{ margin:4px 0; }
   .muted{ opacity:.65; }
+  a.lnk{ color:inherit; text-decoration:none; margin-right:6px; } a.lnk:hover, a.lnk:focus-visible{ background:#7dff7d; color:#06140a; text-shadow:none; outline:none; }
   input{ font:inherit; color:inherit; background:#0c2412; border:1px solid #3c8f3c; padding:6px 8px; width:min(100%, 360px); }
   button{ font:inherit; color:#06140a; background:#7dff7d; border:0; padding:2px 10px; cursor:pointer; margin-right:6px; text-shadow:none; }
   button.no{ background:transparent; color:#ff8a8a; border:1px solid #ff8a8a; }
@@ -35,11 +36,14 @@
   <h1>SYSOP CONSOLE</h1>
   <p class="muted">MEET ME AT SOCIETY BBS // MESSAGE APPROVAL QUEUE</p>
   <p class="muted">NEW MESSAGES STAY OFF THE BOARD UNTIL APPROVED HERE.</p>
+  <p><a class="lnk" href="/meetmeatsociety" target="_blank" rel="noopener">[OPEN MESSAGE INBOX]</a></p>
   <form id="login"><p><label>ENTER SYSOP KEY&gt; <input id="key" type="password" autocomplete="current-password"></label> <button>[LOGIN]</button></p><p id="msg" class="muted"></p></form>
   <section id="lists" hidden>
     <h2>QUEUE: <span id="np">0</span> MESSAGE(S) AWAITING APPROVAL</h2><ol id="pending"></ol>
     <h2>COMMENT QUEUE: <span id="nc">0</span> AWAITING APPROVAL</h2><ol id="cpending"></ol>
-    <h2>BOARD: <span id="nl">0</span> MESSAGE(S) LIVE</h2><ol id="live"></ol>
+    <h2>BOARD: <span id="nl">0</span> MESSAGE(S) LIVE</h2>
+    <p class="muted">TO REMOVE A MESSAGE: [VIEW] IT ON THE BOARD IF NEEDED, THEN [DELETE] HERE (PRESS TWICE TO CONFIRM). ITS PHOTOS AND COMMENTS GO TOO.</p>
+    <ol id="live"></ol>
     <h2>LATEST LIVE COMMENTS</h2><ol id="comments"></ol>
     <p class="muted">AUTO-REFRESH EVERY 20 SEC. <button type="button" id="out" class="no">[LOGOFF]</button></p>
   </section>
@@ -62,7 +66,7 @@
     $("login").hidden = true; $("lists").hidden = false;
     $("np").textContent = d.pending.length; $("nl").textContent = d.live.length;
     $("pending").innerHTML = d.pending.map(p => row(p, `<button data-a="approve" data-id="${esc(p.id)}">[APPROVE]</button><button class="no" data-a="reject" data-id="${esc(p.id)}">[REJECT]</button>`)).join("") || "<li class='muted'>QUEUE EMPTY.</li>";
-    $("live").innerHTML = d.live.map(p => row(p, `<button class="no" data-a="delete" data-id="${esc(p.id)}">[DELETE]</button>`)).join("") || "<li class='muted'>NO MESSAGES.</li>";
+    $("live").innerHTML = d.live.map(p => row(p, `<a class="lnk" href="/meetmeatsociety#p/${encodeURIComponent(p.id)}" target="_blank" rel="noopener">[VIEW]</a> <button class="no" data-a="delete" data-id="${esc(p.id)}">[DELETE]</button>`)).join("") || "<li class='muted'>NO MESSAGES.</li>";
     const crow = (c, btns) => `<li><span>${esc(when(c.at))}</span><span>&lt;${esc(c.author || "[DELETED]")}&gt;</span><span>${btns}</span><span class="s">ON: ${esc(c.subject || "?")}${c.parent ? " (REPLY)" : ""}</span>${c.body ? `<p class="b">${esc(c.body)}</p>` : ""}</li>`;
     $("nc").textContent = (d.cpending || []).length;
     $("cpending").innerHTML = (d.cpending || []).map(c => crow(c, `<button data-a="capprove" data-id="${esc(c.id)}">[APPROVE]</button><button class="no" data-a="creject" data-id="${esc(c.id)}">[REJECT]</button>`)).join("") || "<li class='muted'>QUEUE EMPTY.</li>";
