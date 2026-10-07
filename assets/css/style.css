@@ -1236,7 +1236,7 @@ html.mm-full .mm-bar, html.mm-full .site-footer{ visibility:hidden; }
 @media (max-width:600px){ .mm-screen.full .mmb{ font-size:17px; padding-top:56px; } .mm-screen.full .mmb-logo{ width:112px; height:69px; top:45px; right:26px; }   /* equal space above (to the top) and below (to the rule) */ }
 .mmb-caret{ display:inline-block; width:.6em; height:1em; margin-left:.15em; transform:translateY(.15em); background:currentColor; box-shadow:0 0 .2em rgba(90,255,90,.4); animation:mmb-blink 1s steps(1) infinite; }
 @keyframes mmb-blink{ 50%{ opacity:0; } }
-.mmb-hp{ position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
+.mmb-hp{ position:absolute; left:0; top:0; width:1px; height:1px; opacity:0; pointer-events:none; border:0; padding:0; }   /* spam trap: hidden INSIDE the glass (a field parked at -9999px widened Safari's curved layer and shoved NEW POST right) */
 .mmb-wait{ opacity:.6; }
 .mmb-wait em{ font-style:normal; }
 .mmb-hint{ margin:0 0 1.6em; min-height:1.15em; font-size:.85em; opacity:.85; }
