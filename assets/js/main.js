@@ -376,9 +376,17 @@
 (function(){
   document.querySelectorAll(".site-bar .logo-mm:not(.tab)").forEach(a => a.addEventListener("click", e => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button || a.classList.contains("flash")) return;
-    e.preventDefault(); a.classList.add("flash");
+    e.preventDefault(); a.classList.add("flash"); document.documentElement.classList.add("tab-leaving");
     setTimeout(() => { location.href = a.href; }, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 340);
   }));
-  addEventListener("pageshow", () => document.querySelectorAll(".logo-mm.flash").forEach(a => a.classList.remove("flash")));   // back button
+  addEventListener("pageshow", () => { document.querySelectorAll(".logo-mm.flash").forEach(a => a.classList.remove("flash")); document.documentElement.classList.remove("tab-leaving"); });   // back button
+  // any other menu-bar link: the current page's tab background slides back up first, then the next page's drops down
+  const still = matchMedia("(prefers-reduced-motion: reduce)");
+  document.querySelectorAll(".site-bar a:not(.logo-mm)").forEach(a => a.addEventListener("click", e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button || a.target || a.classList.contains("tab") || still.matches) return;
+    if (!document.querySelector(".site-bar .tab")) return;   // no tab on this page to lift
+    e.preventDefault(); document.documentElement.classList.add("tab-leaving");
+    setTimeout(() => { location.href = a.href; }, 260);
+  }));
 })();
 
