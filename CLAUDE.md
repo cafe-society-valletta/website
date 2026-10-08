@@ -20,6 +20,10 @@ shop.html         The Society Collection — categories open inline in place (pr
                   bleeds right); product view = full-bleed swipe photos + info (assets/js/shop.js). Products in
                   assets/js/shop-data.js (PLACEHOLDERS, Shopify-shaped). Plan: Paper/site own the look, Shopify only
                   does bag/checkout + stock. Deep links: shop.html#apparel, shop.html#p/<handle> (e.g. #p/apparel-test-1).
+                  Shopify (headless): netlify/functions/shop.mjs reads products from thesocietycollection.myshopify.com via the
+                  Storefront API (Netlify env SHOPIFY_STOREFRONT_TOKEN + SHOPIFY_STORE_DOMAIN — never in the repo) and makes the
+                  cart at checkout. Collections map to categories by name. Bag drawer + live products only when the shop is open
+                  (SHOP_COMING_SOON false) or at shop.html?preview; otherwise the placeholders show.
 meetme.html       Meet Me at Society — UNLISTED (noindex, not in nav), served at /meetme (_redirects sends the old /meetmeatsociety there). Background = the beige
                   computer (assets/img/p-meetme-computer.webp/.png); .mm-screen sits exactly over its green screen for content.
                   The tube plays assets/video/mm-intro[-desk] (once) then mm-idle[-desk] (loop), .mp4 H.264 or .webm VP9, pre-rendered
@@ -75,7 +79,7 @@ assets/img/            Photos. Files prefixed `p-` were pulled directly from the
 
 `index.html` must stay at the repository root — Netlify serves it as-is with no build command.
 
-No build tooling. package.json exists ONLY so Netlify installs @netlify/blobs for netlify/functions/meetme.mjs
+No build tooling. package.json exists ONLY so Netlify installs @netlify/blobs for netlify/functions/meetme.mjs (shop.mjs needs no packages)
 (still no build command). Don't add other dependencies without a reason that requires it.
 
 ## Publishing workflow
