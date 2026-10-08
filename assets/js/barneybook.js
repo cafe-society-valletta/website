@@ -201,7 +201,7 @@
   function show(r, scroll){
     if(r !== open){ talkState = null; shot = 0; upMsg = ""; }
     open = r;
-    if(r && !$list.querySelector(`[data-k="${r.k}"]`)){ $q.value = ""; setType(""); }
+    if(r && !$list.querySelector(`[data-k="${r.k}"]`)){ $q.value = ""; setType(""); const x = document.getElementById("bb-x"); if(x) x.hidden = true; }
     render();
     if(r){
       history.replaceState(null, "", "#"+r.id);
@@ -257,6 +257,7 @@
     cancelAnimationFrame(glideRaf);
     holdFull = true; $q.blur();
     if($q.value){ $q.value = ""; }
+    if($x) $x.hidden = true;
     $list.style.minHeight = ""; open = null; render();
     history.replaceState(null, "", location.pathname + location.search);
     if($bb) $bb.classList.remove("bb-compact");
@@ -265,6 +266,11 @@
     const t0 = performance.now(), wait = () => { if(scrollY <= 8 || performance.now() - t0 > 1500) setTimeout(() => holdFull = false, 120); else requestAnimationFrame(wait); };
     requestAnimationFrame(wait);
   }
+  // our own ✕ (Chef, Oct 2026): visible while the box has text; cancels the search, clears it, back to the full list
+  const $x = document.getElementById("bb-x");
+  const showX = () => { if($x) $x.hidden = !$q.value; };
+  $q.addEventListener("input", showX);
+  if($x) $x.addEventListener("click", e => { e.preventDefault(); expand(); showX(); });
   $q.addEventListener("search", () => { if(!$q.value) expand(); });            // ✕ clear button (Chrome/Safari)
   $q.addEventListener("input", e => { if(!$q.value && !e.inputType) expand(); }); // ✕ on browsers that only fire input
   const $logo = document.querySelector(".bb-head picture");
@@ -273,7 +279,7 @@
     $logo.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); expand(); } }); }
   $q.addEventListener("keydown", e => {
     if(e.key==="Enter"){ const first=$list.querySelector(".bb-item"); if(first){ show(R[first.dataset.k], true); $q.blur(); } }
-    if(e.key==="Escape"){ $q.value=""; open=null; render(); }
+    if(e.key==="Escape"){ $q.value=""; showX(); open=null; render(); }
   });
   btns.forEach(b => b.addEventListener("click", () => { setType(b.dataset.t); open=null; render(); }));
 

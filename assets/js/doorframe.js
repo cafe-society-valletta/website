@@ -65,17 +65,63 @@
     df.addEventListener("mouseenter", () => setOpen(true));
     df.addEventListener("mouseleave", e => { if (!zoomed && !upOpen && !add.contains(e.relatedTarget)) setOpen(false); });
   }
-  let x0 = null, y0 = 0;
+  // ---- lateral swipe (Chef, Oct 2026): the frame follows the finger / trackpad left-right, part-way in or out,
+  //      then settles open or shut by where it was let go and how fast. Touch: swipe sideways anywhere on the page.
+  //      Desktop: two-finger sideways swipe on the trackpad (horizontal wheel). Vertical scrolling is left alone.
+  const wide = matchMedia("(min-width:900px)");
+  const cal = [...document.querySelectorAll(".ev-head, .ev-layout")];
+  const travel = () => df.offsetWidth - (parseFloat(getComputedStyle(df).getPropertyValue("--peek")) || 20);
+  const blocked = () => zoomed || upOpen || !!document.querySelector(".ev-layout.open");
+  let sw = null;   // { p0, p, v, t, last }
+  function swStart(){
+    sw = { p0:isOpen() ? 1 : 0, p:isOpen() ? 1 : 0, v:0, t:performance.now() };
+    df.style.transition = "none"; if (!wide.matches) cal.forEach(el => el.style.transition = "none");
+  }
+  function swSet(p){
+    const now = performance.now(), T = travel();
+    p = Math.max(0, Math.min(1, p));
+    sw.v = sw.v * .4 + .6 * (p - sw.p) * T / Math.max(1, now - sw.t); sw.t = now; sw.p = p;   // px per ms, lightly smoothed
+    df.style.transform = `translateX(${-(1 - p) * T}px)`;
+    if (!wide.matches) cal.forEach(el => el.style.transform = `translateX(${p * 164}px)`);   // phone: calendar slides with it
+    if ((p > .5) !== isOpen()) setOpen(p > .5);                                            // logo + tape-up tag follow at halfway
+  }
+  function swEnd(){
+    if (!sw) return;
+    if (performance.now() - sw.t > 90) sw.v = 0;               // held still before letting go: no flick
+    const on = Math.abs(sw.v) > .25 ? sw.v > 0 : sw.p > .5; sw = null;
+    df.style.transition = ""; cal.forEach(el => el.style.transition = "");
+    void df.offsetWidth;                                       // let it glide from where it was let go
+    df.style.transform = ""; cal.forEach(el => el.style.transform = "");
+    setOpen(on);
+  }
+  let tx = null, ty = 0, mode = null;
   addEventListener("touchstart", e => {
-    const t = e.touches[0]; y0 = t.clientY;
-    x0 = (t.clientX < 28 || (isOpen() && df.contains(e.target))) ? t.clientX : null;
+    if (e.touches.length !== 1 || blocked()){ tx = null; return; }
+    const t = e.touches[0]; tx = t.clientX; ty = t.clientY; mode = null;
   }, { passive:true });
   addEventListener("touchmove", e => {
-    if (x0 === null) return;
-    const t = e.touches[0], dx = t.clientX - x0;
-    if (Math.abs(dx) < 30 || Math.abs(dx) < Math.abs(t.clientY - y0)) return;
-    setOpen(dx > 0); x0 = null;
-  }, { passive:true });
+    if (tx === null) return;
+    const t = e.touches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+    if (!mode){
+      if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2){ mode = "h"; drag = null; swStart(); }
+      else if (Math.abs(dy) > 10){ tx = null; return; }
+      else return;
+    }
+    e.preventDefault();
+    swSet(sw.p0 + (t.clientX - tx) / travel());
+  }, { passive:false });
+  const touchDone = () => { if (mode === "h") { swEnd(); df._dragged = true; setTimeout(() => df._dragged = false, 50); } tx = null; mode = null; };
+  addEventListener("touchend", touchDone); addEventListener("touchcancel", touchDone);
+  let wAcc = 0, wIdle = 0;
+  addEventListener("wheel", e => {
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || e.ctrlKey){ return; }
+    if (blocked() && !sw) return;
+    e.preventDefault();                                         // no browser back/forward swipe while steering the frame
+    if (!sw){ swStart(); wAcc = 0; }
+    wAcc -= e.deltaMode === 1 ? e.deltaX * 16 : e.deltaX;       // fingers right → open
+    swSet(sw.p0 + wAcc / travel());
+    clearTimeout(wIdle); wIdle = setTimeout(swEnd, 140);
+  }, { passive:false });
   document.addEventListener("click", e => { if (isOpen() && !zoomed && !upOpen && !df.contains(e.target)) setOpen(false); });
 
   // ---- the drift: posters creep upward; wheel / drag adds speed that eases back off ----
@@ -96,6 +142,7 @@
   }
   requestAnimationFrame(tick);
   df.addEventListener("wheel", e => {
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;   // sideways = open/close swipe (above)
     if (!isOpen()) setOpen(true);
     e.preventDefault();
     const d = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
