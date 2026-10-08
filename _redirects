@@ -1,3 +1,6 @@
 # Meet Me at Society moved from /meetmeatsociety to /meetme (Oct 2026). Old links (and #p/<id> post links) keep working.
 /meetmeatsociety       /meetme  301!
 /meetmeatsociety.html  /meetme  301!
+# Digital Doorframe: direct link to the poster uploader (Chef, Oct 2026)
+/doorframe   /events.html?tapeup  302
+/doorframe/  /events.html?tapeup  302
