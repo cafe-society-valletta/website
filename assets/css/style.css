@@ -651,6 +651,55 @@ body.shop-body{ background:#12305C; }
 
 /* product view — full screen, full-bleed photos (swipe), info below (phone) / beside (desktop) */
 body.pd-on{ overflow:hidden; }
+
+/* SOLD OUT (Shopify stock): band across the tile, struck-through sizes, disabled add button */
+.out-band{ position:absolute; left:-10%; right:-10%; top:50%; z-index:3; translate:0 -50%; rotate:-8deg; padding:5px 0; background:#fff; color:#12305C;
+  font-size:10px; font-weight:700; letter-spacing:.22em; line-height:12px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.3); pointer-events:none; }
+.item.soldout .ph img, .item.soldout .ph.blank{ filter:saturate(.4) brightness(.8); }
+.pd-opts button.out{ opacity:.4; text-decoration:line-through; cursor:default; }
+
+/* BAG — a pill bottom right opens a drawer from the right; CHECKOUT hands over to Shopify (shop.js Bag) */
+.bag-btn{ position:fixed; right:16px; bottom:18px; z-index:65; display:flex; align-items:center; gap:8px; height:40px; padding:0 16px; border:1px solid #fff; border-radius:20px;
+  background:rgba(18,48,92,.88); color:#fff; font:700 12px/1 var(--font-display); letter-spacing:.2em; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.35);
+  -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); transition:scale .15s ease; }
+.bag-btn span{ display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 5px; border-radius:10px; background:rgba(255,255,255,.25); letter-spacing:0; }
+.bag-btn.has span{ background:#fff; color:#12305C; }
+.bag-btn:hover{ scale:1.05; } .bag-btn:active{ scale:.95; }
+.bag-shade{ position:fixed; inset:0; z-index:68; background:rgba(5,15,35,.5); opacity:0; pointer-events:none; transition:opacity .3s ease; }
+.bag{ position:fixed; top:0; right:0; bottom:0; z-index:70; display:flex; flex-direction:column; width:min(420px, 100vw); color:#fff; text-shadow:0 1px 6px rgba(0,0,0,.35);
+  background:linear-gradient(rgba(10,30,70,.25), rgba(10,30,70,.25)), #1D4E89 url('../img/p-bg-collection-mobile.jpg') 50% 0/cover no-repeat;   /* same cyanotype as the shop page (Chef) */
+  box-shadow:-10px 0 30px rgba(0,0,0,.4); transform:translateX(100%); transition:transform .38s cubic-bezier(.22,.8,.24,1); visibility:hidden; }
+body.bag-on .bag{ transform:none; visibility:visible; }
+body.bag-on .bag-shade{ opacity:1; pointer-events:auto; }
+body.bag-on{ overflow:hidden; }
+.bag-head{ display:flex; align-items:center; justify-content:space-between; padding:18px 20px 14px 24px; border-bottom:1px solid rgba(255,255,255,.4); }
+.bag-head h2{ margin:0; font-size:15px; font-weight:700; letter-spacing:.2em; }
+.bag-x{ width:40px; height:40px; display:flex; align-items:center; justify-content:center; border:0; background:none; cursor:pointer; }
+.bag-lines{ flex:1; overflow-y:auto; overscroll-behavior:contain; margin:0; padding:6px 24px; list-style:none; }
+.bag-empty{ padding:28px 0; font-size:13px; opacity:.8; }
+.bag-line{ display:flex; gap:14px; align-items:flex-start; padding:16px 0; border-bottom:1px solid rgba(255,255,255,.2); }
+.bag-th{ flex:0 0 64px; width:64px; height:80px; aspect-ratio:auto; }
+.bag-th.blank::after{ inset:22%; }
+.bag-mid{ flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.bag-name{ margin:0; font-size:12px; font-weight:700; letter-spacing:.08em; line-height:15px; text-transform:uppercase; }
+.bag-size{ margin:0; font-size:10px; font-weight:700; letter-spacing:.14em; opacity:.75; }
+.bag-qty{ display:inline-flex; align-items:center; align-self:flex-start; margin-top:6px; border:1px solid rgba(255,255,255,.6); }
+.bag-qty{ background:rgba(18,48,92,.35); }
+.bag-qty button{ width:30px; height:28px; border:0; background:none; color:#fff; font:500 16px/1 var(--font-display); cursor:pointer; }
+.bag-qty button:disabled{ opacity:.3; cursor:default; }
+.bag-qty span{ min-width:22px; text-align:center; font-size:12px; font-weight:700; }
+.bag-right{ display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+.bag-price{ margin:0; font-size:13px; font-weight:500; letter-spacing:.06em; }
+.bag-rm{ border:0; padding:0; background:none; color:#fff; font:700 9px/1 var(--font-display); letter-spacing:.16em; opacity:.7; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+.bag-rm:hover{ opacity:1; }
+.bag-foot{ display:flex; flex-direction:column; gap:8px; padding:16px 24px 22px; border-top:1px solid rgba(255,255,255,.4); }
+.bag-sub{ display:flex; justify-content:space-between; margin:0; font-size:13px; font-weight:700; letter-spacing:.16em; }
+.bag-fine{ margin:0; font-size:11px; opacity:.75; }
+.bag-go{ text-shadow:none; height:50px; margin-top:6px; border:0; background:#fff; color:#12305C; font:700 13px/1 var(--font-display); letter-spacing:.2em; cursor:pointer; }
+.bag-go:disabled{ background:rgba(255,255,255,.35); color:#fff; cursor:default; }
+.bag-note{ margin:0; min-height:14px; font-size:11px; line-height:14px; opacity:.85; }
+@media (min-width:900px){ .bag-btn{ right:40px; bottom:28px; height:44px; padding:0 20px; font-size:13px; } }
+@media (prefers-reduced-motion:reduce){ .bag, .bag-shade{ transition:none; } }
 .pd{ position:fixed; inset:0; z-index:60; background:#12305C; color:#fff; overflow-y:auto; overscroll-behavior:contain; opacity:0; transform:translateY(16px); transition:opacity .26s ease, transform .26s ease; }
 .pd.in{ opacity:1; transform:none; }
 .pd[hidden]{ display:none !important; }
