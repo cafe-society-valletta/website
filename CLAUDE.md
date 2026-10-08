@@ -44,7 +44,7 @@ netlify/functions/events.js  Netlify Function (zero-dependency, no build step): 
                         "More info" (short text on its line, e.g. "Tickets:", becomes the label); YouTube/Vimeo → "Watch",
                         cafesocietyvalletta gallery URL → "Photos"; several links allowed. Feed starts 1 Oct 2026 (FIRST_DAY)
                         and keeps all past events (no lifespan yet); past days show faded, kicker "Past event:".
-                        Photo Lab deep link: gallery.html#<data-slug> opens that roll (e.g. #qlv-pride).
+                        Photo Lab deep link: /photolab#<data-slug> opens that roll (e.g. #qlv-pride).
 assets/js/grain.js     Film-grain layer (8 tiles in assets/img/grain/, 12 fps, mix-blend screen so only dark areas get grain).
                         REMOVED from all pages on Chef's request (Oct 2026); file kept in case it comes back — re-add
                         <script src="assets/js/grain.js" defer></script> to a page to turn it on.
