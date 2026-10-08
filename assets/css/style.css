@@ -1691,7 +1691,8 @@ html.df-open .doorframe, html.df-open .ev-head, html.df-open .ev-layout{ transit
    About = light frosted glass (Chef: content scrolls visibly behind the bar), Photo Lab = a dark smoky glass over the film strips */
 .about-body .bar-light{ background:transparent; }
 .about-body .bar-light.scrolled{ background:rgba(251,250,247,.2); -webkit-backdrop-filter:blur(1.5px); backdrop-filter:blur(1.5px); box-shadow:none; }   /* see-through frosted glass once scrolled: content shows behind the titles + logos, menu stays readable (Chef, Oct 2026) */
-.events-body .bar-clear.scrolled{ background:rgba(10,10,10,.2); -webkit-backdrop-filter:blur(1.5px); backdrop-filter:blur(1.5px); }   /* Events: same light frost as About instead of the dark backing (Chef, Oct 2026) */
+.events-body .bar-clear.scrolled, .lostsouls-body .bar-clear.scrolled{ background:rgba(10,10,10,.2); -webkit-backdrop-filter:blur(1.5px); backdrop-filter:blur(1.5px); }   /* Events + LSC: same light frost as About instead of the dark backing (Chef, Oct 2026) */
+.shop-body .bar-collection.scrolled{ background:rgba(18,48,92,.2); -webkit-backdrop-filter:blur(1.5px); backdrop-filter:blur(1.5px); }   /* Collection: same frost, navy tint (Chef, Oct 2026) */
 .gallery-body .bar-dark{ background:transparent; }   /* clear over the film background (Chef, Oct 2026) */
 .gallery-body .bar-dark.scrolled{ background:rgba(10,10,10,.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
 /* About: photos + text multiply onto the paper so its grain shows through, as if printed on it (Chef) */
