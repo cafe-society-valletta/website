@@ -528,6 +528,10 @@ body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
   .ev-detail .details{ margin-bottom:auto; flex-shrink:0; }
   .ev-detail .details{ width:100%; max-width:var(--pw); padding:14px 36px 16px; }
   .ev-layout.dim .cal, body.ev-dim .ev-head{ transform:scale(.96); }
+  /* the open event card sits above the Digital Doorframe banner (55) + its logo (56), still under the menu bar (60);
+     .events is isolated, so the whole section is lifted while a card is open (drops back after the .3s close fade) */
+  .events{ position:relative; z-index:0; transition:z-index 0s linear .3s; }
+  .events:has(.ev-layout.open){ z-index:57; transition:none; }
   body.ev-open{ overflow:hidden; }
 }
 @media (min-width:700px) and (max-width:899.98px){
