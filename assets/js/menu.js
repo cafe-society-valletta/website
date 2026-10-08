@@ -147,6 +147,32 @@
   const unzoom = () => { if (z > 1){ z = 1; tx = ty = 0; apply(true); } };
   pf.on("flip", unzoom);
 
+  // desktop trackpad: a two-finger sideways swipe grabs the page corner and the page follows the fingers (live curl);
+  // let go past the spine and it turns, short of it and it falls back (StPageFlip's own drag). Chef, Oct 2026.
+  let sw = null, swIdle = 0;
+  const swEnd = () => { if (!sw) return; try { pf.userStop(sw.pos); } catch (e) {} sw = null; };
+  addEventListener("wheel", e => {
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || e.ctrlKey || z > 1 || innerWidth < 900) return;
+    const r = clip.getBoundingClientRect();
+    if (!sw && (e.clientY < r.top - 80 || e.clientY > r.bottom + 80)) return;          // only when over / near the book
+    e.preventDefault();                                                                 // no browser back / forward swipe
+    const dx = (e.deltaMode === 1 ? 16 : 1) * e.deltaX;
+    if (!sw){
+      if (Math.abs(dx) < 2) return;
+      const fwd = dx > 0, i = pf.getCurrentPageIndex();
+      if (fwd ? i >= N - 1 : i <= 0) return;
+      if (pf.getState() !== "read") return;
+      const b = pf.getRender().getRect(), y = b.top + b.height - 3;
+      sw = { x0: fwd ? b.left + b.width - 3 : b.left + 3, y, acc: 0, pos: null, k: b.width / 350 };   // ~350px of swipe = a full turn
+      sw.pos = { x: sw.x0, y };
+      pf.startUserTouch(sw.pos);
+    }
+    sw.acc += dx;
+    sw.pos = { x: sw.x0 - sw.acc * sw.k, y: sw.y - Math.min(40, Math.abs(sw.acc) * .1) };
+    pf.userMove(sw.pos, false);
+    clearTimeout(swIdle); swIdle = setTimeout(swEnd, 140);
+  }, { passive:false });
+
   nextB.addEventListener("click", () => pf.flipNext());
   prevB.addEventListener("click", () => pf.flipPrev());
   addEventListener("keydown", e => {
