@@ -51,12 +51,12 @@ assets/js/grain.js     Film-grain layer (8 tiles in assets/img/grain/, 12 fps, m
 assets/js/chars.js     Home "Characters" parade frame clock — keeps the line's step and every
                         figure's pose change on the same 1.5 fps frame (one jump per frame).
 assets/js/meetme.js    Meet Me at Society board on the green screen. Home: [ WRITE A POST ] button (typing anywhere also opens it)
-                        + MESSAGE INBOX (newest first, rows link to #p/<id>; post pages not built yet). #new = NEW POST screen:
-                        NAME (remembered in localStorage "mm-name"), SUBJECT (44 chars = one inbox line), MESSAGE (5000), PHOTOS
+                        + POST FEED (newest first, rows link to #p/<id>; post pages not built yet). #new = NEW POST screen:
+                        NAME (remembered in localStorage "mm-name"), SUBJECT (44 chars = one feed line), POST (5000), PHOTOS
                         (max 4; shrunk in the browser to a JPEG <= 1 MB, long side <= 1600 px). VT323 font.
                         Posts are shared via netlify/functions/meetme.mjs (Netlify Blobs; photos stored as img/<id>-<n>); new posts
                         wait in a queue until approved on mmadmin.html ("SYSOP CONSOLE", unlisted, key = Netlify env MEETME_ADMIN_KEY;
-                        shows body + photos; reject/delete also deletes the photos). #p/<id> = POST WINDOW over the inbox (email
+                        shows body + photos; reject/delete also deletes the photos). #p/<id> = POST WINDOW over the feed (email
                         layout FROM/SENT/SUBJ, body, photos in real colour; click a photo = lightbox outside the bent glass), then a
                         reddit-style COMMENTS thread (replies nest; every comment vetted in the SYSOP CONSOLE). The poster's browser
                         keeps an owner key (localStorage "mm-keys") → [ EDIT POST ] (back to the queue) / [ DELETE ] (immediate). Intro: boot prompt typed live, wipe, logo clip.
