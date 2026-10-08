@@ -312,7 +312,7 @@ html.tab-leaving .site-bar .tab::before{ animation:tab-lift .16s cubic-bezier(.5
 /* dark bar (Photo Lab) */
 .bar-dark{ background:var(--black); }
 /* transparent bars (Events, LSC, Collection) — they pick up a backing once the page has scrolled */
-.bar-clear.scrolled{ background:rgba(10,10,10,.88); }
+.bar-clear.scrolled{ background:rgba(10,10,10,.2); -webkit-backdrop-filter:blur(1.5px); backdrop-filter:blur(1.5px); }   /* house style for clear bars once scrolled: light frost, content visible behind (Chef, Oct 2026) — Events, LSC, Menu */
 .bar-collection.scrolled{ background:rgba(18,48,92,.92); }
 .bar-clear .tab.logo-lsc img{ filter:invert(1); }
 .bar-collection .tab{ padding:0 6px; }
@@ -1688,13 +1688,12 @@ html.df-open .doorframe, html.df-open .ev-head, html.df-open .ev-layout{ transit
 }
 
 /* menu bar transparent on About + Photo Lab (Chef); once scrolled it picks up a backing so it stays readable:
-   About = light frosted glass (Chef: content scrolls visibly behind the bar), Photo Lab = a dark smoky glass over the film strips */
+   About = light frosted glass (Chef: content scrolls visibly behind the bar), every transparent bar now uses the same light frost (see .bar-clear.scrolled) */
 .about-body .bar-light{ background:transparent; }
 .about-body .bar-light.scrolled{ background:rgba(251,250,247,.2); -webkit-backdrop-filter:blur(1.5px); backdrop-filter:blur(1.5px); box-shadow:none; }   /* see-through frosted glass once scrolled: content shows behind the titles + logos, menu stays readable (Chef, Oct 2026) */
-.events-body .bar-clear.scrolled, .lostsouls-body .bar-clear.scrolled{ background:rgba(10,10,10,.2); -webkit-backdrop-filter:blur(1.5px); backdrop-filter:blur(1.5px); }   /* Events + LSC: same light frost as About instead of the dark backing (Chef, Oct 2026) */
 .shop-body .bar-collection.scrolled{ background:rgba(18,48,92,.2); -webkit-backdrop-filter:blur(1.5px); backdrop-filter:blur(1.5px); }   /* Collection: same frost, navy tint (Chef, Oct 2026) */
-.gallery-body .bar-dark{ background:transparent; }   /* clear over the film background (Chef, Oct 2026) */
-.gallery-body .bar-dark.scrolled{ background:rgba(10,10,10,.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+.gallery-body .bar-dark, .bb-body .bar-dark{ background:transparent; }   /* clear over the film background (Chef, Oct 2026) */
+.gallery-body .bar-dark.scrolled, .bb-body .bar-dark.scrolled{ background:rgba(10,10,10,.2); -webkit-backdrop-filter:blur(1.5px); backdrop-filter:blur(1.5px); }   /* Photo Lab + Barney Book: same light frost (Chef, Oct 2026) */
 /* About: photos + text multiply onto the paper so its grain shows through, as if printed on it (Chef) */
 .about .about-head, .about .about-sections, .about .site-footer{ mix-blend-mode:multiply; }
 @media (min-width:900px){ body.about-body{ --tile:272px; } }   /* paper tile: phone 170px, desktop 272px (Chef) */
