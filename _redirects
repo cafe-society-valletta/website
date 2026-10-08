@@ -4,3 +4,6 @@
 # Digital Doorframe: direct link to the poster uploader (Chef, Oct 2026)
 /doorframe   /events.html?tapeup  302
 /doorframe/  /events.html?tapeup  302
+# Photo Lab moved from /gallery.html to /photolab (Chef, Oct 2026). Old links (and #<roll> deep links) keep working.
+/gallery.html  /photolab  301
+/gallery       /photolab  301

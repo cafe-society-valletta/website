@@ -10,7 +10,7 @@ Static, 8-page HTML site. No build step, no package manager, no framework.
 index.html       Home
 about.html        About
 events.html       Events (upcoming/past toggle)
-gallery.html      Photo Lab — film rolls; a roll with data-gallery opens the same gallery viewer, and its photos get a
+photolab.html     Photo Lab (served at /photolab; old /gallery.html 301s there) — film rolls; a roll with data-gallery opens the same gallery viewer, and its photos get a
                   'Download full res' button (GALLERY_SETS[name].dl = base URL of the originals, hosted off-repo)
 lostsouls.html    Lost Souls Club
 menu.html         Menu — the printed A5 booklet as a 3D flip book (assets/js/menu.js): closed cover → A4-wide spreads →
