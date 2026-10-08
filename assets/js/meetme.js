@@ -206,6 +206,13 @@
     box.appendChild(ptr);   // inside the monitor, above the glass and below the screen shadow; moves to <body> in fullscreen
     let kind = "", frame = 0, last = null;
     const lin = b => b / 255;   // map byte → 0..1 (0.5 = no shift)
+    const bend = (x, y, w, h) => {   // un-bent screen point → where the filter draws it
+      const m = warpMap; if(!m || screen.classList.contains("full")) return [x, y];
+      const S = m.range * w, d = (qx, qy) => { const mx = Math.min(m.w - 1, Math.max(0, Math.round(qx / w * m.w - .5))),
+        my = Math.min(m.h - 1, Math.max(0, Math.round(qy / h * m.h - .5))), k = (my * m.w + mx) * 4;
+        return [S * (lin(m.px[k]) - .5), S * (lin(m.px[k + 1]) - .5)]; };
+      let qx = x, qy = y; for(let n = 0; n < 5; n++){ const [dx, dy] = d(qx, qy); qx = x - dx; qy = y - dy; }
+      return [qx, qy]; };
     // desktop glass outline (fraction of the glass box; quadratic fits of the monitor photo's glass edge)
     const EDGE = box.classList.contains("mm-computer") ? { top:[.09268, -.0883, -.00293], bottom:[-.12059, .13698, .9662], left:[.05491, -.05618, .00466], right:[-.04281, .04188, .99292] } : null;
     const q2 = (c, t) => (c[0] * t + c[1]) * t + c[2];
@@ -226,7 +233,7 @@
       sys.hidden = !(d < 0 && d > -BAND); if(!sys.hidden){ sys.style.opacity = Math.min(1, -d / BAND); sys.style.transform = `translate3d(${last.x}px, ${last.y}px, 0)`; }
       ptr.hidden = d <= 0; if(ptr.hidden) return;
       ptr.style.opacity = Math.min(1, d / BAND);
-      const qx = last.x - r.left, qy = last.y - r.top;   // drawn right under the real pointer (Chef: no bending for the cursor)
+      const [qx, qy] = bend(last.x - r.left, last.y - r.top, r.width, r.height);
       const k = last.t && last.t.closest && last.t.closest("input:not([type=file]), textarea") ? "beam" : "arrow";
       if(k !== kind){ kind = k; ptr.style.backgroundImage = `url("${k === "beam" ? beam : arrow}")`; ptr.style.aspectRatio = k === "beam" ? "7 / 13" : "11 / 17"; ptr.classList.toggle("beam", k === "beam"); }
       const wpx = full ? (k === "beam" ? 10 : 16) : Math.max(k === "beam" ? 10 : 16, r.width * (k === "beam" ? .0125 : .02));
@@ -241,12 +248,12 @@
 
   // ---- taps on a touch screen land where the content really is: the CRT bend moves what you SEE away from where the
   // browser thinks it is (up to ~20px near the edges), so a tap on a drawn button could miss it. A tap at a seen point v
-  // shows the content from v + d(v) (exactly what the filter samples), so the tap is re-aimed there.
-  // Mouse clicks too: the 8-bit pointer is drawn straight under the mouse, so a click goes to what you see under it.
+  // shows the content from v + d(v) (exactly what the filter samples), so the tap is re-aimed there. (Mouse users get the
+  // 8-bit pointer, which is already drawn over what a click hits.)
   let lastPtr = "mouse";
   glass.addEventListener("pointerdown", e => { lastPtr = e.pointerType; }, true);
   glass.addEventListener("click", e => {
-    const m = warpMap; if(!e.isTrusted || !m || screen.classList.contains("full")) return;
+    const m = warpMap; if(!e.isTrusted || !m || lastPtr === "mouse" || screen.classList.contains("full")) return;
     const r = glass.getBoundingClientRect(), w = r.width, h = r.height, x = e.clientX - r.left, y = e.clientY - r.top;
     const mx = Math.min(m.w - 1, Math.max(0, Math.round(x / w * m.w - .5))), my = Math.min(m.h - 1, Math.max(0, Math.round(y / h * m.h - .5))), k = (my * m.w + mx) * 4;
     const S = m.range * w, ux = e.clientX + S * (m.px[k] / 255 - .5), uy = e.clientY + S * (m.px[k + 1] / 255 - .5);
