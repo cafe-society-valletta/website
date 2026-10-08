@@ -1,8 +1,8 @@
-/* Meet Me at Society — the green-screen message board (retro Craigslist × Reddit).
+/* Meet Me at Society — the green-screen post board (retro Craigslist × Reddit).
    Renders into whichever monitor is showing (.mm-phone < 900px, else .mm-computer). Two screens:
      HOME     [ WRITE A POST ]_   ← button (or just start typing) → the compose screen
               ===== M E S S A G E   I N B O X =====   DATE TIME AUTHOR SUBJECT, newest first; rows link to #p/<id>
-     COMPOSE  (#new)  NAME> (remembered)  CATEGORY> (required, 17 categories)  SUBJECT> (44 chars = one inbox line)  MESSAGE> (up to 5000)
+     COMPOSE  (#new)  NAME> (remembered)  CATEGORY> (required, 17 categories)  SUBJECT> (44 chars = one feed line)  POST> (up to 5000)
               PHOTOS> up to 4, shrunk in the browser to JPEG ≤ 1600 px / ≤ 1 MB each     [SEND] [CANCEL]
    All screen copy is written the way the 8-bit terminal would print it (Chef): CAPS system lines, > prompts, terse.
    Only exception: the attached photos themselves (shown as normal photos).
@@ -93,7 +93,7 @@
         <label class="mmb-field"><span class="mmb-k">NAME&gt;</span><input name="author" maxlength="${LIM.author}" autocomplete="nickname" spellcheck="false"></label>
         <div class="mmb-field"><span class="mmb-k">CATEGORY&gt;</span>${picker("category")}</div>
         <label class="mmb-field"><span class="mmb-k">SUBJECT&gt;</span><input name="subject" maxlength="${LIM.subject}" autocomplete="off" autocapitalize="sentences"><small class="mmb-n" data-for="subject"></small></label>
-        <label class="mmb-field mmb-tall"><span class="mmb-k">MESSAGE&gt;</span><textarea name="body" maxlength="${LIM.body}" rows="7" autocapitalize="sentences"></textarea><small class="mmb-n" data-for="body"></small></label>
+        <label class="mmb-field mmb-tall"><span class="mmb-k">POST&gt;</span><textarea name="body" maxlength="${LIM.body}" rows="7" autocapitalize="sentences"></textarea><small class="mmb-n" data-for="body"></small></label>
         <div class="mmb-field"><span class="mmb-k">PHOTOS&gt;</span><button type="button" class="mmb-btn mmb-add">[+ ATTACH]</button><small class="mmb-n mmb-pn"></small></div>
         <input class="mmb-file" type="file" accept="image/*" multiple hidden>
         <ul class="mmb-thumbs"></ul>
@@ -102,9 +102,9 @@
         <p class="mmb-hint mmb-send-hint" aria-live="polite"></p>
         <p class="mmb-actions"><button type="submit" class="mmb-btn">[ SEND ]</button><button type="button" class="mmb-btn mmb-cancel">[ CANCEL ]</button></p>
       </form>
-      <section class="mmb-post" hidden role="dialog" aria-modal="true" aria-label="Message">
+      <section class="mmb-post" hidden role="dialog" aria-modal="true" aria-label="Post">
         <div class="mmb-win">
-          <div class="mmb-win-bar"><span class="mmb-win-t">MESSAGE</span><button type="button" class="mmb-btn mmb-close" aria-label="Close message">[X]</button></div>
+          <div class="mmb-win-bar"><span class="mmb-win-t">POST</span><button type="button" class="mmb-btn mmb-close" aria-label="Close post">[X]</button></div>
           <div class="mmb-post-in"></div>
         </div>
       </section>
@@ -326,7 +326,7 @@
   function drawPost(p, note, comments){
     const [d, t] = fmt(p.at), n = p.photos || 0; curPost = p;
     postShots = Array.from({ length:n }, (_, i) => photoURL(p.id, i));
-    $postT.textContent = `MESSAGE  ${d}  ${t}`;
+    $postT.textContent = `POST  ${d}  ${t}`;
     $postIn.innerHTML = `
       <p class="mmb-hdr"><span>FROM:</span> &lt;${esc(p.author)}&gt;</p>
       <p class="mmb-hdr"><span>SENT:</span> ${d} ${t}</p>
@@ -335,7 +335,7 @@
       ${rule("-", 200)}
       ${note ? `<p class="mmb-note">${note}</p>` : ""}
       ${store.get("mm-keys", {})[p.id] ? `<p class="mmb-own"><button type="button" class="mmb-btn mmb-edit">[ EDIT POST ]</button><button type="button" class="mmb-btn mmb-del">[ DELETE ]</button></p>` : ""}
-      <div class="mmb-text">${p.body ? esc(p.body) : (note ? "" : "(NO MESSAGE TEXT)")}</div>
+      <div class="mmb-text">${p.body ? esc(p.body) : (note ? "" : "(NO POST TEXT)")}</div>
       ${n && note ? `${rule("-", 200)}<p class="mmb-hdr"><span>ATTACHED:</span> ${n} PHOTO${n > 1 ? "S" : ""} (SHOWN ONCE APPROVED)</p>` : ""}
       ${n && !note ? `${rule("-", 200)}<p class="mmb-hdr"><span>ATTACHED:</span> ${n} PHOTO${n > 1 ? "S" : ""}</p>
         <div class="mmb-photos">${postShots.map((u, i) => `<button type="button" class="mmb-photo" data-i="${i}" aria-label="Open photo ${i + 1} of ${n}"><img src="${u}" alt="Photo ${i + 1} of ${n}" loading="lazy"><span>[ PHOTO ${i + 1}/${n} &middot; CLICK TO ENLARGE ]</span></button>`).join("")}</div>` : ""}
@@ -349,7 +349,7 @@
         <input class="mmb-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <p class="mmb-hint mmb-chint" aria-live="polite"></p>
         <p class="mmb-actions"><button type="submit" class="mmb-btn">[ SEND COMMENT ]</button></p>
-      </form>` : `<p class="mmb-note">${note ? "COMMENTS OPEN ONCE THIS MESSAGE IS APPROVED." : "COMMENTS ARE OFF ON THIS EXAMPLE MESSAGE."}</p>`}
+      </form>` : `<p class="mmb-note">${note ? "COMMENTS OPEN ONCE THIS POST IS APPROVED." : "COMMENTS ARE OFF ON THIS EXAMPLE POST."}</p>`}
       ${rule("-", 200)}
       <p class="mmb-actions"><button type="button" class="mmb-btn mmb-close2">[ BACK TO FEED ]</button></p>`;
     $postIn.querySelectorAll("img").forEach(im => im.addEventListener("load", fitPost));
@@ -411,7 +411,7 @@
         mine.push({ id:d.id, post:postId, parent:replyTo, at:iso, author, body }); store.set("mm-mine-c", mine);
         f.elements.body.value = ""; setReply(null); drawThread();
         f.querySelector(".mmb-chint").textContent = "COMMENT QUEUED. AWAITING SYSOP APPROVAL."; })
-      .catch(st => { hint.textContent = st === 429 ? "?ERROR: TOO MANY MESSAGES. WAIT 10 MIN." : "NO CARRIER. PRESS [ SEND COMMENT ] TO RETRY."; })
+      .catch(st => { hint.textContent = st === 429 ? "?ERROR: TOO MANY COMMENTS. WAIT 10 MIN." : "NO CARRIER. PRESS [ SEND COMMENT ] TO RETRY."; })
       .finally(() => { btn.disabled = false; fitPost(); });
   });
   function openPost(id){
@@ -419,12 +419,12 @@
     $post.hidden = false; screen.scrollTop = 0;
     const known = posts().find(p => p.id === id);
     if(known && (known.waiting || !live.some(p => p.id === id))){   // seed or own post still waiting for the sysop
-      drawPost(known, known.waiting ? "THIS MESSAGE IS WAITING FOR SYSOP APPROVAL." : ""); return; }
-    $postT.textContent = "MESSAGE"; $postIn.innerHTML = `<p class="mmb-note">LOADING MESSAGE...</p>`; fitPost();
+      drawPost(known, known.waiting ? "THIS POST IS WAITING FOR SYSOP APPROVAL." : ""); return; }
+    $postT.textContent = "POST"; $postIn.innerHTML = `<p class="mmb-note">LOADING POST...</p>`; fitPost();
     const my = ++postReq;
     fetch(`${API}?post=${encodeURIComponent(id)}`, { cache:"no-store" }).then(r => r.ok ? r.json() : null)
       .then(d => { if(my !== postReq) return;
-        if(d && d.post) drawPost(d.post, "", d.comments || []); else { $postIn.innerHTML = `<p class="mmb-note">?ERROR: MESSAGE NOT FOUND.</p>`; fitPost(); } })
+        if(d && d.post) drawPost(d.post, "", d.comments || []); else { $postIn.innerHTML = `<p class="mmb-note">?ERROR: POST NOT FOUND.</p>`; fitPost(); } })
       .catch(() => { if(my === postReq){ $postIn.innerHTML = `<p class="mmb-note">NO CARRIER. CLOSE AND TRY AGAIN.</p>`; fitPost(); } });
   }
   const closePost = () => { if(history.state && history.state.mmPost) history.back();
@@ -449,7 +449,7 @@
       box.outerHTML = `<form class="mmb-eform" novalidate>
         <div class="mmb-field"><span class="mmb-k">CATEGORY&gt;</span>${picker("category", false, curPost.category || "general")}</div>
         <label class="mmb-field"><span class="mmb-k">SUBJECT&gt;</span><input name="subject" maxlength="${LIM.subject}" value="${esc(curPost.subject)}"></label>
-        <label class="mmb-field mmb-tall"><span class="mmb-k">MESSAGE&gt;</span><textarea name="body" maxlength="${LIM.body}" rows="7">${esc(curPost.body || "")}</textarea></label>
+        <label class="mmb-field mmb-tall"><span class="mmb-k">POST&gt;</span><textarea name="body" maxlength="${LIM.body}" rows="7">${esc(curPost.body || "")}</textarea></label>
         <p class="mmb-hint mmb-ehint">SAVING SENDS YOUR POST BACK TO THE SYSOP FOR APPROVAL.</p>
         <p class="mmb-actions"><button type="submit" class="mmb-btn">[ SAVE ]</button><button type="button" class="mmb-btn mmb-ecancel">[ CANCEL ]</button></p></form>`;
       $postIn.querySelector(".mmb-eform textarea").focus({ preventScroll:true }); return fitPost();
@@ -460,7 +460,7 @@
       if(!del.dataset.sure){ del.dataset.sure = "1"; del.textContent = "[ REALLY DELETE? Y ]";
         setTimeout(() => { if(del.isConnected){ delete del.dataset.sure; del.textContent = "[ DELETE ]"; } }, 4000); return; }
       del.disabled = true; del.textContent = "DELETING...";
-      return ownCall("own-delete").then(() => ownDone("MESSAGE DELETED.")).catch(() => { del.disabled = false; del.textContent = "?ERROR. [ DELETE ]"; });
+      return ownCall("own-delete").then(() => ownDone("POST DELETED.")).catch(() => { del.disabled = false; del.textContent = "?ERROR. [ DELETE ]"; });
     }
     if(e.target.closest(".mmb-close, .mmb-close2")) return closePost();
     const ph = e.target.closest(".mmb-photo"); if(ph) openLightbox(+ph.dataset.i);
@@ -510,11 +510,11 @@
         const mine = store.get("mm-mine", []); mine.push({ id:d.id, at, author, subject, body, category, photos:shots.length }); store.set("mm-mine", mine);
         if(d.ownerKey){ const keys = store.get("mm-keys", {}); keys[d.id] = d.ownerKey; store.set("mm-keys", keys); }   // lets this browser edit/delete it
         $subject.value = ""; $body.value = ""; setPick($form.querySelector(".mmb-pick"), ""); shots.forEach(s => URL.revokeObjectURL(s.url)); shots = []; drawThumbs();
-        $homeHint.textContent = "MESSAGE QUEUED. AWAITING SYSOP APPROVAL.";
+        $homeHint.textContent = "POST QUEUED. AWAITING SYSOP APPROVAL.";
         render(); toHome();
       })
       .catch(err => { const m = err && err.message;
-        $hint.textContent = m === "slow-down" ? "?ERROR: TOO MANY MESSAGES. WAIT 10 MIN."
+        $hint.textContent = m === "slow-down" ? "?ERROR: TOO MANY POSTS. WAIT 10 MIN."
           : m === "category" ? "?ERROR: CATEGORY REQUIRED."
           : m === "photo-size" ? "?ERROR: IMAGE TOO LARGE." : m === "photo-type" ? "?ERROR: UNSUPPORTED IMAGE."
           : "NO CARRIER. PRESS [ SEND ] TO RETRY."; })
