@@ -22,7 +22,7 @@ shop.html         The Society Collection — categories open inline in place (pr
                   does bag/checkout + stock. Deep links: shop.html#apparel, shop.html#p/<handle> (e.g. #p/apparel-test-1).
                   Shopify (headless): netlify/functions/shop.mjs reads products from thesocietycollection.myshopify.com via the
                   Storefront API (Netlify env SHOPIFY_STOREFRONT_TOKEN + SHOPIFY_STORE_DOMAIN — never in the repo) and makes the
-                  cart at checkout. Collections map to categories by name. Bag drawer + live products only when the shop is open
+                  cart at checkout. Collections map to categories by name; products in no matching collection are guessed from product type/title (GUESS in shop.mjs), else Retail. Bag drawer + live products only when the shop is open
                   (SHOP_COMING_SOON false) or at shop.html?preview; otherwise the placeholders show.
 meetme.html       Meet Me at Society — UNLISTED (noindex, not in nav), served at /meetme (_redirects sends the old /meetmeatsociety there). Background = the beige
                   computer (assets/img/p-meetme-computer.webp/.png); .mm-screen sits exactly over its green screen for content.
@@ -36,7 +36,9 @@ assets/css/style.css   Single stylesheet for all 7 pages. Pages 2–6: phone (<7
 assets/fonts/          Site font "CS Neutra" (free stand-in for Neutraface Text): Josefin Sans for weights
                         under 350 (thin/light), Jost from Book up. Self-hosted WOFF2, SIL OFL licences included.
 assets/js/main.js      Shared helpers + the pages 2–6 menu bar (always visible; transparent bars get a
-                        backing on scroll) + About section open/close + About gallery viewer (tile zooms out into a
+                        backing on scroll — HOUSE STYLE (Chef, Oct 2026): every page's bar is clear at the top and a light frost once
+                        scrolled: ~20% tint (dark rgba(10,10,10,.2), About paper .2, Collection navy .2) + backdrop blur 1.5px.
+                        Use it on any new page too) + About section open/close + About gallery viewer (tile zooms out into a
                         3-wide phone / 5-wide desktop grid of prints). Photo sets + chosen covers live in assets/js/gallery-photos.js (window.GALLERY_SETS; coverCrop = hand-cropped <dir>-cover.jpg).
 assets/js/events.js    Events Calendar — month grids generated in JS. Events load LIVE from the "Events"
                         Google Calendar via netlify/functions/events.js; EVENTS is a fallback snapshot, WEEKLY
