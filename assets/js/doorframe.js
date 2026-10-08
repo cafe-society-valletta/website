@@ -13,14 +13,11 @@
   // posters come from /.netlify/functions/doorframe (approved in the SYSOP CONSOLE); fillers until the first one goes up
   const API = "/.netlify/functions/doorframe";
   const P = "assets/img/";
-  const FILLER = [
-    { src:P + "p-poster-dusk-busk.jpg", alt:"Dusk Busk poster" },
-    { src:P + "p-poster-mastertape.jpg", alt:"MasterTape poster" },
+  const FILLER = [   // placeholders until real posters are approved (Chef, Oct 2026)
     { src:P + "p-cs-logo.png", alt:"Café Society Valletta", logo:true },
-    { src:P + "p-poster-dusk-busk.jpg", alt:"Dusk Busk poster" },
     { src:P + "p-lsc-stacked.png", alt:"Lost Souls Club", logo:true },
     { src:P + "p-poster-mastertape.jpg", alt:"MasterTape poster" },
-    { src:P + "p-cs-logo.png", alt:"Café Society Valletta", logo:true }
+    { src:P + "p-df-dusk-busk.jpg", alt:"Dusk Busk poster" }
   ];
   function seeded(str){
     let h = 2166136261;
