@@ -28,13 +28,19 @@
   li .ph{ display:flex; gap:8px; flex-wrap:wrap; }
   li .ph a{ display:block; width:96px; height:96px; border:1px solid #3c8f3c; background:#0c2412; }
   li .ph img{ width:100%; height:100%; object-fit:cover; display:block; }
+  ol.df li{ grid-template-columns:auto 1fr auto; align-items:start; align-content:start; }
+  ol.df .ph{ grid-column:1; grid-row:1 / span 4; }
+  ol.df .ph a{ width:113px; height:160px; }
+  ol.df .s{ grid-column:2 / -1; }
+  ol.df li > span:nth-child(2){ grid-column:2; grid-row:1; } ol.df li > span:nth-child(3){ grid-column:3; grid-row:1; }
+  ol.df a.out{ color:inherit; word-break:break-all; }
   @media (max-width:600px){ li{ grid-template-columns:1fr; } li .s, li .b, li .ph{ grid-column:1; } }
 </style>
 </head>
 <body>
 <main>
   <h1>SYSOP CONSOLE</h1>
-  <p class="muted">MEET ME AT SOCIETY BBS // MESSAGE APPROVAL QUEUE</p>
+  <p class="muted">MEET ME AT SOCIETY BBS // MESSAGE APPROVAL QUEUE // + THE EVENTS DOORFRAME</p>
   <p class="muted">NEW MESSAGES STAY OFF THE BOARD UNTIL APPROVED HERE.</p>
   <p><a class="lnk" href="/meetme" target="_blank" rel="noopener">[OPEN MESSAGE INBOX]</a></p>
   <form id="login"><p><label>ENTER SYSOP KEY&gt; <input id="key" type="password" autocomplete="current-password"></label> <button>[LOGIN]</button></p><p id="msg" class="muted"></p></form>
@@ -45,6 +51,12 @@
     <p class="muted">TO REMOVE A MESSAGE: [VIEW] IT ON THE BOARD IF NEEDED, THEN [DELETE] HERE (PRESS TWICE TO CONFIRM). ITS PHOTOS AND COMMENTS GO TOO.</p>
     <ol id="live"></ol>
     <h2>LATEST LIVE COMMENTS</h2><ol id="comments"></ol>
+    <h2>DOORFRAME QUEUE: <span id="ndp">0</span> POSTER(S) AWAITING APPROVAL</h2>
+    <p class="muted">EVENTS PAGE // POSTERS TAPED UP BY VISITORS. NAME + CONTACT ARE PRIVATE (SYSOP ONLY); THE LINK GOES PUBLIC WITH THE POSTER.</p>
+    <ol id="dpending" class="df"></ol>
+    <h2>DOORFRAME: <span id="ndl">0</span> POSTER(S) UP</h2>
+    <p class="muted">TAKE DOWN OUTDATED POSTERS WITH [DELETE] (PRESS TWICE TO CONFIRM). THE UPLOADER'S BROWSER CAN ALSO TAKE ITS OWN DOWN.</p>
+    <ol id="dlive" class="df"></ol>
     <p class="muted">AUTO-REFRESH EVERY 20 SEC. <button type="button" id="out" class="no">[LOGOFF]</button></p>
   </section>
 </main>
@@ -53,11 +65,15 @@
   const API = "/.netlify/functions/meetme", $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const when = at => at.replace("T", " ");
+  const CAT = { general:"GENERAL INQUIRY OR ANNOUNCEMENT", meetup:"MEETUP / ACTIVITY BUDDY", staff:"LOOKING FOR STAFF", job:"LOOKING FOR A JOB", flat:"LOOKING FOR A FLAT",
+    rent:"FLAT FOR RENT", flatmate:"LOOKING FOR A FLATMATE", art:"ARTWORK/HOMEMADE PRODUCT FOR SALE", sale:"ITEM FOR SALE OR SWAP", free:"FREE / GIVEAWAY",
+    service:"SERVICE FOR HIRE", classes:"CLASSES & LANGUAGE EXCHANGE", collab:"COLLABORATORS WANTED", club:"CLUB OR ORGANIZATION", cause:"VOLUNTEERS & CAUSES",
+    lost:"LOST & FOUND", missed:"MISSED CONNECTIONS" };   // keep in step with assets/js/meetme.js
   let key = ""; try{ key = sessionStorage.getItem("mm-key") || ""; }catch(e){}
   const pics = {};   // photo id -> object URL (photos need the key header, so they are fetched, not linked)
   const photo = id => { if(pics[id]) return Promise.resolve(pics[id]);
     return fetch(API + "?photo=" + encodeURIComponent(id), { headers:{ "x-mm-key":key } }).then(r => r.ok ? r.blob() : null).then(b => b ? (pics[id] = URL.createObjectURL(b)) : ""); };
-  const row = (p, btns) => `<li><span>${esc(when(p.at))}</span><span>&lt;${esc(p.author)}&gt;</span><span>${btns}</span><span class="s">SUBJ: ${esc(p.subject)}${p.edited ? " (EDITED BY POSTER)" : ""}</span>`
+  const row = (p, btns) => `<li><span>${esc(when(p.at))}</span><span>&lt;${esc(p.author)}&gt;</span><span>${btns}</span><span class="s">SUBJ: ${esc(p.subject)}${p.edited ? " (EDITED BY POSTER)" : ""}</span><span class="s">CAT: ${esc(CAT[p.category] || CAT.general)}</span>`
     + (p.body ? `<p class="b">${esc(p.body)}</p>` : "")
     + (p.photos ? `<span class="ph">${Array.from({ length:p.photos }, (_, n) => `<a target="_blank" data-ph="${esc(p.id)}-${n}"><img alt="PHOTO ${n+1}"></a>`).join("")}</span>` : "")
     + `</li>`;
@@ -73,9 +89,23 @@
     $("comments").innerHTML = (d.comments || []).filter(c => !c.deleted).map(c => crow(c, `<button class="no" data-a="cdelete" data-id="${esc(c.id)}" data-post="${esc(c.post)}">[DELETE]</button>`)).join("") || "<li class='muted'>NO COMMENTS.</li>";
     fillPhotos();
   }
+  const DF = "/.netlify/functions/doorframe";
+  const dimg = id => { const k = "df:" + id; if(pics[k]) return Promise.resolve(pics[k]);
+    return fetch(DF + "?img=" + encodeURIComponent(id), { headers:{ "x-mm-key":key } }).then(r => r.ok ? r.blob() : null).then(b => b ? (pics[k] = URL.createObjectURL(b)) : ""); };
+  const drow = (p, btns) => `<li><span class="ph"><a target="_blank" data-df="${esc(p.id)}"><img alt="POSTER"></a></span><span>${esc(when(p.at))}</span><span>${btns}</span>`
+    + `<span class="s">FROM: ${esc(p.name)} // CONTACT: ${esc(p.contact)}</span>`
+    + `<span class="s">LINK: ${p.link ? `<a class="out" href="${esc(p.link)}" target="_blank" rel="noopener nofollow">${esc(p.link)}</a>` : "(NONE)"}</span>`
+    + (p.up ? `<span class="s muted">UP SINCE ${esc(when(p.up))}</span>` : "") + `</li>`;
+  function showDF(d){
+    $("ndp").textContent = d.pending.length; $("ndl").textContent = d.live.length;
+    $("dpending").innerHTML = d.pending.map(p => drow(p, `<button data-api="df" data-a="approve" data-id="${esc(p.id)}">[APPROVE]</button><button class="no" data-api="df" data-a="reject" data-id="${esc(p.id)}">[REJECT]</button>`)).join("") || "<li class='muted'>QUEUE EMPTY.</li>";
+    $("dlive").innerHTML = d.live.map(p => drow(p, `<button class="no" data-api="df" data-a="delete" data-id="${esc(p.id)}">[DELETE]</button>`)).join("") || "<li class='muted'>NO POSTERS UP.</li>";
+    document.querySelectorAll("a[data-df]").forEach(a => dimg(a.dataset.df).then(u => { if(u){ a.href = u; a.firstChild.src = u; } }));
+  }
   function fail(r){ if(r.status === 401){ key = ""; try{ sessionStorage.removeItem("mm-key"); }catch(e){} $("login").hidden = false; $("lists").hidden = true; $("msg").textContent = "ACCESS DENIED. (SYSOP KEY WRONG, OR MEETME_ADMIN_KEY NOT SET IN NETLIFY.)"; } else $("msg").textContent = "NO CARRIER. TRY AGAIN."; }
   function load(){ if(!key) return;
     fetch(API + "?admin=1", { headers:{ "x-mm-key":key }, cache:"no-store" }).then(r => r.ok ? r.json().then(show) : fail(r)).catch(() => fail({}));
+    fetch(DF + "?admin=1", { headers:{ "x-mm-key":key }, cache:"no-store" }).then(r => r.ok ? r.json().then(showDF) : null).catch(() => {});
   }
   $("login").addEventListener("submit", e => { e.preventDefault(); key = $("key").value.trim(); try{ sessionStorage.setItem("mm-key", key); }catch(e){} load(); });
   document.addEventListener("click", e => { const b = e.target.closest("button[data-a]"); if(!b) return;
@@ -85,7 +115,7 @@
       setTimeout(() => { if(b.isConnected){ delete b.dataset.sure; b.textContent = del ? "[DELETE]" : "[REJECT]"; } }, 4000);
       return; }
     b.disabled = true;
-    fetch(API, { method:"POST", headers:{ "Content-Type":"application/json", "x-mm-key":key }, body:JSON.stringify({ action:b.dataset.a, id:b.dataset.id, post:b.dataset.post }) })
+    fetch(b.dataset.api === "df" ? DF : API, { method:"POST", headers:{ "Content-Type":"application/json", "x-mm-key":key }, body:JSON.stringify({ action:b.dataset.a, id:b.dataset.id, post:b.dataset.post }) })
       .then(r => r.ok ? load() : fail(r)).catch(() => fail({}));
   });
   $("out").addEventListener("click", () => { key = ""; try{ sessionStorage.removeItem("mm-key"); }catch(e){} location.reload(); });
