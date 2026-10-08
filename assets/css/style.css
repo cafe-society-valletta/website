@@ -1562,6 +1562,14 @@ html.df-open .doorframe, html.df-open .ev-head, html.df-open .ev-layout{ transit
 @media (hover:hover){ .df-logo:hover img{ scale:1.06; filter:drop-shadow(0 0 6px rgba(255,236,190,.35)); } }
 .df-logo:active img{ scale:.94; transition-duration:.06s; }   /* it's a button: grows on hover, presses on click (Chef) */
 @media (min-width:900px){ .df-logo{ left:calc(24px + 16px); top:78px; width:120px; } }
+/* phone, collapsed (Chef, Oct 2026): logo + tape-up tag sit further left, over the strip; the strip tucks under the
+   menu bar (clipped below it) and only covers the bar once the frame is pulled open */
+@media (max-width:899.98px){
+  .df-logo{ left:6px; }
+  .df-add{ left:6px; }
+  .doorframe{ clip-path:inset(35px 0 0 0); transition:transform .45s cubic-bezier(.2,.8,.2,1), clip-path .3s ease; }
+  html.df-open .doorframe{ clip-path:inset(0); }
+}
 @media (prefers-reduced-motion:reduce){ .df-logo{ transition:opacity .2s !important; } html.df-open .df-logo{ transform:none; } }
 
 /* the DIGITAL DOOR FRAME sign on the uploader sheet, top right (beside the close ×) */
