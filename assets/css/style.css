@@ -399,9 +399,9 @@ body.about-body{ --tile:170px; --paper:url('../img/p-bg-about-paper.jpg'); backg
 body.events-body{ background:var(--black); }
 .events{ background:var(--black); color:var(--white); isolation:isolate; }
 /* the page photo sits on its own layer so it can dim + blur with the calendar when a poster is open */
-.events::before{ content:""; position:absolute; inset:-14px; z-index:-1; background:url('../img/p-bg-events-polaroids.jpg') 50% 0/cover no-repeat; transition:filter .45s ease; }
+.events::before{ content:""; position:absolute; inset:-14px; z-index:-1; background:url('../img/p-bg-events-polaroids.jpg') 50% -90px/cover no-repeat; transition:filter .45s ease; }   /* photo nudged up 90px so the menu + "events calendar" sit on darker photos (Chef, Oct 2026) */
 body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
-.events-scrim{ position:absolute; top:0; left:0; right:0; height:190px; background:linear-gradient(180deg, rgba(10,10,10,.85) 0%, rgba(10,10,10,.7) 55%, rgba(10,10,10,0) 100%); pointer-events:none; }
+.events-scrim{ position:absolute; top:0; left:0; right:0; height:190px; background:linear-gradient(180deg, rgba(10,10,10,.45) 0%, rgba(10,10,10,.35) 55%, rgba(10,10,10,0) 100%); pointer-events:none; }   /* toned down to about half (Chef, Oct 2026) */
 .ev-head{ position:relative; display:flex; flex-direction:column; align-items:center; padding:29px 0 6px; }
 .ev-head img{ width:106px; height:37px; }
 .ev-head h1{ margin:-1px 0 0; font-family:var(--font-display); font-size:34px; font-weight:300; letter-spacing:.02em; line-height:42px; }
@@ -810,7 +810,7 @@ body.menu-body{ background:var(--black); }
 
   /* EVENT CALENDAR (D03) */
   .events::before{ background:linear-gradient(rgba(10,10,10,.12), rgba(10,10,10,.12)), var(--black) url('../img/p-bg-events-desktop.jpg') 100% 50%/cover no-repeat; }
-  .events-scrim{ height:260px; background:linear-gradient(180deg, rgba(10,10,10,.6) 0%, rgba(10,10,10,.35) 55%, rgba(10,10,10,0) 100%); }
+  .events-scrim{ height:260px; background:linear-gradient(180deg, rgba(10,10,10,.3) 0%, rgba(10,10,10,.18) 55%, rgba(10,10,10,0) 100%); }
   .ev-head{ gap:12px; padding:56px 0 0; }
   .ev-head img{ width:150px; height:52px; }
   .ev-head h1{ margin:0; font-size:60px; line-height:66px; }
