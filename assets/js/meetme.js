@@ -89,6 +89,7 @@
         </div>
       </section>
       <form class="mmb-compose" hidden novalidate>
+        <p class="mmb-winnav"><button type="button" class="mmb-btn mmb-fs mmb-fs-x">[FULLSCREEN]</button></p>
         ${rule("=", 160)}<h2 class="mmb-title">N E W&nbsp;&nbsp;&nbsp;P O S T</h2>${rule("=", 160)}
         <label class="mmb-field"><span class="mmb-k">NAME&gt;</span><input name="author" maxlength="${LIM.author}" autocomplete="nickname" spellcheck="false"></label>
         <div class="mmb-field"><span class="mmb-k">CATEGORY&gt;</span>${picker("category")}</div>
@@ -104,7 +105,7 @@
       </form>
       <section class="mmb-post" hidden role="dialog" aria-modal="true" aria-label="Post">
         <div class="mmb-win">
-          <div class="mmb-win-bar"><span class="mmb-win-t">POST</span><button type="button" class="mmb-btn mmb-close" aria-label="Close post">[X]</button></div>
+          <div class="mmb-win-bar"><span class="mmb-win-t">POST</span><span class="mmb-win-btns"><button type="button" class="mmb-btn mmb-fs mmb-fs-x">[FULLSCREEN]</button><button type="button" class="mmb-btn mmb-close" aria-label="Close post">[X]</button></span></div>
           <div class="mmb-post-in"></div>
         </div>
       </section>
@@ -281,7 +282,7 @@
       const a = screen.getBoundingClientRect(), keys = zoomKeys();
       home = [screen.parentNode, screen.nextSibling]; document.body.appendChild(screen);
       screen.classList.add("full"); document.documentElement.classList.add("mm-full");
-      $(".mmb-fs").hidden = true; $(".mmb-back").hidden = false;
+      screen.querySelectorAll(".mmb-fs").forEach(b => b.hidden = true); $(".mmb-back").hidden = false;
       const b = screen.getBoundingClientRect();
       if(screen.animate){
         box.animate(keys, { duration:DUR, easing:"cubic-bezier(.45,0,.55,1)", fill:"forwards" });
@@ -298,10 +299,10 @@
       if(box.animate) box.animate([keys[1], keys[0]], { duration:DUR, easing:"cubic-bezier(.45,0,.55,1)" });   // …then play the zoom backwards
       screen.classList.remove("full"); screen.classList.add("leaving"); document.documentElement.classList.remove("mm-full");
       Object.assign(screen.style, { left:g.left + "px", top:g.top + "px", width:g.width + "px", height:g.height + "px" });
-      $(".mmb-fs").hidden = false; $(".mmb-back").hidden = true;
+      screen.querySelectorAll(".mmb-fs").forEach(b => b.hidden = false); $(".mmb-back").hidden = true;
       const b = screen.getBoundingClientRect();
       const land = () => { screen.classList.remove("leaving"); ["left", "top", "width", "height"].forEach(k => screen.style[k] = "");
-        home[0].insertBefore(screen, home[1]); veil.getAnimations().forEach(x => x.cancel()); done(); $(".mmb-fs").focus({ preventScroll:true }); };
+        home[0].insertBefore(screen, home[1]); veil.getAnimations().forEach(x => x.cancel()); done(); const f = [...screen.querySelectorAll(".mmb-fs")].find(b => b.offsetParent); if(f) f.focus({ preventScroll:true }); };
       if(screen.animate){
         veil.getAnimations().forEach(x => x.cancel());
         veil.animate([{ opacity:1 }, { opacity:0, offset:.55 }, { opacity:0 }], { duration:DUR, fill:"forwards" });
@@ -311,7 +312,8 @@
       } else land();
     }
   }
-  $(".mmb-fs").addEventListener("click", () => setFull(true));
+  // [FULLSCREEN] on the home row, the NEW POST / EDIT screen and the post window (top right); <- GO BACK top left (Chef, Oct 2026)
+  screen.querySelectorAll(".mmb-fs").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); setFull(true); }));
   $(".mmb-back").addEventListener("click", () => setFull(false));
   addEventListener("keydown", e => { if(e.key === "Escape" && !isCompose()) setFull(false); });
 
