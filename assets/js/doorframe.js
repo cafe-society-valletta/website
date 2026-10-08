@@ -268,6 +268,15 @@
   const add = document.createElement("button");
   add.type = "button"; add.className = "df-add"; add.innerHTML = '<span>+ Tape up<br>a poster</span><i class="df-tape"></i>';
   document.body.appendChild(add);   // outside the clipped frame so it stays on screen when the frame is collapsed
+  // phone: the posters slide behind the menu bar's home logo — a twin of it sits above the frame, over the original
+  const navHome = document.querySelector(".site-bar .logo-home");
+  if (navHome){
+    const twin = navHome.cloneNode(true); twin.className = "df-home"; twin.setAttribute("aria-hidden", "true"); twin.tabIndex = -1;
+    document.body.appendChild(twin);
+    const place = () => { const r = (navHome.querySelector("img") || navHome).getBoundingClientRect();
+      Object.assign(twin.style, { left:r.left + "px", top:r.top + "px", width:r.width + "px", height:r.height + "px" }); };
+    place(); addEventListener("resize", place); addEventListener("scroll", place, { passive:true }); addEventListener("load", place);
+  }
   if (canHover.matches) add.addEventListener("mouseleave", e => { if (!zoomed && !upOpen && !df.contains(e.relatedTarget)) setOpen(false); });
   const LOCK = '<svg viewBox="0 0 12 14" width="10" height="12" aria-hidden="true"><rect x="1" y="6" width="10" height="7.2" rx="1.2" fill="currentColor"/><path d="M3.3 6V4.2a2.7 2.7 0 0 1 5.4 0V6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
   const up = document.createElement("div");
