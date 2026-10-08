@@ -63,7 +63,7 @@
   const setOpen = on => { root.classList.toggle("df-open", on); df.setAttribute("aria-expanded", String(on)); };
   if (canHover.matches){
     df.addEventListener("mouseenter", () => setOpen(true));
-    df.addEventListener("mouseleave", () => { if (!zoomed && !upOpen) setOpen(false); });
+    df.addEventListener("mouseleave", e => { if (!zoomed && !upOpen && !add.contains(e.relatedTarget)) setOpen(false); });
   }
   let x0 = null, y0 = 0;
   addEventListener("touchstart", e => {
@@ -220,7 +220,8 @@
   // ---- TAPE UP A POSTER: the uploader (button on the frame) ----
   const add = document.createElement("button");
   add.type = "button"; add.className = "df-add"; add.innerHTML = '<span>+ Tape up<br>a poster</span><i class="df-tape"></i>';
-  df.appendChild(add);
+  document.body.appendChild(add);   // outside the clipped frame so it stays on screen when the frame is collapsed
+  if (canHover.matches) add.addEventListener("mouseleave", e => { if (!zoomed && !upOpen && !df.contains(e.relatedTarget)) setOpen(false); });
   const LOCK = '<svg viewBox="0 0 12 14" width="10" height="12" aria-hidden="true"><rect x="1" y="6" width="10" height="7.2" rx="1.2" fill="currentColor"/><path d="M3.3 6V4.2a2.7 2.7 0 0 1 5.4 0V6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
   const up = document.createElement("div");
   up.className = "df-up"; up.hidden = true;
@@ -283,7 +284,7 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll:true });
     if (canHover.matches && !df.matches(":hover")) setOpen(false);
   }
-  add.addEventListener("click", e => { e.stopPropagation(); if (!isOpen()){ setOpen(true); return; } openUp(); });
+  add.addEventListener("click", e => { e.stopPropagation(); setOpen(true); openUp(); });   // one tap/click straight to the uploader, open or collapsed
   up.addEventListener("click", e => { if (e.target === up) closeUp(); });
   up.querySelector(".df-x").addEventListener("click", closeUp);
   up.querySelector(".df-ok").addEventListener("click", closeUp);
