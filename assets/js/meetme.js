@@ -2,7 +2,7 @@
    Renders into whichever monitor is showing (.mm-phone < 900px, else .mm-computer). Two screens:
      HOME     [ WRITE A POST ]_   ← button (or just start typing) → the compose screen
               ===== M E S S A G E   I N B O X =====   DATE TIME AUTHOR SUBJECT, newest first; rows link to #p/<id>
-     COMPOSE  (#new)  NAME> (remembered)  SUBJECT> (44 chars = one inbox line)  MESSAGE> (up to 5000)
+     COMPOSE  (#new)  NAME> (remembered)  CATEGORY> (required, 17 categories)  SUBJECT> (44 chars = one inbox line)  MESSAGE> (up to 5000)
               PHOTOS> up to 4, shrunk in the browser to JPEG ≤ 1600 px / ≤ 1 MB each     [SEND] [CANCEL]
    All screen copy is written the way the 8-bit terminal would print it (Chef): CAPS system lines, > prompts, terse.
    Only exception: the attached photos themselves (shown as normal photos).
@@ -46,6 +46,23 @@
   const two = n => String(n).padStart(2, "0");
   const fmt = iso => { const d = new Date(iso); return [`${two(d.getDate())}-${two(d.getMonth()+1)}-${String(d.getFullYear()).slice(-2)}`, `${two(d.getHours())}:${two(d.getMinutes())}`]; };
   const API = "/.netlify/functions/meetme";
+  // CATEGORIES (keys must match CATS in netlify/functions/meetme.mjs): [key, full name, short inbox tag]
+  const CATS = [
+    ["general", "GENERAL INQUIRY OR ANNOUNCEMENT", "GENERAL"], ["meetup", "MEETUP / ACTIVITY BUDDY", "MEETUP"],
+    ["staff", "LOOKING FOR STAFF", "STAFF WANTED"], ["job", "LOOKING FOR A JOB", "JOB WANTED"],
+    ["flat", "LOOKING FOR A FLAT", "FLAT WANTED"], ["rent", "FLAT FOR RENT", "FOR RENT"], ["flatmate", "LOOKING FOR A FLATMATE", "FLATMATE"],
+    ["art", "ARTWORK/HOMEMADE PRODUCT FOR SALE", "ART/HOMEMADE"], ["sale", "ITEM FOR SALE OR SWAP", "SALE/SWAP"], ["free", "FREE / GIVEAWAY", "FREE"],
+    ["service", "SERVICE FOR HIRE", "FOR HIRE"], ["classes", "CLASSES & LANGUAGE EXCHANGE", "CLASSES"], ["collab", "COLLABORATORS WANTED", "COLLAB"],
+    ["club", "CLUB OR ORGANIZATION", "CLUB/ORG"], ["cause", "VOLUNTEERS & CAUSES", "CAUSES"], ["lost", "LOST & FOUND", "LOST+FOUND"],
+    ["missed", "MISSED CONNECTIONS", "MISSED CONN."] ];
+  const cat = k => CATS.find(c => c[0] === k) || CATS[0];
+  // 8-bit drop-down: [ LABEL v ] opens a numbered list printed right under it (no OS pop-up; arrows/enter/esc work)
+  const picker = (name, all, val) => `<div class="mmb-pick" data-name="${name}">
+      <button type="button" class="mmb-btn mmb-pick-btn" aria-haspopup="listbox" aria-expanded="false">[ <span class="mmb-pick-l">${val ? cat(val)[1] : all ? "ALL CATEGORIES" : "SELECT A CATEGORY"}</span> v ]</button>
+      <ol class="mmb-pick-list" role="listbox" hidden>${(all ? [["", "ALL CATEGORIES"], ...CATS] : CATS).map(([k, n], i) =>
+        `<li><button type="button" class="mmb-btn mmb-opt" role="option" data-v="${k}">${two(all ? i : i + 1)}. ${n}</button></li>`).join("")}</ol>
+      <input type="hidden" name="${name}" value="${val || ""}"></div>`;
+  let filter = ""; try{ filter = sessionStorage.getItem("mm-filter") || ""; }catch(e){}
   let live = [];
   const posts = () => {
     const ids = new Set(live.map(p => p.id));
@@ -65,6 +82,7 @@
         <p class="mmb-hint mmb-home-hint" aria-live="polite"></p>
         <div class="mmb-inbox">
           ${rule("=", 160)}<h2 class="mmb-title">M E S S A G E&nbsp;&nbsp;&nbsp;I N B O X</h2>${rule("=", 160)}
+          <div class="mmb-field mmb-filter"><span class="mmb-k">SHOW&gt;</span>${picker("filter", true, filter)}</div>
           <div class="mmb-row mmb-head" aria-hidden="true"><span>DATE</span><span>TIME</span><span>AUTHOR</span><span>SUBJECT</span></div>
           ${rule("-", 200)}
           <ol class="mmb-list"></ol>
@@ -73,6 +91,7 @@
       <form class="mmb-compose" hidden novalidate>
         ${rule("=", 160)}<h2 class="mmb-title">N E W&nbsp;&nbsp;&nbsp;P O S T</h2>${rule("=", 160)}
         <label class="mmb-field"><span class="mmb-k">NAME&gt;</span><input name="author" maxlength="${LIM.author}" autocomplete="nickname" spellcheck="false"></label>
+        <div class="mmb-field"><span class="mmb-k">CATEGORY&gt;</span>${picker("category")}</div>
         <label class="mmb-field"><span class="mmb-k">SUBJECT&gt;</span><input name="subject" maxlength="${LIM.subject}" autocomplete="off" autocapitalize="sentences"><small class="mmb-n" data-for="subject"></small></label>
         <label class="mmb-field mmb-tall"><span class="mmb-k">MESSAGE&gt;</span><textarea name="body" maxlength="${LIM.body}" rows="7" autocapitalize="sentences"></textarea><small class="mmb-n" data-for="body"></small></label>
         <div class="mmb-field"><span class="mmb-k">PHOTOS&gt;</span><button type="button" class="mmb-btn mmb-add">[+ ATTACH]</button><small class="mmb-n mmb-pn"></small></div>
@@ -95,8 +114,10 @@
   const $author = $form.elements.author, $subject = $form.elements.subject, $body = $form.elements.body, $file = $(".mmb-file"), $thumbs = $(".mmb-thumbs");
 
   function render(){
-    $list.innerHTML = posts().map(p => { const [d, t] = fmt(p.at);
-      return `<li><a class="mmb-row${p.waiting ? " mmb-wait" : ""}" href="#p/${esc(p.id)}"><span>${d}</span><span>${t}</span><span>&lt;${esc(p.author)}&gt;</span><span>${esc(p.subject)}${p.waiting ? " <em>[PENDING]</em>" : ""}</span></a></li>`; }).join("");
+    const shown = posts().filter(p => !filter || (p.category || "general") === filter);
+    $list.innerHTML = shown.map(p => { const [d, t] = fmt(p.at);
+      return `<li><a class="mmb-row${p.waiting ? " mmb-wait" : ""}" href="#p/${esc(p.id)}"><span>${d}</span><span>${t}</span><span>&lt;${esc(p.author)}&gt;</span><span>${esc(p.subject)}${p.waiting ? " <em>[PENDING]</em>" : ""}</span></a></li>`; }).join("")
+      || `<li class="mmb-empty">NO MESSAGES IN ${filter ? cat(filter)[1] : "THE INBOX"} YET.</li>`;
   }
   render(); load(); setInterval(() => { if(!document.hidden) load(); }, 60e3);
 
@@ -157,12 +178,13 @@
   $(".mmb-cancel").addEventListener("click", () => { if(history.state && history.state.mmNew) history.back(); else toHome(); });
   const openCompose = () => { if(!isCompose()){ history.pushState({ mmNew:true }, "", "#new"); view(); } };
   $(".mmb-write").addEventListener("click", e => { e.preventDefault(); openCompose(); });
-  $form.addEventListener("keydown", e => { if(e.key === "Escape") $(".mmb-cancel").click(); });
+  $form.addEventListener("keydown", e => { if(e.key === "Escape" && !e.target.closest(".mmb-pick")) $(".mmb-cancel").click(); });
 
   // start typing on the home screen = start a post (the key lands in the first empty field)
   addEventListener("keydown", e => {
     if(isCompose() || !$post.hidden || document.querySelector(".mm-lightbox") || e.metaKey || e.ctrlKey || e.altKey || e.key.length !== 1) return;
     if(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+    if(document.activeElement && document.activeElement.closest && document.activeElement.closest(".mmb-pick")) return;   // keys on the category list stay there
     e.preventDefault(); openCompose();
     const f = $author.value ? $subject : $author; f.focus({ preventScroll:true }); f.value += e.key; counts();
   });
@@ -309,6 +331,7 @@
       <p class="mmb-hdr"><span>FROM:</span> &lt;${esc(p.author)}&gt;</p>
       <p class="mmb-hdr"><span>SENT:</span> ${d} ${t}</p>
       <p class="mmb-hdr"><span>SUBJ:</span> ${esc(p.subject)}</p>
+      <p class="mmb-hdr"><span>CAT:</span> ${cat(p.category)[1]}</p>
       ${rule("-", 200)}
       ${note ? `<p class="mmb-note">${note}</p>` : ""}
       ${store.get("mm-keys", {})[p.id] ? `<p class="mmb-own"><button type="button" class="mmb-btn mmb-edit">[ EDIT POST ]</button><button type="button" class="mmb-btn mmb-del">[ DELETE ]</button></p>` : ""}
@@ -366,10 +389,10 @@
   });
   $postIn.addEventListener("submit", e => {
     const ef = e.target.closest(".mmb-eform");
-    if(ef){ e.preventDefault(); const subject = ef.elements.subject.value.trim(), body = ef.elements.body.value.trim(), h = ef.querySelector(".mmb-ehint");
+    if(ef){ e.preventDefault(); const subject = ef.elements.subject.value.trim(), body = ef.elements.body.value.trim(), category = ef.elements.category.value || "general", h = ef.querySelector(".mmb-ehint");
       if(subject.length < 2){ h.textContent = "?ERROR: SUBJECT REQUIRED."; return; }
       h.textContent = "TRANSMITTING..."; ef.querySelectorAll("button").forEach(b => b.disabled = true);
-      ownCall("own-edit", { subject, body }).then(() => ownDone("EDIT SENT. AWAITING SYSOP APPROVAL.", { subject, body }))
+      ownCall("own-edit", { subject, body, category }).then(() => ownDone("EDIT SENT. AWAITING SYSOP APPROVAL.", { subject, body, category }))
         .catch(() => { h.textContent = "NO CARRIER. PRESS [ SAVE ] TO RETRY."; ef.querySelectorAll("button").forEach(b => b.disabled = false); });
       return; }
     const f = e.target.closest(".mmb-cform"); if(!f) return; e.preventDefault();
@@ -424,6 +447,7 @@
     if(e.target.closest(".mmb-edit")){
       const box = $postIn.querySelector(".mmb-text"), own = $postIn.querySelector(".mmb-own"); own.hidden = true;
       box.outerHTML = `<form class="mmb-eform" novalidate>
+        <div class="mmb-field"><span class="mmb-k">CATEGORY&gt;</span>${picker("category", false, curPost.category || "general")}</div>
         <label class="mmb-field"><span class="mmb-k">SUBJECT&gt;</span><input name="subject" maxlength="${LIM.subject}" value="${esc(curPost.subject)}"></label>
         <label class="mmb-field mmb-tall"><span class="mmb-k">MESSAGE&gt;</span><textarea name="body" maxlength="${LIM.body}" rows="7">${esc(curPost.body || "")}</textarea></label>
         <p class="mmb-hint mmb-ehint">SAVING SENDS YOUR POST BACK TO THE SYSOP FOR APPROVAL.</p>
@@ -470,29 +494,58 @@
   // ---- send ----
   $form.addEventListener("submit", e => {
     e.preventDefault();
-    const author = $author.value.trim(), subject = $subject.value.trim(), body = $body.value.trim();
+    const author = $author.value.trim(), subject = $subject.value.trim(), body = $body.value.trim(), category = $form.elements.category.value;
     if(!author){ $hint.textContent = "?ERROR: NAME REQUIRED."; $author.focus(); return; }
+    if(!category){ $hint.textContent = "?ERROR: CATEGORY REQUIRED."; $form.querySelector(".mmb-pick-btn").focus(); return; }
     if(subject.length < 2){ $hint.textContent = "?ERROR: SUBJECT REQUIRED."; $subject.focus(); return; }
     store.set("mm-name", author);
     const btns = $form.querySelectorAll("button"); btns.forEach(b => b.disabled = true);
     $hint.textContent = shots.length ? `TRANSMITTING ${shots.length} IMAGE(S)...` : "TRANSMITTING...";
     fetch(API, { method:"POST", headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ author, subject, body, photos:shots.map(({ type, data }) => ({ type, data })), website:$form.elements.website.value }) })
+      body:JSON.stringify({ author, subject, body, category, photos:shots.map(({ type, data }) => ({ type, data })), website:$form.elements.website.value }) })
       .then(r => r.json().catch(() => ({})).then(d => ({ ok:r.ok, d })))
       .then(({ ok, d }) => {
         if(!ok || !d.ok) throw new Error((d && d.error) || "net");
         const n = new Date(), at = `${n.getFullYear()}-${two(n.getMonth()+1)}-${two(n.getDate())}T${two(n.getHours())}:${two(n.getMinutes())}`;
-        const mine = store.get("mm-mine", []); mine.push({ id:d.id, at, author, subject, body, photos:shots.length }); store.set("mm-mine", mine);
+        const mine = store.get("mm-mine", []); mine.push({ id:d.id, at, author, subject, body, category, photos:shots.length }); store.set("mm-mine", mine);
         if(d.ownerKey){ const keys = store.get("mm-keys", {}); keys[d.id] = d.ownerKey; store.set("mm-keys", keys); }   // lets this browser edit/delete it
-        $subject.value = ""; $body.value = ""; shots.forEach(s => URL.revokeObjectURL(s.url)); shots = []; drawThumbs();
+        $subject.value = ""; $body.value = ""; setPick($form.querySelector(".mmb-pick"), ""); shots.forEach(s => URL.revokeObjectURL(s.url)); shots = []; drawThumbs();
         $homeHint.textContent = "MESSAGE QUEUED. AWAITING SYSOP APPROVAL.";
         render(); toHome();
       })
       .catch(err => { const m = err && err.message;
         $hint.textContent = m === "slow-down" ? "?ERROR: TOO MANY MESSAGES. WAIT 10 MIN."
+          : m === "category" ? "?ERROR: CATEGORY REQUIRED."
           : m === "photo-size" ? "?ERROR: IMAGE TOO LARGE." : m === "photo-type" ? "?ERROR: UNSUPPORTED IMAGE."
           : "NO CARRIER. PRESS [ SEND ] TO RETRY."; })
       .finally(() => { btns.forEach(b => b.disabled = false); counts(); });
+  });
+
+  // ---- category pickers (compose, edit, inbox filter) ----
+  function setPick(pk, v){
+    const all = pk.dataset.name === "filter";
+    pk.querySelector("input").value = v;
+    pk.querySelector(".mmb-pick-l").textContent = v ? cat(v)[1] : all ? "ALL CATEGORIES" : "SELECT A CATEGORY";
+    if(all){ filter = v; try{ sessionStorage.setItem("mm-filter", v); }catch(e){} render(); }
+  }
+  function openPick(pk, on){
+    screen.querySelectorAll(".mmb-pick").forEach(o => { if(o !== pk || !on){ o.querySelector(".mmb-pick-list").hidden = true; o.querySelector(".mmb-pick-btn").setAttribute("aria-expanded", "false"); } });
+    if(!on) return;
+    pk.querySelector(".mmb-pick-list").hidden = false; pk.querySelector(".mmb-pick-btn").setAttribute("aria-expanded", "true");
+    const cur = pk.querySelector(`.mmb-opt[data-v="${pk.querySelector("input").value}"]`) || pk.querySelector(".mmb-opt");
+    cur.focus({ preventScroll:true }); fitPost();
+  }
+  screen.addEventListener("click", e => {
+    const b = e.target.closest(".mmb-pick-btn"), o = e.target.closest(".mmb-opt");
+    if(b){ const pk = b.closest(".mmb-pick"); openPick(pk, pk.querySelector(".mmb-pick-list").hidden); return; }
+    if(o){ const pk = o.closest(".mmb-pick"); setPick(pk, o.dataset.v); openPick(pk, false); pk.querySelector(".mmb-pick-btn").focus({ preventScroll:true }); fitPost(); return; }
+    if(!e.target.closest(".mmb-pick")) openPick(null, false);
+  });
+  screen.addEventListener("keydown", e => {
+    const o = e.target.closest && e.target.closest(".mmb-opt"); if(!o) return;
+    const opts = [...o.closest(".mmb-pick-list").querySelectorAll(".mmb-opt")], i = opts.indexOf(o);
+    if(e.key === "ArrowDown" || e.key === "ArrowUp"){ e.preventDefault(); opts[(i + (e.key === "ArrowDown" ? 1 : -1) + opts.length) % opts.length].focus({ preventScroll:true }); }
+    else if(e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); const pk = o.closest(".mmb-pick"); openPick(pk, false); pk.querySelector(".mmb-pick-btn").focus({ preventScroll:true }); }
   });
 
   // CRT curve: everything on the screen is bent with the same barrel distortion as the intro clip (ffmpeg lenscorrection
@@ -654,3 +707,25 @@
   bar.addEventListener("focusin", () => show());
   bar.addEventListener("focusout", () => setTimeout(() => { if(!bar.contains(document.activeElement)) hide(); }, 50));
 })();
+
+/* Meet Me sticky note: hover (CSS) or keyboard focus shows it; a click / tap pins it open or closed; on touch screens a swipe
+   in from the right edge (or across the note) pulls it out, a swipe back to the right tucks it away; a tap elsewhere closes it. */
+(function(){
+  const note = document.querySelector(".mm-note"); if(!note) return;
+  try{ if(sessionStorage.getItem("mm-note-off")) document.documentElement.classList.add("mm-note-off"); }catch(e){}
+  note.querySelector(".mm-note-x").addEventListener("click", e => {   // [x]: gone for this visit
+    e.stopPropagation(); document.documentElement.classList.add("mm-note-off");
+    try{ sessionStorage.setItem("mm-note-off", "1"); }catch(err){}
+  });
+  const set = on => { note.classList.toggle("open", on); note.setAttribute("aria-expanded", String(on)); };
+  note.addEventListener("click", e => { e.stopPropagation(); set(!note.classList.contains("open")); });
+  note.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); set(!note.classList.contains("open")); } else if(e.key === "Escape") set(false); });
+  document.addEventListener("click", e => { if(!note.contains(e.target)) set(false); });
+  let x0 = null, y0 = 0;
+  addEventListener("touchstart", e => { const t = e.touches[0];
+    x0 = (t.clientX > innerWidth - 36 || note.contains(e.target)) ? t.clientX : null; y0 = t.clientY; }, { passive:true });
+  addEventListener("touchmove", e => { if(x0 === null) return; const t = e.touches[0], dx = t.clientX - x0;
+    if(Math.abs(dx) < 30 || Math.abs(dx) < Math.abs(t.clientY - y0)) return;
+    set(dx < 0); x0 = null; }, { passive:true });
+})();
+

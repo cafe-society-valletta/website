@@ -389,3 +389,12 @@
   }));
 })();
 
+/* Menu hover glow: one shared SVG filter (#home-grain) used by the home menu and every menu bar (style.css) —
+   a blurred copy of the item, speckled by fractal noise, sits under the crisp item = a faint grainy glow */
+(function(){
+  if (document.getElementById("home-grain")) return;
+  const d = document.createElement("div");
+  d.innerHTML = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="home-grain" x="-30%" y="-80%" width="160%" height="260%" color-interpolation-filters="sRGB"> <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="b1"/><feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b2"/> <feMerge result="halo"><feMergeNode in="b2"/><feMergeNode in="b1"/></feMerge> <feTurbulence type="fractalNoise" baseFrequency="1.3" numOctaves="2" seed="7" result="n"/> <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.6 0 0 0 -.35" result="m"/> <feComposite in="halo" in2="m" operator="in" result="grainy"/> <feComponentTransfer in="grainy" result="glow"><feFuncA type="linear" slope=".85"/></feComponentTransfer> <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge></filter></svg>`;
+  document.body.appendChild(d.firstChild);
+})();
+
