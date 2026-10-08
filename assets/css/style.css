@@ -1456,7 +1456,7 @@ html.df-zoomed .df-zoom{ background:rgba(10,10,10,.4); }
 .df-zoom .slap{ margin:0; flex-shrink:0; }
 html.df-zoomed .ev-head, html.df-zoomed .ev-layout{ filter:brightness(.72) blur(1.5px); }
 @media (min-width:900px){
-  .doorframe{ --dfw:271px; --peek:24px; }
+  .doorframe{ --dfw:271px; --peek:clamp(24px, calc((100vw - 1117px) / 2), 48px); }   /* collapsed: 48px of posters show behind the logo + tape-up tag (Chef), less when the calendar needs the room */
   .df-track{ gap:28px; padding:0 8px 28px 18px; }
   .df-tape{ width:64px; height:17px; top:-6px; }
   html.df-open .ev-head, html.df-open .ev-layout{ transform:none; padding-left:calc(271px + 24px); }
