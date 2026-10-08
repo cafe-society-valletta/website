@@ -406,7 +406,8 @@ body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
 .ev-head img{ width:106px; height:37px; }
 .ev-head h1{ margin:-1px 0 0; font-family:var(--font-display); font-size:34px; font-weight:300; letter-spacing:.02em; line-height:42px; }
 .cal{ position:relative; display:flex; flex-direction:column; gap:28px; padding:8px 32px 48px; }
-.month{ background:rgba(10,10,10,.78); border:1px solid rgba(255,255,255,.55); scroll-margin-top:52px; }   /* clears the sticky menu bar */
+.month{ background:rgba(10,10,10,.78); border:1px solid rgba(255,255,255,.55); scroll-margin-top:52px;
+  border-radius:6px; overflow:hidden; }   /* outer corners rounded like the menu tabs (6px phone / 8px desktop); cells clipped to it */   /* clears the sticky menu bar */
 .m-head{ display:flex; align-items:center; justify-content:space-between; padding:14px; border-bottom:1px solid rgba(255,255,255,.55); }
 .m-head h2{ margin:0; font-size:15px; font-weight:700; letter-spacing:.15em; line-height:18px; text-transform:uppercase; }
 .m-head button{ background:none; border:0; padding:0 2px; font-family:var(--font-display); font-size:14px; line-height:18px; color:rgba(255,255,255,.6); cursor:pointer; }
@@ -765,17 +766,18 @@ body.menu-body{ background:var(--black); }
   .ev-head img{ width:150px; height:52px; }
   .ev-head h1{ margin:0; font-size:60px; line-height:66px; }
   .cal{ width:var(--col); margin-inline:auto; gap:32px; padding:32px 0 72px; }
-  .month{ scroll-margin-top:72px; display:none; }
+  .month{ scroll-margin-top:72px; display:none; border-radius:8px; }
   .month.cur{ display:block; }   /* desktop: one month at a time, ← → to change */
-  .m-head{ padding:18px 20px; }
-  .m-head h2{ font-size:20px; line-height:24px; }
-  .m-head button{ font-size:18px; line-height:22px; }
-  .m-days span{ padding:9px 0; font-size:12px; line-height:14px; }
-  .day{ height:96px; padding:6px; }
-  .day .n{ font-size:14px; line-height:16px; }
-  .day .hol-name{ font-size:9px; letter-spacing:.06em; }
-  .day .shut{ font-size:12px; letter-spacing:.18em; line-height:14px; }
-  .thumb{ width:60px; height:60px; }
+  /* desktop month calendar 20% bigger than the Paper D03 sizes (Chef, Oct 2026): 864 wide, everything ×1.2 */
+  .m-head{ padding:22px 24px; }
+  .m-head h2{ font-size:24px; line-height:29px; }
+  .m-head button{ font-size:22px; line-height:26px; }
+  .m-days span{ padding:11px 0; font-size:14px; line-height:17px; }
+  .day{ height:115px; padding:7px; }
+  .day .n{ font-size:17px; line-height:19px; }
+  .day .hol-name{ font-size:11px; letter-spacing:.06em; }
+  .day .shut{ font-size:14px; letter-spacing:.18em; line-height:17px; }
+  .thumb{ width:72px; height:72px; }
   .ev-panel{ gap:18px; padding:22px; }
   .ev-panel .when{ font-size:12px; line-height:14px; }
   .ev-panel .x svg{ width:16px; height:16px; }
@@ -879,7 +881,11 @@ body.menu-body{ background:var(--black); }
    the poster's width with the details sitting directly underneath. */
 @media (min-width:900px){
   .ev-layout{ --pw:min(420px, 30vw, calc((100vh - 250px) / 1.414)); display:flex; justify-content:center; align-items:flex-start; padding:32px 40px 72px; }
-  .ev-layout .cal{ flex:0 1 720px; min-width:0; width:auto; margin:0; padding:0; }
+  .ev-layout .cal{ flex:0 1 864px; min-width:0; width:auto; margin:0; padding:0; }   /* 720 × 1.2 (Chef) */
+  /* title block spacing = Paper D04 (Chef, Oct 2026): bar → 14px → logo 202×73 → 3px → title → calendar straight under it */
+  .events .ev-head{ gap:3px; padding-top:14px; }
+  .events .ev-head img{ width:202px; height:73px; object-fit:cover; }
+  .ev-layout{ padding-top:0; margin-top:-2px; }
   .ev-detail{ display:block; flex:0 0 auto; width:0; margin-left:0; opacity:0; visibility:hidden; overflow:visible; position:sticky; top:88px; transition:width .45s ease, margin-left .45s ease, opacity .2s ease, visibility 0s linear .2s; }
   .ev-layout.open .ev-detail{ width:var(--pw); margin-left:40px; opacity:1; visibility:visible; transition:width .45s ease, margin-left .45s ease, opacity .1s ease; }
   /* desktop: details + links float to the LEFT of the poster, over the dimmed/blurred calendar,
@@ -1254,7 +1260,7 @@ html.mm-wk .mm-screen:not(.full){ overflow:hidden; }
 .mmb-write{ background:#7dff7d; color:#06200b; text-shadow:none; text-decoration:none; padding:.12em .45em; box-shadow:0 0 .35em rgba(90,255,90,.35); }   /* a real button: green box, dark letters (Chef) */
 .mmb-write:hover, .mmb-write:focus-visible{ background:none; color:#7dff7d; box-shadow:inset 0 0 0 1px #7dff7d; outline:none; }
 .mmb-fs{ font-size:.7em; position:relative; }
-.mm-screen:not(.full) .mmb-fs::before{ content:""; position:absolute; top:-4em; right:-4em; bottom:-1.6em; left:-2.2em; }   /* big invisible hit area: the whole top-right corner wakes the button (Chef) */
+.mm-screen:not(.full) .mmb-write-row .mmb-fs::before{ content:""; position:absolute; top:-4em; right:-4em; bottom:-1.6em; left:-2.2em; }   /* big invisible hit area: the whole top-right corner wakes the button (Chef) */
 /* logo between the two buttons on the monitor (Chef): centred, same vertical centre as the buttons; fullscreen uses .mmb-logo */
 .mmb-write-row .mmb-mark{ display:block; flex:0 1 auto; min-width:0; height:3.5em; width:auto; filter:drop-shadow(0 0 .1em rgba(110,255,110,.45)); }
 .mm-screen:not(.full) .mmb-write-row{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; }   /* logo dead centre whatever the button widths */
@@ -1343,6 +1349,13 @@ html.mm-note-off .mm-note{ display:none; }
 .mm-veil{ position:fixed; inset:0; z-index:49; background:#06140a; opacity:0; pointer-events:none; }
 .mm-screen.full .mmb{ position:relative; max-width:880px; margin:0 auto; padding:64px 16px 64px; font-size:20px; }
 .mmb-back{ position:absolute; top:18px; left:16px; font-size:.85em; }
+.mm-screen.full .mmb-back{ z-index:5; }   /* stays clickable above an open post window's dimmer */
+/* [FULLSCREEN] in the other windows: top right of NEW POST / EDIT, and in the post window's title bar next to [X] */
+.mmb-winnav{ display:flex; justify-content:flex-end; margin:0 0 .4em; font-size:.7em; }
+.mmb-win-btns{ display:flex; align-items:center; gap:.6em; flex-shrink:0; }
+.mmb-win-btns .mmb-fs-x, .mmb-winnav .mmb-fs-x{ font-size:1em; }
+.mmb-fs[hidden]{ display:none; }
+.mm-screen.full .mmb-compose{ padding-top:96px; }   /* fullscreen NEW POST / EDIT: the title clears the big logo in the top right */
 .mm-screen .mmb-logo{ display:none; }
 .mm-screen.full .mmb-logo{ display:block; position:absolute; top:45px; right:67px; width:174px; height:107px; filter:drop-shadow(0 0 .12em rgba(110,255,110,.45)); }   /* fullscreen only; placed by Chef on Paper (3Z6-0): beside [ WRITE A POST ] */
 .mm-screen.full .mmb{ padding-top:64px; }
