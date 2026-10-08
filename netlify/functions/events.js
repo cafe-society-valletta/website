@@ -112,7 +112,7 @@ function social(url){
 
 const isVideo = u => /(^|\.)youtu\.be$/i.test(u.hostname) || (/(^|\.)youtube\.com$/i.test(u.hostname) && /^\/(watch|live\/|shorts\/|embed\/)/.test(u.pathname)) || /(^|\.)vimeo\.com$/i.test(u.hostname);
 const isForm = u => (/(^|\.)docs\.google\.com$/i.test(u.hostname) && /^\/forms\//.test(u.pathname)) || /(^|\.)forms\.gle$/i.test(u.hostname);
-const isGallery = u => /(^|\.)cafesocietyvalletta\.(com|netlify\.app)$/i.test(u.hostname) && /gallery/.test(u.pathname);
+const isGallery = u => /(^|\.)cafesocietyvalletta\.(com|netlify\.app)$/i.test(u.hostname) && /gallery|photolab/.test(u.pathname);
 function parseDescription(raw){
   const out = {}, socials = [], rest = [], links = [];
   for (let line of htmlToText(raw).split("\n")){
