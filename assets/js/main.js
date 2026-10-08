@@ -334,7 +334,7 @@
     t.addEventListener("click", () => open(t));
     t.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); open(t); } });
   });
-  // deep link: gallery.html#qlv-pride (or about.html#the-drinks) opens that gallery on arrival — used by
+  // deep link: /photolab#qlv-pride (or about.html#the-drinks) opens that gallery on arrival — used by
   // "Photos →" buttons on past events in the Events Calendar
   const slug = x => x.toLowerCase().replace(/['’]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const want = decodeURIComponent(location.hash.slice(1));
