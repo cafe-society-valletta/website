@@ -3,10 +3,33 @@
    phone / beside on desktop. Deep links: shop.html#apparel, shop.html#p/society-tee.
    Data: assets/js/shop-data.js (placeholders until Shopify is connected — Shopify will only do
    the bag/checkout and stock). */
-(() => {
+(async () => {
   const list = document.querySelector(".shop-cats");
   if (!list || !window.SHOP_CATEGORIES) return;
-  const CATS = window.SHOP_CATEGORIES, PRODUCTS = window.SHOP_PRODUCTS || [];
+  const CATS = window.SHOP_CATEGORIES;
+  let PRODUCTS = window.SHOP_PRODUCTS || [];
+  // BAG: live once the shop opens (SHOP_COMING_SOON false); shop.html?preview turns it on early for designing, with
+  // a few demo stock states (sold out, a sold-out size, last few left) on the placeholder products
+  const PREVIEW = /[?&]preview\b/.test(location.search);
+  if (PREVIEW){
+    window.SHOP_COMING_SOON = false;
+    const demo = { "apparel-test-4":{ available:false }, "apparel-test-2":{ soldOutSizes:["XL"] }, "apparel-test-1":{ stock:2 } };
+    PRODUCTS.forEach(p => Object.assign(p, demo[p.handle] || {}));
+  }
+  const BAG_ON = !window.SHOP_COMING_SOON;
+  // live products from Shopify (netlify/functions/shop.mjs) — used in preview and once the shop is open; the
+  // placeholders stay if Shopify isn't reachable/configured or has nothing in the five categories yet
+  let LIVE = false;
+  if (BAG_ON){
+    try {
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 4000);
+      const r = await fetch("/.netlify/functions/shop", { signal: ctl.signal }); clearTimeout(t);
+      const d = r.ok ? await r.json() : null;
+      const got = d && Array.isArray(d.products) ? d.products.filter(p => p.cat && CATS.some(c => c.id === p.cat)) : [];
+      if (got.length){ PRODUCTS = got; LIVE = true; }
+    } catch (e) {}
+  }
+  const soldOut = p => p.available === false;
   const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
   const euro = n => "€" + (Number.isInteger(n) ? n : n.toFixed(2));
   const ARROW = '<svg class="arr" width="18" height="12" viewBox="0 0 18 12" aria-hidden="true"><path d="M0 6H16M11 1L16 6L11 11" fill="none" stroke="#FFFFFF" stroke-width="1.6"/></svg>';
@@ -34,6 +57,7 @@
     PRODUCTS.filter(p => p.cat === c.id).forEach(p => {
       const a = el("a", "item"); a.href = `#p/${p.handle}`;
       a.appendChild(photo(p, 0));
+      if (soldOut(p)){ a.classList.add("soldout"); a.querySelector(".ph").appendChild(el("b", "out-band", "SOLD OUT")); }
       a.appendChild(el("span", "name", p.title));
       a.appendChild(el("span", "price", euro(p.price)));
       strip.appendChild(a);
@@ -174,6 +198,7 @@
     if (p.sizes && p.sizes.length){
       const opts = el("div", "pd-opts"); opts.setAttribute("role", "radiogroup"); opts.setAttribute("aria-label", "Size");
       p.sizes.forEach(s => { const b = el("button", null, s); b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", "false");
+        if (soldOut(p) || (p.soldOutSizes || []).includes(s)){ b.disabled = true; b.classList.add("out"); b.title = s + " — sold out"; }
         b.addEventListener("click", () => { size = s; [...opts.children].forEach(o => o.setAttribute("aria-checked", o === b)); add.disabled = false; add.textContent = "ADD TO BAG"; });
         opts.appendChild(b); });
       info.appendChild(opts);
@@ -181,7 +206,13 @@
     const add = el("button", "pd-add", p.sizes && p.sizes.length ? "CHOOSE A SIZE" : "ADD TO BAG"); add.type = "button";
     if (p.sizes && p.sizes.length) add.disabled = true;
     const note = el("p", "pd-note");
-    add.addEventListener("click", () => { note.textContent = "The online shop opens soon — this button will go to the bag."; });  // Shopify cart hooks in here
+    if (soldOut(p)){ add.disabled = true; add.textContent = "SOLD OUT"; }
+    else if (p.stock > 0 && p.stock <= 3) note.textContent = `Only ${p.stock} left.`;
+    add.addEventListener("click", () => {
+      if (!BAG_ON){ note.textContent = "The online shop opens soon — this button will go to the bag."; return; }
+      Bag.add(p, size); add.textContent = "ADDED ✓"; setTimeout(() => { add.textContent = "ADD TO BAG"; }, 1400);
+      Bag.open();
+    });
     info.append(add, note);
     info.appendChild(el("p", "pd-desc", p.desc || ""));
     pd.append(media, info, x);
@@ -209,8 +240,79 @@
     if (t && (e.key === "ArrowRight" || e.key === "ArrowLeft")) t.scrollBy({ left:(e.key === "ArrowRight" ? 1 : -1) * t.clientWidth, behavior:"smooth" });
   });
 
+  // ---- bag ----------------------------------------------------------------------
+  // Lines live in this browser (localStorage "cs-bag") until Shopify is connected; then the same drawer drives a
+  // Shopify cart and CHECKOUT goes to Shopify's hosted checkout (cart.checkoutUrl).
+  const Bag = (() => {
+    const KEY = "cs-bag";
+    let lines = [];
+    try { lines = JSON.parse(localStorage.getItem(KEY) || "[]").filter(l => PRODUCTS.some(p => p.handle === l.handle)); } catch (e) {}
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(lines)); } catch (e) {} render(); };
+    const prod = h => PRODUCTS.find(p => p.handle === h);
+    const btn = el("button", "bag-btn"); btn.type = "button"; btn.setAttribute("aria-label", "Open your bag");
+    const shade = el("div", "bag-shade"), box = el("aside", "bag"); box.setAttribute("aria-label", "Your bag"); box.setAttribute("aria-hidden", "true");
+    box.innerHTML = `<div class="bag-head"><h2>YOUR BAG</h2><button type="button" class="bag-x" aria-label="Close the bag"><svg width="16" height="16" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1L13 13M13 1L1 13" fill="none" stroke="#fff" stroke-width="1.6"/></svg></button></div>
+      <ul class="bag-lines"></ul>
+      <div class="bag-foot"><p class="bag-sub"><span>SUBTOTAL</span><b></b></p><p class="bag-fine">Shipping and VAT are worked out at checkout.</p>
+      <button type="button" class="bag-go">CHECKOUT</button><p class="bag-note" aria-live="polite"></p></div>`;
+    if (BAG_ON) document.body.append(btn, shade, box);
+    const $l = box.querySelector(".bag-lines"), $sub = box.querySelector(".bag-sub b"), $go = box.querySelector(".bag-go"), $note = box.querySelector(".bag-note");
+    function render(){
+      const n = lines.reduce((a, l) => a + l.qty, 0), total = lines.reduce((a, l) => a + l.qty * (prod(l.handle) || {}).price, 0);
+      btn.innerHTML = `BAG <span>${n}</span>`; btn.classList.toggle("has", n > 0);
+      $l.innerHTML = "";
+      if (!lines.length) $l.appendChild(el("li", "bag-empty", "Your bag is empty."));
+      lines.forEach((l, i) => {
+        const p = prod(l.handle), li = el("li", "bag-line");
+        const th = photo(p, 0); th.querySelectorAll(".soon-band").forEach(b => b.remove()); th.classList.add("bag-th");
+        const mid = el("div", "bag-mid");
+        mid.appendChild(el("p", "bag-name", p.title));
+        if (l.size) mid.appendChild(el("p", "bag-size", "SIZE " + l.size));
+        const q = el("div", "bag-qty");
+        const minus = el("button", null, "−"), plus = el("button", null, "+"), num = el("span", null, String(l.qty));
+        minus.type = plus.type = "button"; minus.setAttribute("aria-label", "One fewer"); plus.setAttribute("aria-label", "One more");
+        plus.disabled = p.stock > 0 && l.qty >= p.stock;
+        minus.addEventListener("click", () => { l.qty--; if (!l.qty) lines.splice(i, 1); save(); });
+        plus.addEventListener("click", () => { l.qty++; save(); });
+        q.append(minus, num, plus); mid.appendChild(q);
+        const right = el("div", "bag-right");
+        right.appendChild(el("p", "bag-price", euro(p.price * l.qty)));
+        const rm = el("button", "bag-rm", "REMOVE"); rm.type = "button"; rm.addEventListener("click", () => { lines.splice(i, 1); save(); });
+        right.appendChild(rm);
+        li.append(th, mid, right); $l.appendChild(li);
+      });
+      $sub.textContent = euro(total); $go.disabled = !lines.length; $note.textContent = "";
+    }
+    const open = () => { if (!BAG_ON) return; render(); document.body.classList.add("bag-on"); box.setAttribute("aria-hidden", "false"); box.querySelector(".bag-x").focus({ preventScroll:true }); };
+    const close = () => { document.body.classList.remove("bag-on"); box.setAttribute("aria-hidden", "true"); };
+    btn.addEventListener("click", open); shade.addEventListener("click", close); box.querySelector(".bag-x").addEventListener("click", close);
+    addEventListener("keydown", e => { if (e.key === "Escape" && document.body.classList.contains("bag-on")){ e.stopImmediatePropagation(); close(); } }, true);
+    // CHECKOUT: a fresh Shopify cart from the bag's lines, then straight to Shopify's hosted checkout
+    $go.addEventListener("click", async () => {
+      const send = lines.filter(l => l.variant).map(l => ({ variant:l.variant, qty:l.qty }));
+      if (!LIVE || !send.length){ $note.textContent = "Checkout opens with the shop — these are placeholder products."; return; }
+      $go.disabled = true; $go.textContent = "ONE MOMENT…"; $note.textContent = "";
+      try {
+        const r = await fetch("/.netlify/functions/shop", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ lines: send }) });
+        const d = await r.json();
+        if (d.checkoutUrl){ location.href = d.checkoutUrl; return; }
+        $note.textContent = d.error === "not-configured" ? "Checkout isn't connected yet." : "Couldn't start checkout: " + (d.error || "try again");
+      } catch (e) { $note.textContent = "Couldn't reach checkout — check your connection and try again."; }
+      $go.disabled = false; $go.textContent = "CHECKOUT";
+    });
+    render();
+    return {
+      add(p, size){ const l = lines.find(x => x.handle === p.handle && x.size === (size || null));
+        const v = (p.variants || []).find(x => x.size === (size || null)) || (p.variants || []).find(x => x.available) || null;
+        if (l){ if (!(p.stock > 0 && l.qty >= p.stock)) l.qty++; } else lines.push({ handle:p.handle, size:size || null, qty:1, variant: v ? v.id : null });
+        save(); },
+      open, close
+    };
+  })();
+
   // ---- routing ----------------------------------------------------------------
   function route(){
+    Bag.close();                                   // following a link (or back) closes the bag
     const h = decodeURIComponent(location.hash.slice(1));
     if (h.startsWith("p/")){
       const p = PRODUCTS.find(x => x.handle === h.slice(2));
