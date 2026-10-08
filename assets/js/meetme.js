@@ -81,7 +81,7 @@
         <p class="mmb-write-row"><a class="mmb-write" href="#new" role="button">[ WRITE A POST ]</a><img class="mmb-mark" src="assets/img/mm-logo.webp" alt="Meet Me at Society"><button type="button" class="mmb-btn mmb-fs">[FULLSCREEN]</button></p>
         <p class="mmb-hint mmb-home-hint" aria-live="polite"></p>
         <div class="mmb-inbox">
-          ${rule("=", 160)}<h2 class="mmb-title">M E S S A G E&nbsp;&nbsp;&nbsp;I N B O X</h2>${rule("=", 160)}
+          ${rule("=", 160)}<h2 class="mmb-title">P O S T&nbsp;&nbsp;&nbsp;F E E D</h2>${rule("=", 160)}
           <div class="mmb-field mmb-filter"><span class="mmb-k">SHOW&gt;</span>${picker("filter", true, filter)}</div>
           <div class="mmb-row mmb-head" aria-hidden="true"><span>DATE</span><span>TIME</span><span>AUTHOR</span><span>SUBJECT</span></div>
           ${rule("-", 200)}
@@ -117,7 +117,7 @@
     const shown = posts().filter(p => !filter || (p.category || "general") === filter);
     $list.innerHTML = shown.map(p => { const [d, t] = fmt(p.at);
       return `<li><a class="mmb-row${p.waiting ? " mmb-wait" : ""}" href="#p/${esc(p.id)}"><span>${d}</span><span>${t}</span><span>&lt;${esc(p.author)}&gt;</span><span>${esc(p.subject)}${p.waiting ? " <em>[PENDING]</em>" : ""}</span></a></li>`; }).join("")
-      || `<li class="mmb-empty">NO MESSAGES IN ${filter ? cat(filter)[1] : "THE INBOX"} YET.</li>`;
+      || `<li class="mmb-empty">NO POSTS IN ${filter ? cat(filter)[1] : "THE FEED"} YET.</li>`;
   }
   render(); load(); setInterval(() => { if(!document.hidden) load(); }, 60e3);
 
@@ -351,7 +351,7 @@
         <p class="mmb-actions"><button type="submit" class="mmb-btn">[ SEND COMMENT ]</button></p>
       </form>` : `<p class="mmb-note">${note ? "COMMENTS OPEN ONCE THIS MESSAGE IS APPROVED." : "COMMENTS ARE OFF ON THIS EXAMPLE MESSAGE."}</p>`}
       ${rule("-", 200)}
-      <p class="mmb-actions"><button type="button" class="mmb-btn mmb-close2">[ BACK TO INBOX ]</button></p>`;
+      <p class="mmb-actions"><button type="button" class="mmb-btn mmb-close2">[ BACK TO FEED ]</button></p>`;
     $postIn.querySelectorAll("img").forEach(im => im.addEventListener("load", fitPost));
     if(comments){ postComments = comments; postId = p.id; drawThread(); const f = $postIn.querySelector(".mmb-cform"); f.elements.author.value = store.get("mm-name", ""); }
     fitPost();
