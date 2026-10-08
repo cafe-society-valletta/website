@@ -1015,6 +1015,13 @@ body.bb-body{ background:var(--black); }
 .bb-box svg{ width:20px; height:20px; flex-shrink:0; }
 .bb-box input{ flex:1; min-width:0; height:100%; padding:0; border:0; outline:0; background:none; color:var(--black); font:400 19px/1 var(--font-display); letter-spacing:.02em; -webkit-appearance:none; appearance:none; }
 .bb-box input::placeholder{ color:rgba(10,10,10,.45); }
+.bb-box input::-webkit-search-cancel-button, .bb-box input::-webkit-search-decoration{ -webkit-appearance:none; appearance:none; display:none; }
+/* ✕ that cancels a search (shown only while the box has text): clears it and goes back to the full list */
+.bb-x{ flex-shrink:0; display:flex; align-items:center; justify-content:center; width:36px; height:36px; margin-right:-8px; padding:0; border:0; background:none; color:var(--black); cursor:pointer; -webkit-tap-highlight-color:transparent; transition:scale .15s ease, opacity .15s ease; }
+.bb-x[hidden]{ display:none; }
+.bb-x svg{ width:20px; height:20px; }
+.bb-x:hover{ scale:1.12; } .bb-x:active{ scale:.9; }
+.bb-x:focus-visible{ outline:1.5px solid var(--black); outline-offset:-2px; }
 .bb-box:focus-within{ box-shadow:0 0 0 1px var(--black); }
 .bb-filters{ display:flex; flex-wrap:wrap; gap:4px; }
 /* category legend folds away with the compact header (search focused or list scrolled) to give the list/card more room */
