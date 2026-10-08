@@ -555,8 +555,8 @@ body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
    PHOTO LAB  (artboard "04 Gallery")
    ========================================================= */
 body.gallery-body{ background:var(--black); }
-.gallery{ background:var(--black) url('../img/p-bg-photolab-mobile.jpg') 50% 0/100% auto repeat-y; color:var(--white); }   /* Chef's film-strip collage (Oct 2026) */
-@media (min-width:700px){ .gallery{ background-image:url('../img/p-bg-photolab-desktop.jpg'); } }
+.gallery{ background:var(--black) url('../img/p-bg-photolab-mobile.jpg') 50% -28px/100% auto repeat-y; color:var(--white); }   /* Chef's film-strip collage (Oct 2026); nudged up so the clear menu bar's logos sit on a dark band */
+@media (min-width:700px){ .gallery{ background-image:url('../img/p-bg-photolab-desktop.jpg'); background-position:50% -56px; } }
 .lab-head{ display:flex; flex-direction:column; align-items:center; gap:1px; padding:37px 32px 36px; }
 .lab-head img{ width:84px; height:30px; }
 .lab-head h1{ margin:0; font-family:var(--font-display); font-size:24px; font-weight:700; letter-spacing:.04em; line-height:30px; }
@@ -1642,7 +1642,7 @@ html.df-open .doorframe, html.df-open .ev-head, html.df-open .ev-layout{ transit
    About = the same paper (fixed, so it looks see-through), Photo Lab = a dark smoky glass over the film strips */
 .about-body .bar-light{ background:transparent; }
 .about-body .bar-light.scrolled{ background:#fbfaf7 var(--paper) 0 0/var(--tile) auto repeat fixed; box-shadow:0 1px 0 rgba(0,0,0,.06); }
-.gallery-body .bar-dark{ background:linear-gradient(rgba(10,10,10,.72), rgba(10,10,10,.35) 70%, rgba(10,10,10,0)); }   /* see-through, but the bright film strip at the top of the photo can't wash out the logos */
+.gallery-body .bar-dark{ background:transparent; }   /* clear over the film background (Chef, Oct 2026) */
 .gallery-body .bar-dark.scrolled{ background:rgba(10,10,10,.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
 /* About: photos + text multiply onto the paper so its grain shows through, as if printed on it (Chef) */
 .about .about-head, .about .about-sections, .about .site-footer{ mix-blend-mode:multiply; }
