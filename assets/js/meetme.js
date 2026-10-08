@@ -558,7 +558,8 @@
   });
 
   // CRT curve: everything on the screen is bent with the same barrel distortion as the intro clip (ffmpeg lenscorrection
-  // k1 .32 / k2 .06 on the scaled frame, centre magnified ~1.22× so the corners land on the corners, as in the clips). An SVG displacement map (assets/img/mm-warp-*.png; R = x shift, G = y shift,
+  // k1 .32 / k2 .06 on the scaled frame, centre magnified ~1.22× so the corners land on the corners, as in the clips), then softened to 60% of that bend (Chef,
+  // Oct 2026: the mid-sides bulged too far) — f = 1 + 0.6·(0.8188 + 0.1621 r² + 0.0193 r⁴ − 1), r² by half-diagonal; corners unchanged. An SVG displacement map (assets/img/mm-warp-*.png; R = x shift, G = y shift,
   // 0.5 = none)) is applied as a CSS filter to the screen, sized in px to the screen and re-sized with it.
   // WARP_SCALE = the map's full range in screen-box px at the size the map was made for (phone 933 px wide, desktop 868).
   let warp = "";   // the CRT filter (set once its map has loaded); dropped in fullscreen
