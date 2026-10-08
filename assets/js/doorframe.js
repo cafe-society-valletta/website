@@ -374,4 +374,9 @@
     cimg.hidden = true; cimg.removeAttribute("src"); crop.classList.remove("has"); bar.hidden = true; msg.textContent = "";
     up.querySelector(".df-form").hidden = false; up.querySelector(".df-done").hidden = true;
   }
+  // direct link straight to the uploader: cafesocietyvalletta.com/doorframe (→ events.html?tapeup) or events.html#tapeup
+  if (/[?&]tapeup\b/.test(location.search) || location.hash === "#tapeup"){
+    setOpen(true); openUp();
+    history.replaceState(null, "", location.pathname);   // closing it leaves a clean events URL
+  }
 })();
