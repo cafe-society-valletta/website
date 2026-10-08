@@ -32,14 +32,20 @@ const catOf = cols => {
   return null;
 };
 
+// The Headless channel gives a PUBLIC and a PRIVATE token; each needs its own header. Try public first, then
+// private on a 401, and remember which one worked.
+let privateMode = false;
 async function gql(query, variables) {
-  const domain = process.env.SHOPIFY_STORE_DOMAIN || "", token = process.env.SHOPIFY_STOREFRONT_TOKEN || "";
+  const domain = process.env.SHOPIFY_STORE_DOMAIN || "", token = (process.env.SHOPIFY_STOREFRONT_TOKEN || "").trim();
   if (!domain || !token) return { notConfigured: true };
-  const r = await fetch(`https://${domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "")}/api/${VERSION}/graphql.json`, {
+  const url = `https://${domain.trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "")}/api/${VERSION}/graphql.json`;
+  const call = priv => fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token },
+    headers: { "Content-Type": "application/json", [priv ? "Shopify-Storefront-Private-Token" : "X-Shopify-Storefront-Access-Token"]: token },
     body: JSON.stringify({ query, variables })
   });
+  let r = await call(privateMode);
+  if (r.status === 401 || r.status === 403) { const alt = await call(!privateMode); if (alt.ok) { privateMode = !privateMode; r = alt; } }
   const j = await r.json().catch(() => ({}));
   if (!r.ok || j.errors) return { error: (j.errors && j.errors[0] && j.errors[0].message) || "shopify-" + r.status };
   return { data: j.data };
