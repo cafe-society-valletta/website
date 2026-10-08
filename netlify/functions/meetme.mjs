@@ -1,5 +1,5 @@
 /* =========================================================
-   /.netlify/functions/meetme — the Meet Me at Society board (meetmeatsociety.html).
+   /.netlify/functions/meetme — the Meet Me at Society board (meetme.html).
 
    Storage: Netlify Blobs (store "meetme", strong consistency → an approved post shows instantly).
      live         → JSON array of approved posts, newest first: [{ id, at, author, subject, body, photos }]
@@ -19,7 +19,8 @@
      GET ?post=<id>                        → { post, comments } (live posts only; approved comments, oldest first)
      POST { kind:"comment", post, parent, author, body, website }  → { ok:true, id, pending:true }   (comments are vetted too)
      GET ?photo=<id>-<n>                   → the image          (live posts only, or admin key)
-     POST { subject, author, body, photos:[{type,data(base64)}], website }  → { ok:true, id, pending:true }
+     POST { subject, author, body, category, photos:[{type,data(base64)}], website }  → { ok:true, id, pending:true }
+                                             (category = one of CATS, required; GET list returns it, "general" for old posts)
                                              (website = honeypot, must be empty)
    Admin (header x-mm-key must equal the Netlify env var MEETME_ADMIN_KEY — set by Chef, never in the repo):
      GET  ?admin=1                         → { pending, live, cpending, comments }   (comments = latest approved, newest first)
@@ -42,6 +43,8 @@ const cleanBody = (s, n) => String(s || "").replace(/\r\n?/g, "\n").replace(/[\u
   .replace(/\n{4,}/g, "\n\n\n").trim().slice(0, n);
 const MAX_LIVE = 500, LIM = { subject: 44, author: 24, body: 5000, photos: 4, photoBytes: 1024 * 1024, comment: 1000 };
 const TYPES = ["image/jpeg", "image/png", "image/webp"];
+// post categories (keys; names + inbox tags live in assets/js/meetme.js). Posts from before categories count as "general".
+const CATS = ["general", "meetup", "staff", "job", "flat", "rent", "flatmate", "art", "sale", "free", "service", "classes", "collab", "club", "cause", "lost", "missed"];
 const sha = k => crypto.createHash("sha256").update(String(k) + "|mm-owner").digest("hex");
 const maltaNow = () => new Date().toLocaleString("sv-SE", { timeZone: "Europe/Malta" }).slice(0, 16).replace(" ", "T");
 
@@ -89,7 +92,7 @@ export default async (req, context) => {
       const subj = Object.fromEntries(live.map(p => [p.id, p.subject]));
       return out(200, { pending: await get("pending"), live, cpending: (await get("cpending")).map(c => ({ ...c, subject: subj[c.post] || "?" })), comments: all.slice(0, 100) });
     }
-    return out(200, { posts: (await get("live")).map(({ id, at, author, subject, photos }) => ({ id, at, author, subject, photos: photos || 0 })) });
+    return out(200, { posts: (await get("live")).map(({ id, at, author, subject, photos, category }) => ({ id, at, author, subject, photos: photos || 0, category: category || "general" })) });
   }
   if (req.method !== "POST") return out(405, { error: "method" });
 
@@ -111,8 +114,9 @@ export default async (req, context) => {
     } else {
       const subject = clean(b.subject, LIM.subject), body = cleanBody(b.body, LIM.body);
       if (subject.length < 2) return out(400, { error: "empty" });
+      const category = CATS.includes(b.category) ? b.category : (p.category || "general");
       where.splice(i, 1);
-      pending.push({ ...p, subject, body, edited: maltaNow() });   // back to the sysop; comments and photos stay
+      pending.push({ ...p, subject, body, category, edited: maltaNow() });   // back to the sysop; comments and photos stay
     }
     await store.setJSON("pending", pending); await store.setJSON("live", live);
     return out(200, { ok: true });
@@ -173,6 +177,7 @@ export default async (req, context) => {
   }
   const subject = clean(b.subject, LIM.subject), author = clean(b.author, LIM.author), body = cleanBody(b.body, LIM.body);
   if (subject.length < 2 || author.length < 1) return out(400, { error: "empty" });
+  if (!CATS.includes(b.category)) return out(400, { error: "category" });
   const photos = Array.isArray(b.photos) ? b.photos.slice(0, LIM.photos) : [];
   const bins = [];
   for (const ph of photos) {
@@ -190,7 +195,7 @@ export default async (req, context) => {
   const at = maltaNow();   // Malta time, YYYY-MM-DDTHH:MM
   for (let n = 0; n < bins.length; n++) await store.set(`img/${id}-${n}`, bins[n].buf, { metadata: { type: bins[n].type } });
   const ownerKey = crypto.randomBytes(16).toString("hex");   // given to the poster's browser only; lets them edit/delete their post
-  pending.push({ id, at, author, subject, body, photos: bins.length, ip: h, owner: sha(ownerKey) });
+  pending.push({ id, at, author, subject, body, category: b.category, photos: bins.length, ip: h, owner: sha(ownerKey) });
   await store.setJSON("pending", pending);
   return out(200, { ok: true, id, pending: true, ownerKey });
 };
