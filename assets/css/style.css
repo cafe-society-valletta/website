@@ -1451,13 +1451,18 @@ html.df-zoomed .ev-head, html.df-zoomed .ev-layout{ filter:brightness(.72) blur(
 .df-link:hover span, .df-link:focus-visible span{ text-decoration:underline; text-underline-offset:3px; }
 .df-down{ background:transparent; color:rgba(255,255,255,.75); box-shadow:none; rotate:0deg; font-weight:500; border-bottom:1px solid rgba(255,255,255,.4); padding:2px 0; }
 .df-down:hover, .df-down[data-sure]{ color:#fff; border-color:#fff; }
-/* the "tape up a poster" tag on the open frame */
-.df-add{ position:absolute; z-index:2; left:50%; bottom:22px; translate:-50% 0; rotate:-2.5deg; padding:12px 16px 10px; border:0; cursor:pointer;
-  background:#ece4d0; color:#1d1a14; font:inherit; font-size:12px; font-weight:700; letter-spacing:.12em; line-height:15px; text-transform:uppercase; text-align:center;
-  box-shadow:0 4px 10px rgba(0,0,0,.55); opacity:0; pointer-events:none; transition:opacity .25s ease .15s, scale .15s ease; }
-.df-add .df-tape{ top:-7px; }
-html.df-open .df-add{ opacity:1; pointer-events:auto; }
+/* the "tape up a poster" tag — always on screen (Chef, Oct 2026; phone 80%, desktop 150% vs the old 12px tag): tucked beside the collapsed strip, centred on the
+   open frame. Lives on <body> (not inside the clipped frame); above the frame (55) + its logo (56), under an open event card (57). */
+.df-add{ --dfw:min(176px, 46vw); --peek:20px; position:fixed; z-index:56; left:calc(var(--peek) + 10px); bottom:42px; translate:0 0; rotate:-2.5deg;
+  padding:10px 13px 8px; border:0; cursor:pointer;
+  background:#ece4d0; color:#1d1a14; font:inherit; font-size:9.6px; font-weight:700; letter-spacing:.12em; line-height:12px; text-transform:uppercase; text-align:center;
+  box-shadow:0 3px 8px rgba(0,0,0,.55); transition:left .45s cubic-bezier(.2,.8,.2,1), translate .45s cubic-bezier(.2,.8,.2,1), scale .15s ease;
+  -webkit-tap-highlight-color:transparent; }
+.df-add .df-tape{ top:-5px; width:35px; height:10px; }
+html.df-open .df-add{ left:calc(var(--dfw) / 2); translate:-50% 0; }
 .df-add:hover{ scale:1.05; } .df-add:active{ scale:.95; }
+@media (min-width:900px){ .df-add{ --dfw:271px; --peek:24px; bottom:64px; padding:18px 24px 15px; font-size:18px; line-height:22px; box-shadow:0 6px 15px rgba(0,0,0,.55); } .df-add .df-tape{ width:96px; height:26px; top:-11px; } }
+@media (prefers-reduced-motion:reduce){ .df-add{ transition:scale .15s ease; } }
 .df-add:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
 /* the uploader: a cream sheet taped askew over the dimmed page */
 .df-up{ position:fixed; inset:0; z-index:130; overflow-y:auto; overscroll-behavior:contain; display:flex; padding:44px 18px 40px; background:rgba(10,10,10,.55);
