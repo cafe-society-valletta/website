@@ -1528,6 +1528,9 @@ html:not(.df-open) .df-logo{ transition:transform .5s cubic-bezier(.2,.8,.2,1) .
 /* the logo gets out of the way first: the frame (and the calendar's shift) wait for it when opening */
 html.df-open .doorframe, html.df-open .ev-head, html.df-open .ev-layout{ transition-delay:.17s; }
 .df-logo:focus-visible{ outline:2px solid #fff; outline-offset:4px; }
+.df-logo img{ transition:scale .15s ease, filter .15s ease; }
+@media (hover:hover){ .df-logo:hover img{ scale:1.06; filter:drop-shadow(0 0 6px rgba(255,236,190,.35)); } }
+.df-logo:active img{ scale:.94; transition-duration:.06s; }   /* it's a button: grows on hover, presses on click (Chef) */
 @media (min-width:900px){ .df-logo{ left:calc(24px + 16px); top:78px; width:120px; } }
 @media (prefers-reduced-motion:reduce){ .df-logo{ transition:opacity .2s !important; } html.df-open .df-logo{ transform:none; } }
 
