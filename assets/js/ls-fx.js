@@ -2,7 +2,8 @@
    Arrival: the sketches fade in out of a slight zoom and the headline pieces rise in one after another.
    Scroll:
      · background drifts at half speed
-     · text box (.l1) drifts up slower than the page, shrinking toward its top edge, fading and blurring
+     · text box (.l1) drifts up slower than the page, shrinking toward its top edge, fading and blurring at the same
+       rate as the tagline (gone when the text meets the logo)
      · tagline (.l3) grows at a steady rate in step with the box contracting, its centre kept halfway between the
        logo and the body text; it fades from the moment it starts growing and is gone when the text meets the logo
      · Lost Souls Club logo (.l2) scrolls up until it reaches the top of the window, then stops just under the menu
@@ -42,7 +43,8 @@
     tag.style.setProperty("--reach", px(reach)); tag.style.setProperty("--ms", px(S)); tag.style.setProperty("--meet", px(S + gap));
     const tagTop = logoTop + logo.offsetHeight + parseFloat(getComputedStyle(tag).marginTop);
     toff = (logoTop + logo.offsetHeight + copy.offsetTop) / 2 - (tagTop + tag.offsetHeight / 2);   // nudge it exactly to the middle
-    tag.style.setProperty("--qs", px(qs)); tag.style.setProperty("--qe", px(qe)); tag.style.setProperty("--toff", px(toff)); tag.style.setProperty("--tdrift", px(toff + gap / 2));
+    [tag, box].forEach(el => { el.style.setProperty("--qs", px(qs)); el.style.setProperty("--qe", px(qe)); });   // box fades on the tagline's timing
+    tag.style.setProperty("--toff", px(toff)); tag.style.setProperty("--tdrift", px(toff + gap / 2));
     copy.style.setProperty("--u0", px(u0)); copy.style.setProperty("--ms", px(S)); copy.style.setProperty("--span", px(Math.max(1, max - S)));
     veil.style.setProperty("--vs", px(Math.max(0, S - 60))); veil.style.setProperty("--ms", px(Math.max(1, S)));
   }
@@ -55,7 +57,8 @@
     box.style.translate = "0 " + px(Math.min(y, reach) * LAG); box.style.setProperty("--p", p);
     tag.style.translate = "0 " + px(toff + Math.min(gap, Math.max(0, y - S)) / 2);
     tag.style.setProperty("--p", p);
-    tag.style.setProperty("--q", Math.min(1, Math.max(0, (y - qs) / (qe - qs))).toFixed(3));
+    const q = Math.min(1, Math.max(0, (y - qs) / (qe - qs))).toFixed(3);
+    tag.style.setProperty("--q", q); box.style.setProperty("--q", q);
     copy.style.setProperty("--m0", px(u0 + Math.max(0, y - S)));
     veil.style.opacity = Math.min(1, Math.max(0, (y - (S - 60)) / 60)).toFixed(2);
   }

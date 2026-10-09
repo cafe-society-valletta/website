@@ -403,7 +403,8 @@
 /* =========================================================
    Page motion (Chef, Oct 2026) — see style.css "PAGE MOTION". Off with prefers-reduced-motion.
    · Events / Photo Lab / Collection: background parallax (scroll-driven where supported, else on scroll)
-   · About: thumbnails come into focus one after another; title illustration exits (pure CSS)
+   · About: thumbnails (section banners + press tiles) drift in from the bottom left and come into focus one after
+     another, 110ms apart, starting just after the page opens; title illustration exits (pure CSS)
    ========================================================= */
 (function(){
   "use strict";
@@ -426,13 +427,14 @@
   const about = document.querySelector(".page.about");
   if (about) {
     const queue = []; let timer = null;
-    const step = () => { const b = queue.shift(); if (!b) { timer = null; return; } b.classList.add("in"); timer = setTimeout(step, 140); };
+    const step = () => { const b = queue.shift(); if (!b) { timer = null; return; } b.classList.add("in"); timer = setTimeout(step, 110); };
+    let first = true;   // the opening sequence waits a beat after the page appears
     const io = new IntersectionObserver(es => {
       es.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
         .forEach(e => { io.unobserve(e.target); queue.push(e.target); });
-      if (!timer) step();
+      if (!timer) { if (first) { first = false; timer = setTimeout(step, 120); } else step(); }
     }, { rootMargin: "0px 0px -6% 0px" });
-    about.querySelectorAll(".banner").forEach(b => io.observe(b));
+    about.querySelectorAll(".banner, .press-tile").forEach(b => io.observe(b));
     // a section is open → reading mode: no scroll motion at all (Chef: "read like a book or magazine")
     const upd = () => root.classList.toggle("about-reading", !!about.querySelector(".about-sec.open:not(.sec-4)"));
     new MutationObserver(upd).observe(about, { subtree: true, attributes: true, attributeFilter: ["class"] }); upd();
