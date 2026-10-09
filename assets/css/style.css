@@ -380,7 +380,8 @@ body.about-body{ --tile:170px; --paper:url('../img/p-bg-about-paper.jpg'); backg
 /* About · AS FEATURED ON: (Chef, Oct 2026) — a grid of same-size 16:9 tiles, each a link out: a publication's logo on
    black, or a video thumbnail with a play button */
 .banner-press{ background:#000; }
-.sec-4 .sec-body{ padding-bottom:40px; animation:none; }   /* always open, so no fold-out animation on load */
+.sec-4 .sec-body{ padding-bottom:40px; animation:none; }
+.sec-4 .gal-title{ font-size:16px; height:32px; }   /* same size as the section headings (banner titles) — Chef */   /* always open, so no fold-out animation on load */
 .press-list{ list-style:none; margin:0; padding:0; align-self:stretch; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .press-tile{ position:relative; display:block; aspect-ratio:16/9; overflow:hidden; background:#000; color:var(--white); text-decoration:none; }
 .press-tile picture, .press-tile img{ display:block; width:100%; height:100%; }
@@ -388,7 +389,8 @@ body.about-body{ --tile:170px; --paper:url('../img/p-bg-about-paper.jpg'); backg
 .press-video:hover img, .press-video:focus-visible img{ transform:scale(1.04); }
 /* Time Out tile — Chef's Paper version (Oct 2026): logo 43% tall, heavy 2-line headline, small CTA */
 .press-logo-tile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; padding:3px 0; }
-.press-logo-tile picture{ width:auto; height:43%; flex-shrink:0; } .press-logo-tile img{ width:auto; height:100%; }
+/* the <picture> steps aside (Safari sized it to the logo's full intrinsic width, pushing the logo left); the img itself is the centred flex item */
+.press-logo-tile picture{ display:contents; } .press-logo-tile img{ width:auto; height:43%; max-width:90%; flex-shrink:0; align-self:center; object-fit:contain; }
 .press-cta{ font-family:var(--font-display); font-size:6px; font-weight:400; line-height:8px; letter-spacing:.12em; text-transform:uppercase; color:#fff; border-bottom:1px solid #e00; padding-bottom:1px; transition:border-color .2s; }
 .press-cta b{ color:#e00; font-weight:inherit; }
 .press-tile:hover .press-cta, .press-tile:focus-visible .press-cta{ border-bottom-color:#fff; }
@@ -821,7 +823,7 @@ body.menu-body{ background:var(--black); }
   .sec-body > .chev{ margin-top:12px; }
   .sec-body > p{ font-size:17px; }
   .press-list{ gap:16px; } .press-logo-tile{ gap:11px; padding:6px 0; } .press-cap{ font-size:24px; line-height:26px; } .press-cta{ font-size:13px; line-height:17px; border-bottom-width:2px; padding-bottom:3px; } .press-cta b{ font-size:15px; } .press-play{ width:56px; height:56px; margin:-28px 0 0 -28px; } .press-play::after{ left:22px; top:17px; border-width:11px 0 11px 17px; }
-  .sec-4 .sec-body{ padding-bottom:56px; }
+  .sec-4 .sec-body{ padding-bottom:56px; } .sec-4 .gal-title{ font-size:28px; line-height:30px; height:40px; }
   .fig figcaption{ padding:4px 0 0; font-size:10px; letter-spacing:-.01em; line-height:14px; }
   .about-sec.sec-3.open{ width:min(1100px, calc(100% - 80px)); padding:56px 0 40px; }   /* galleries run wider than the 720 column (Chef) */
   .gal-title{ height:44px; padding:0; font-size:40px; line-height:44px; }
