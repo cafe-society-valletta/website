@@ -402,6 +402,8 @@
           if (evs.length){
             const ev = evs[0];
             const t = el("button", past ? "thumb past" : "thumb"); t.type = "button";
+            { let h = 0; for (const ch of key(date)) h = (h * 31 + ch.charCodeAt(0)) | 0;   // ever so slightly askew, same tilt every visit
+              t.style.setProperty("--tilt", (((h >>> 0) % 1000) / 1000 * 9 - 4.5).toFixed(2) + "deg"); }
             t.setAttribute("aria-label", `${ev.title}, ${date.getDate()} ${MONTH_NAMES[date.getMonth()]}`);
             if (ev.poster) t.style.backgroundImage = `url('${ev.poster}')`;
             if (ev.posterFit === "contain"){ t.style.backgroundSize = ev.posterSize || "90% auto"; t.style.backgroundColor = "#0A0A0A"; }
@@ -455,7 +457,7 @@
     // full-size thumbnail (room is reserved for one even on days without an event)
     const labs = [...cal.querySelectorAll(".day .hol-name")].filter(l => l.offsetParent);   // desktop shows one month at a time
     if (!labs.length) return;
-    const anyThumb = cal.querySelector(".thumb"), thH = anyThumb ? anyThumb.offsetHeight : (wide.matches ? 60 : 40);
+    const anyThumb = cal.querySelector(".thumb"), thH = anyThumb ? anyThumb.offsetHeight : (wide.matches ? 92 : 42);
     labs.forEach(l => l.style.fontSize = "");
     let fs = parseFloat(getComputedStyle(labs[0]).fontSize);
     const fits = lab => {
