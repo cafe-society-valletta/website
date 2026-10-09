@@ -427,7 +427,7 @@ body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
 .ev-head img{ width:106px; height:37px; }
 .ev-head h1{ margin:-1px 0 0; font-family:var(--font-display); font-size:34px; font-weight:300; letter-spacing:.02em; line-height:42px; }
 .cal{ position:relative; display:flex; flex-direction:column; gap:28px; padding:8px 32px 48px; }
-.month{ background:rgba(10,10,10,.78); border:1px solid rgba(255,255,255,.55); scroll-margin-top:52px;
+.month{ background:rgba(58,58,58,.5); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.55); box-shadow:0 2px 10px rgba(0,0,0,.25); scroll-margin-top:52px;
   border-radius:6px; overflow:hidden; }   /* outer corners rounded like the menu tabs (6px phone / 8px desktop); cells clipped to it */   /* clears the sticky menu bar */
 .m-head{ display:flex; align-items:center; justify-content:space-between; padding:14px; border-bottom:1px solid rgba(255,255,255,.55); }
 .m-head h2{ margin:0; font-size:15px; font-weight:700; letter-spacing:.15em; line-height:18px; text-transform:uppercase; }
@@ -455,8 +455,18 @@ body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
 .day.today{ background:rgba(255,255,255,.2); }   /* today: lighter cell */
 .day.sel{ background:rgba(255,255,255,.12); }
 .day.today.sel{ background:rgba(255,255,255,.3); }
-.thumb{ align-self:center; width:40px; height:40px; padding:0; border:1px solid rgba(255,255,255,.8); background:var(--grey-placeholder) center/cover no-repeat; cursor:pointer; }
-.day.sel .thumb{ border:2px solid #fff; }
+/* event thumbnails (Chef, Oct 2026): A4 portrait (1:√2), no outline, centred in their whole day box and slightly askew (±4.5°)
+   (--tilt from events.js), on their own parallax layer above the calendar + background, and they grow on hover like the
+   site's other buttons */
+.day{ position:relative; }
+.thumb{ position:absolute; inset:0; z-index:3; margin:auto; width:30px; height:42px; padding:0; border:0; background:var(--grey-placeholder) center/cover no-repeat; cursor:pointer;
+  rotate:var(--tilt, 0deg); box-shadow:0 2px 6px rgba(0,0,0,.4); transition:scale .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s; }
+.thumb:hover, .thumb:focus-visible{ scale:1.15; box-shadow:0 5px 12px rgba(0,0,0,.5); }
+.day.sel .thumb{ scale:1.15; }
+.mo-sda .thumb{ animation:thumbLift linear both; animation-timeline:view(); }   /* nearer layer: drifts against the calendar as you scroll */
+@keyframes thumbLift{ from{ translate:0 14px; } to{ translate:0 -14px; } }
+/* lighter grey calendar (Chef): the photos behind it are blurred (backdrop-filter on .month); text, lines + posters keep a light shadow */
+.m-head, .m-days, .week{ filter:drop-shadow(0 1px 1px rgba(0,0,0,.45)); }
 .ev-panel{ display:flex; flex-direction:column; gap:12px; padding:14px; background:rgba(10,10,10,.92); border-top:2px solid #fff; border-bottom:1px solid rgba(255,255,255,.3); }
 .ev-panel .top{ display:flex; align-items:center; justify-content:space-between; }
 .ev-panel .when{ font-size:10px; font-weight:700; letter-spacing:.14em; line-height:12px; text-transform:uppercase; color:rgba(255,255,255,.7); }
@@ -897,7 +907,8 @@ body.menu-body{ background:var(--black); }
   .day .n{ font-size:20px; line-height:23px; }
   .day .hol-name{ font-size:13px; letter-spacing:.06em; }
   .day .shut{ font-size:17px; letter-spacing:.18em; line-height:20px; }
-  .thumb{ width:86px; height:86px; }
+  .thumb{ width:65px; height:92px; }
+  @keyframes thumbLift{ from{ translate:0 24px; } to{ translate:0 -24px; } }
   .ev-panel{ gap:18px; padding:22px; }
   .ev-panel .when{ font-size:12px; line-height:14px; }
   .ev-panel .x svg{ width:16px; height:16px; }
