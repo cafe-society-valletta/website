@@ -1239,6 +1239,16 @@ body.mm-body{ background:var(--black); }
 html.mm-bar-on .mm-bar{ translate:0 0; opacity:1; pointer-events:auto; }
 html:not(.mm-bar-on) .mm-bar .tab::before{ animation:none; transform:translateY(-101%); }   /* Meet Me: the tab drops in each time the bar appears */
 @media (prefers-reduced-motion:reduce){ .mm-bar{ transition:opacity .2s; } }
+/* phone (<900px): the bar never leaves the casing — instead the whole monitor (bar included) rides up by --mmh, the casing's
+   top band the bar sits on, so both are tucked above the window; it slides back down when the bar is wanted (Chef, Oct 2026).
+   The page is --mmh shorter so no gap opens under the casing. */
+@media (max-width:899.98px){
+  .page.v2.mm{ --mmh:calc(var(--mmw) * .114); height:calc(var(--mmw) * 2622 / 1202 - var(--mmh)); }
+  .mm-bar, html.mm-bar-on .mm-bar{ opacity:1; pointer-events:auto; }
+  .mm-bar, .mm-stage{ translate:0 calc(-1 * var(--mmh)); transition:translate .35s ease; }
+  html.mm-bar-on .mm-bar, html.mm-bar-on .mm-stage{ translate:0 0; }
+  @media (prefers-reduced-motion:reduce){ .mm-bar, .mm-stage{ transition:none; } }
+}
 .mm .site-footer{ bottom:0; margin:0; }
 .mm .site-footer.footer-dark{ text-shadow:0 1px 2px rgba(0,0,0,.9), 0 2px 6px rgba(0,0,0,.7); }   /* white, with a shadow underneath (Chef) */
 .mm .footer-dark svg{ filter:drop-shadow(0 1px 2px rgba(0,0,0,.9)) drop-shadow(0 2px 5px rgba(0,0,0,.6)); }
@@ -1379,7 +1389,8 @@ html.mm-full .mm-bar, html.mm-full .site-footer{ visibility:hidden; }
   background:url("../img/p-meetme-note.webp") center/contain no-repeat; filter:drop-shadow(-3px 5px 8px rgba(0,0,0,.35));
   rotate:var(--r); transform-origin:0 0; transition:left .45s cubic-bezier(.2,.8,.2,1), top .45s cubic-bezier(.2,.8,.2,1), rotate .45s cubic-bezier(.2,.8,.2,1);
   cursor:pointer; outline:none; -webkit-tap-highlight-color:transparent; }
-.mm-note:hover, .mm-note:focus-visible, .mm-note.open{ left:var(--xo); top:var(--yo); rotate:var(--ro); }
+.mm-note:focus-visible, .mm-note.open{ left:var(--xo); top:var(--yo); rotate:var(--ro); }
+@media (hover:hover){ .mm-note:hover{ left:var(--xo); top:var(--yo); rotate:var(--ro); } }   /* hover only with a real mouse: a phone's tap leaves a sticky :hover that kept the note out (Chef: it must retract) */
 .mm-note-body{ position:absolute; left:12%; top:12%; right:14%; bottom:16%; overflow:hidden; color:#2a2410; }
 @media (min-width:900px){ .mm-note{ --nw:340px; --x:calc(100% - 70px); --y:3vh; --r:.11deg; --xo:calc(100% - 259px); --yo:-.78vh; --ro:13.14deg; width:var(--nw); } }   /* desktop: Paper D09 / D09c */
 html.mm-full .mm-note{ display:none; }
@@ -1387,7 +1398,8 @@ html.mm-full .mm-note{ display:none; }
 .mm-note{ --vis:205px; }
 .mm-note-x{ position:absolute; left:calc(var(--vis) - 50px); top:9%; width:32px; height:32px; padding:0; border:0; border-radius:50%; background:none;
   color:#1c1a12; rotate:-6deg; cursor:pointer; opacity:0; pointer-events:none; transition:opacity .2s ease .15s, background-color .15s; }
-.mm-note:hover .mm-note-x, .mm-note:focus-within .mm-note-x, .mm-note.open .mm-note-x{ opacity:.85; pointer-events:auto; }
+.mm-note:focus-within .mm-note-x, .mm-note.open .mm-note-x{ opacity:.85; pointer-events:auto; }
+@media (hover:hover){ .mm-note:hover .mm-note-x{ opacity:.85; pointer-events:auto; } }
 .mm-note-x svg{ display:block; width:100%; height:100%; }
 .mm-note-x:hover, .mm-note-x:focus-visible{ opacity:1 !important; outline:none; scale:1.08; }
 .mm-note-x:active{ scale:.92; }
