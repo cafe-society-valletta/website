@@ -43,6 +43,30 @@
   const store = { get(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } },
                   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} } };
   const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  // post text tools (Chef, Oct 2026): the body stays plain text with markers — **bold**, *italic*, __underline__, ==highlight==,
+  // [SMALL]/[BIG]/[HUGE]..[/..] text sizes (one line each) — and rich() turns them into tags AFTER escaping, so nothing else in a
+  // post can become HTML. Comments stay plain (no tools, no formatting).
+  const rich = s => emo(esc(s).replace(/\*\*(\S(?:[^\n]*?\S)?)\*\*/g, "<b>$1</b>").replace(/__(\S(?:[^\n]*?\S)?)__/g, "<u>$1</u>")
+    .replace(/==([^=\s](?:[^\n]*?[^=\s])?)==/g, '<mark class="mmb-hl">$1</mark>')
+    .replace(/(^|[^*])\*([^*\s](?:[^*\n]*?[^*\s])?)\*(?!\*)/g, "$1<i>$2</i>")
+    .replace(/\[(SMALL|BIG|HUGE)\]([^\n]+?)\[\/\1\]/g, function sz(_, z, t){   // nested sizes: the inner one wins (CSS --mmb-base)
+      return `<span class="mmb-sz-${z.toLowerCase()}">${t.replace(/\[(SMALL|BIG|HUGE)\]([^\n]+?)\[\/\1\]/g, sz)}</span>`; }));
+  const EMO = window.MM_EMOJI, emo = h => EMO ? EMO.swap(h) : h;   // :name: → 8-bit emoji (assets/js/mm-emoji.js)
+  // tiny pixel icons (same 9×9 green look as the emoji)
+  const GLASS = ["..XXX....",".X...X...","X.....X..","X.....X..","X.....X..",".X...X...","..XXX.X..","......XX.",".......XX"];
+  const PIX = rows => { let r = ""; rows.forEach((row, y) => [...row].forEach((c, x) => { if(c === "X") r += `<rect x="${x}" y="${y}" width="1" height="1"/>`; }));
+    return "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 9" shape-rendering="crispEdges" fill="#7dff7d">${r}</svg>`); };
+  const SIZES = [["SMALL", "SMALL"], ["", "NORMAL"], ["BIG", "LARGE"], ["HUGE", "X-LARGE"]];   // marker, menu label
+  const TOOLS = `<span class="mmb-tool-row" role="toolbar" aria-label="TEXT TOOLS">`
+    + `<button type="button" class="mmb-btn mmb-tool" data-m="**" title="BOLD">[<b>B</b>]</button>`
+    + `<button type="button" class="mmb-btn mmb-tool" data-m="*" title="ITALICS">[<i>I</i>]</button>`
+    + `<button type="button" class="mmb-btn mmb-tool" data-m="__" title="UNDERLINE">[<u>U</u>]</button>`
+    + `<button type="button" class="mmb-btn mmb-tool" data-m="==" title="HIGHLIGHT">[<mark class="mmb-hl">H</mark>]</button>`
+    + (EMO ? `<span class="mmb-emoji"><button type="button" class="mmb-btn mmb-emo-btn" aria-haspopup="dialog" aria-expanded="false" title="EMOJI">[<img class="mmb-emo" src="${EMO.src("smile")}" alt="">]</button>`
+      + `<span class="mmb-emo-pop" role="dialog" aria-label="8-BIT EMOJI" hidden>${EMO.names.map(n => `<button type="button" class="mmb-btn mmb-emo-opt" data-e="${n}" title=":${n}:"><img src="${EMO.src(n)}" alt=":${n}:"></button>`).join("")}</span></span>` : "")
+    + `<span class="mmb-size"><button type="button" class="mmb-btn mmb-size-btn" aria-haspopup="listbox" aria-expanded="false" title="TEXT SIZE">[ SIZE v ]</button>`
+    + `<ol class="mmb-size-list" role="listbox" hidden>${SIZES.map(([k, n], i) => `<li><button type="button" class="mmb-btn mmb-size-opt" role="option" data-sz="${k}">${n}</button></li>`).join("")}</ol></span>`
+    + `</span>`;   // sits right on top of the POST box, inside its column (.mmb-box), flush with its right edge
   const two = n => String(n).padStart(2, "0");
   const fmt = iso => { const d = new Date(iso); return [`${two(d.getDate())}-${two(d.getMonth()+1)}-${String(d.getFullYear()).slice(-2)}`, `${two(d.getHours())}:${two(d.getMinutes())}`]; };
   const API = "/.netlify/functions/meetme";
@@ -82,8 +106,9 @@
         <p class="mmb-hint mmb-home-hint" aria-live="polite"></p>
         <div class="mmb-inbox">
           ${rule("=", 160)}<h2 class="mmb-title">P O S T&nbsp;&nbsp;&nbsp;F E E D</h2>${rule("=", 160)}
-          <div class="mmb-field mmb-filter"><span class="mmb-k">SHOW&gt;</span>${picker("filter", true, filter)}</div>
-          <div class="mmb-row mmb-head" aria-hidden="true"><span>DATE</span><span>TIME</span><span>AUTHOR</span><span>SUBJECT</span></div>
+          <div class="mmb-field mmb-filter"><span class="mmb-k">SHOW&gt;</span>${picker("filter", true, filter)}<button type="button" class="mmb-btn mmb-qbtn" aria-expanded="false" aria-controls="mmb-search" title="SEARCH">[<img class="mmb-emo" src="${PIX(GLASS)}" alt="SEARCH">]</button></div>
+          <div class="mmb-field mmb-search" id="mmb-search" hidden><span class="mmb-k">SEARCH&gt;</span><input name="q" type="search" maxlength="60" autocomplete="off" spellcheck="false" enterkeyhint="search" aria-label="Search posts: subject, text or author"><button type="button" class="mmb-btn mmb-qx" aria-label="Clear search" hidden>[X]</button></div>
+          <div class="mmb-row mmb-head"><span class="mmb-cal-wrap"><button type="button" class="mmb-btn mmb-date-btn" aria-haspopup="dialog" aria-expanded="false" title="JUMP TO A DATE">DATE</button><div class="mmb-cal" role="dialog" aria-label="Jump to a date" hidden></div></span><span aria-hidden="true">TIME</span><span aria-hidden="true">AUTHOR</span><span aria-hidden="true">SUBJECT</span></div>
           ${rule("-", 200)}
           <ol class="mmb-list"></ol>
         </div>
@@ -94,7 +119,7 @@
         <label class="mmb-field"><span class="mmb-k">NAME&gt;</span><input name="author" maxlength="${LIM.author}" autocomplete="nickname" spellcheck="false"></label>
         <div class="mmb-field"><span class="mmb-k">CATEGORY&gt;</span>${picker("category")}</div>
         <label class="mmb-field"><span class="mmb-k">SUBJECT&gt;</span><input name="subject" maxlength="${LIM.subject}" autocomplete="off" autocapitalize="sentences"><small class="mmb-n" data-for="subject"></small></label>
-        <label class="mmb-field mmb-tall"><span class="mmb-k">POST&gt;</span><textarea name="body" maxlength="${LIM.body}" rows="7" autocapitalize="sentences"></textarea><small class="mmb-n" data-for="body"></small></label>
+        <label class="mmb-field mmb-tall mmb-boxed"><span class="mmb-k">POST&gt;</span><span class="mmb-box">${TOOLS}<textarea name="body" maxlength="${LIM.body}" rows="7" autocapitalize="sentences"></textarea></span><small class="mmb-n" data-for="body"></small></label>
         <div class="mmb-field"><span class="mmb-k">PHOTOS&gt;</span><button type="button" class="mmb-btn mmb-add">[+ ATTACH]</button><small class="mmb-n mmb-pn"></small></div>
         <input class="mmb-file" type="file" accept="image/*" multiple hidden>
         <ul class="mmb-thumbs"></ul>
@@ -113,14 +138,69 @@
   const $ = s => screen.querySelector(s);
   const $home = $(".mmb-home"), $form = $(".mmb-compose"), $list = $(".mmb-list"), $homeHint = $(".mmb-home-hint"), $hint = $(".mmb-send-hint");
   const $author = $form.elements.author, $subject = $form.elements.subject, $body = $form.elements.body, $file = $(".mmb-file"), $thumbs = $(".mmb-thumbs");
+  const $q = $(".mmb-search input"), $qx = $(".mmb-qx"), $qrow = $(".mmb-search"), $qbtn = $(".mmb-qbtn"), $cal = $(".mmb-cal"), $calBtn = $(".mmb-date-btn");
 
+  // SEARCH> filters the feed as you type: subject + author at once in the browser, the post text through the server
+  // (?q=, it holds the bodies), merged when the answer comes back.
+  let query = "", textHits = null;
+  const shownPosts = () => { const t = query.toLowerCase();
+    return posts().filter(p => (!filter || (p.category || "general") === filter)
+      && (!t || String(p.subject).toLowerCase().includes(t) || String(p.author).toLowerCase().includes(t) || (textHits && textHits.has(p.id)))); };
+  const dayKey = iso => { const d = new Date(iso); return `${d.getFullYear()}-${two(d.getMonth()+1)}-${two(d.getDate())}`; };
   function render(){
-    const shown = posts().filter(p => !filter || (p.category || "general") === filter);
+    const shown = shownPosts();
     $list.innerHTML = shown.map(p => { const [d, t] = fmt(p.at);
-      return `<li><a class="mmb-row${p.waiting ? " mmb-wait" : ""}" href="#p/${esc(p.id)}"><span>${d}</span><span>${t}</span><span>&lt;${esc(p.author)}&gt;</span><span>${esc(p.subject)}${p.waiting ? " <em>[PENDING]</em>" : ""}</span></a></li>`; }).join("")
-      || `<li class="mmb-empty">NO POSTS IN ${filter ? cat(filter)[1] : "THE FEED"} YET.</li>`;
+      return `<li data-day="${dayKey(p.at)}"><a class="mmb-row${p.waiting ? " mmb-wait" : ""}" href="#p/${esc(p.id)}"><span>${d}</span><span>${t}</span><span>&lt;${esc(p.author)}&gt;</span><span>${esc(p.subject)}${p.waiting ? " <em>[PENDING]</em>" : ""}</span></a></li>`; }).join("")
+      || (query ? `<li class="mmb-empty">NO POSTS MATCH "${esc(query.toUpperCase())}"${filter ? ` IN ${cat(filter)[1]}` : ""}.</li>`
+                : `<li class="mmb-empty">NO POSTS IN ${filter ? cat(filter)[1] : "THE FEED"} YET.</li>`);
+    if(!$cal.hidden) drawCal();
   }
   render(); load(); setInterval(() => { if(!document.hidden) load(); }, 60e3);
+
+  let qT = 0;
+  $q.addEventListener("input", () => {
+    query = $q.value.trim(); textHits = null; $qx.hidden = !$q.value; render(); clearTimeout(qT);
+    if(!query) return;
+    const asked = query;
+    qT = setTimeout(() => fetch(API + "?q=" + encodeURIComponent(asked), { cache:"no-store" }).then(r => r.ok ? r.json() : null)
+      .then(d => { if(d && Array.isArray(d.ids) && asked === query){ textHits = new Set(d.ids); render(); } }).catch(() => {}), 280);
+  });
+  // the magnifying glass (end of the SHOW> line) folds the SEARCH> line out; folding it away again clears the search
+  const qOpen = on => { $qrow.hidden = !on; $qbtn.setAttribute("aria-expanded", String(on));
+    if(on) $q.focus({ preventScroll:true }); else if($q.value){ $q.value = ""; query = ""; textHits = null; $qx.hidden = true; render(); } };
+  $qbtn.addEventListener("click", () => qOpen($qrow.hidden));
+  $q.addEventListener("keydown", e => { if(e.key === "Escape"){ e.stopPropagation(); if($q.value) $qx.click(); else { qOpen(false); $qbtn.focus({ preventScroll:true }); } } else if(e.key === "Enter") $q.blur(); });
+  $qx.addEventListener("click", () => { $q.value = ""; query = ""; textHits = null; $qx.hidden = true; render(); $q.focus({ preventScroll:true }); });
+
+  // DATE (column header) → a month calendar; [<] [>] change month, days with posts are marked, picking a day scrolls the
+  // feed to that day (or, if nothing was posted then, to the next earlier day that has posts) and flashes its rows.
+  const MONTHS = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+  let calY = 0, calM = 0;
+  function drawCal(){
+    const has = new Set(shownPosts().map(p => dayKey(p.at))), now = dayKey(new Date().toISOString());
+    const start = (new Date(calY, calM, 1).getDay() + 6) % 7, days = new Date(calY, calM + 1, 0).getDate();
+    let cells = "<span></span>".repeat(start);
+    for(let d = 1; d <= days; d++){ const k = `${calY}-${two(calM+1)}-${two(d)}`, h = has.has(k);
+      cells += `<button type="button" class="mmb-btn mmb-cal-d${h ? " has" : ""}${k === now ? " today" : ""}" data-d="${k}" aria-label="${d} ${MONTHS[calM]} ${calY}${h ? ", HAS POSTS" : ""}">${two(d)}</button>`; }
+    $cal.innerHTML = `<p class="mmb-cal-h"><button type="button" class="mmb-btn mmb-cal-nav" data-dir="-1" aria-label="Previous month">[&lt;]</button><span>${MONTHS[calM]} ${calY}</span><button type="button" class="mmb-btn mmb-cal-nav" data-dir="1" aria-label="Next month">[&gt;]</button></p>`
+      + `<div class="mmb-cal-g">${["MO","TU","WE","TH","FR","SA","SU"].map(w => `<span class="mmb-cal-w">${w}</span>`).join("")}${cells}</div>`;
+  }
+  const calOpen = on => { $cal.hidden = !on; $calBtn.setAttribute("aria-expanded", String(on));
+    if(on){ const s = shownPosts(), d = s.length ? new Date(s[0].at) : new Date(); calY = d.getFullYear(); calM = d.getMonth(); drawCal(); } };
+  const jumpTo = k => {
+    const rows = [...$list.querySelectorAll("li[data-day]")], hit = rows.find(li => li.dataset.day <= k);   // newest first
+    if(!hit){ $homeHint.textContent = `NO POSTS ON OR BEFORE ${k.slice(8)}-${k.slice(5, 7)}-${k.slice(2, 4)}.`; return; }
+    $homeHint.textContent = hit.dataset.day === k ? "" : `NOTHING ON ${k.slice(8)}-${k.slice(5, 7)}-${k.slice(2, 4)} - SHOWING THE DAY BEFORE IT WITH POSTS.`;
+    screen.scrollTop += hit.getBoundingClientRect().top - screen.getBoundingClientRect().top - screen.clientHeight * .18;
+    rows.filter(li => li.dataset.day === hit.dataset.day).forEach(li => { li.classList.remove("mmb-hit"); void li.offsetWidth; li.classList.add("mmb-hit"); });
+  };
+  screen.addEventListener("click", e => {
+    if(e.target.closest(".mmb-date-btn")){ calOpen($cal.hidden); return; }
+    const nav = e.target.closest(".mmb-cal-nav"); if(nav){ calM += +nav.dataset.dir; if(calM < 0){ calM = 11; calY--; } if(calM > 11){ calM = 0; calY++; } drawCal(); return; }
+    const d = e.target.closest(".mmb-cal-d"); if(d){ calOpen(false); jumpTo(d.dataset.d); $calBtn.focus({ preventScroll:true }); return; }
+    if(!$cal.hidden && !e.target.closest(".mmb-cal")) calOpen(false);
+  });
+  $cal.addEventListener("keydown", e => { if(e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); calOpen(false); $calBtn.focus({ preventScroll:true }); } });
 
   // ---- counters ----
   const counts = () => {
@@ -185,7 +265,7 @@
   addEventListener("keydown", e => {
     if(isCompose() || !$post.hidden || document.querySelector(".mm-lightbox") || e.metaKey || e.ctrlKey || e.altKey || e.key.length !== 1) return;
     if(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
-    if(document.activeElement && document.activeElement.closest && document.activeElement.closest(".mmb-pick")) return;   // keys on the category list stay there
+    if(document.activeElement && document.activeElement.closest && document.activeElement.closest(".mmb-pick, .mmb-cal")) return;   // keys on the category list / calendar stay there
     e.preventDefault(); openCompose();
     const f = $author.value ? $subject : $author; f.focus({ preventScroll:true }); f.value += e.key; counts();
   });
@@ -263,6 +343,63 @@
     e.preventDefault(); e.stopPropagation();
     if(/^(INPUT|TEXTAREA|SELECT)$/.test(tgt.tagName) && tgt.type !== "file") tgt.focus(); else tgt.click();
   }, true);
+
+  // ---- text tools: [B] [I] [U] [H] wrap the selected text (the emoji [☺] and [ SIZE v ] pop-ups follow) in the post box with the marker (or unwrap it if it already is);
+  // with nothing selected they drop an empty pair and put the caret inside. Multi-line selections are wrapped line by line.
+  screen.addEventListener("mousedown", e => { if(e.target.closest(".mmb-tool, .mmb-size, .mmb-emoji")) e.preventDefault(); });   // keep the text selected
+  // [☺]: a pop-up library of 8-bit emoji (assets/js/mm-emoji.js); picking one types its :name: code at the caret
+  const emoOpen = (z, on) => { screen.querySelectorAll(".mmb-emoji").forEach(o => { const v = o === z && on;
+    o.querySelector(".mmb-emo-pop").hidden = !v; o.querySelector(".mmb-emo-btn").setAttribute("aria-expanded", String(v)); }); };
+  screen.addEventListener("click", e => {
+    const eb = e.target.closest(".mmb-emo-btn"), eo = e.target.closest(".mmb-emo-opt");
+    if(eb){ const z = eb.closest(".mmb-emoji"); sizeOpen(null, false); emoOpen(z, z.querySelector(".mmb-emo-pop").hidden); return; }
+    if(!eo){ if(!e.target.closest(".mmb-emoji")) emoOpen(null, false); return; }
+    const f = eo.closest("form"), ta = f && f.querySelector("textarea[name=body]"); emoOpen(null, false); if(!ta) return;
+    const code = `:${eo.dataset.e}:`, s = ta.selectionStart, en = ta.selectionEnd;
+    if(ta.value.length - (en - s) + code.length > LIM.body) return;
+    ta.focus({ preventScroll:true }); ta.setRangeText(code, s, en, "end"); ta.dispatchEvent(new Event("input", { bubbles:true }));
+  });
+  screen.addEventListener("keydown", e => { if(e.key === "Escape" && e.target.closest && e.target.closest(".mmb-emoji")){
+    const z = e.target.closest(".mmb-emoji"); if(!z.querySelector(".mmb-emo-pop").hidden){ e.preventDefault(); e.stopPropagation(); emoOpen(z, false); z.querySelector(".mmb-emo-btn").focus({ preventScroll:true }); } } });
+  // [ SIZE v ]: a terminal drop-down (SMALL / NORMAL / LARGE / X-LARGE) that re-sizes the selection: any size marker already
+  // around it is taken off, then the new one is put on (NORMAL = just taken off). Line by line, like the other tools.
+  const sizeOpen = (sz, on) => { screen.querySelectorAll(".mmb-size").forEach(z => { const o = z === sz && on;
+    z.querySelector(".mmb-size-list").hidden = !o; z.querySelector(".mmb-size-btn").setAttribute("aria-expanded", String(o)); }); };
+  const SZ = /^\[(SMALL|BIG|HUGE)\]([\s\S]*)\[\/\1\]$/;
+  screen.addEventListener("click", e => {
+    const sb = e.target.closest(".mmb-size-btn"), so = e.target.closest(".mmb-size-opt");
+    if(sb){ const z = sb.closest(".mmb-size"); emoOpen(null, false); sizeOpen(z, z.querySelector(".mmb-size-list").hidden); return; }
+    if(!so){ if(!e.target.closest(".mmb-size")) sizeOpen(null, false); return; }
+    const z = so.closest(".mmb-size"), f = so.closest("form"), ta = f && f.querySelector("textarea[name=body]"); sizeOpen(z, false); if(!ta) return;
+    const k = so.dataset.sz, v = ta.value; let s = ta.selectionStart, en = ta.selectionEnd;
+    const around = v.slice(0, s).match(/\[(SMALL|BIG|HUGE)\]$/);   // caret/selection sits just inside an existing size pair
+    if(around && v.slice(en).startsWith(`[/${around[1]}]`)){ s -= around[0].length; en += around[1].length + 3; }
+    const lines = v.slice(s, en).split("\n").map(l => { const m = l.match(SZ); return m ? m[2] : l; });
+    const out = lines.map(l => k && l.trim() ? `[${k}]${l}[/${k}]` : l).join("\n");
+    if(v.length - (en - s) + out.length > LIM.body) return;
+    ta.focus({ preventScroll:true }); ta.setRangeText(out, s, en);
+    if(s === en && k){ ta.setSelectionRange(s + k.length + 2, s + k.length + 2); } else ta.setSelectionRange(s, s + out.length);
+    ta.dispatchEvent(new Event("input", { bubbles:true }));
+  });
+  screen.addEventListener("keydown", e => {
+    const o = e.target.closest && e.target.closest(".mmb-size-opt"); if(!o) return;
+    const opts = [...o.closest(".mmb-size-list").querySelectorAll(".mmb-size-opt")], i = opts.indexOf(o);
+    if(e.key === "ArrowDown" || e.key === "ArrowUp"){ e.preventDefault(); opts[(i + (e.key === "ArrowDown" ? 1 : -1) + opts.length) % opts.length].focus({ preventScroll:true }); }
+    else if(e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); const z = o.closest(".mmb-size"); sizeOpen(z, false); z.querySelector(".mmb-size-btn").focus({ preventScroll:true }); }
+  });
+  screen.addEventListener("click", e => {
+    const b = e.target.closest(".mmb-tool"); if(!b) return;
+    const f = b.closest("form"), ta = f && f.querySelector("textarea[name=body]"); if(!ta) return;
+    const m = b.dataset.m, c = b.dataset.c || m, L = m.length, C = c.length, v = ta.value;
+    let s = ta.selectionStart, en = ta.selectionEnd, sel = v.slice(s, en), out, a0, a1;
+    if(sel.length >= L + C && sel.startsWith(m) && sel.endsWith(c)){ out = sel.slice(L, -C); a0 = s; a1 = s + out.length; }
+    else if(v.slice(s - L, s) === m && v.slice(en, en + C) === c && (m !== "*" || (v[s - L - 1] !== "*" && v[en + C] !== "*"))){ s -= L; en += C; out = sel; a0 = s; a1 = s + sel.length; }
+    else if(!sel){ out = m + c; a0 = a1 = s + L; }
+    else { out = sel.split("\n").map(l => l.trim() ? m + l + c : l).join("\n"); a0 = s; a1 = s + out.length; }
+    if(v.length - (en - s) + out.length > LIM.body) return;
+    ta.focus({ preventScroll:true }); ta.setRangeText(out, s, en); ta.setSelectionRange(a0, a1);
+    ta.dispatchEvent(new Event("input", { bubbles:true }));
+  });
 
   // ---- [FULLSCREEN]: the screen zooms out of the monitor into a flat, full-window terminal (no casing, menu or footer,
   // no CRT warp) — the SYSOP-console look. [<- GO BACK] (or Esc on the home screen) zooms it back into the monitor.
@@ -344,7 +481,7 @@
       ${rule("-", 200)}
       ${note ? `<p class="mmb-note">${note}</p>` : ""}
       ${store.get("mm-keys", {})[p.id] ? `<p class="mmb-own"><button type="button" class="mmb-btn mmb-edit">[ EDIT POST ]</button><button type="button" class="mmb-btn mmb-del">[ DELETE ]</button></p>` : ""}
-      <div class="mmb-text">${p.body ? esc(p.body) : (note ? "" : "(NO POST TEXT)")}</div>
+      <div class="mmb-text">${p.body ? rich(p.body) : (note ? "" : "(NO POST TEXT)")}</div>
       ${n && note ? `${rule("-", 200)}<p class="mmb-hdr"><span>ATTACHED:</span> ${n} PHOTO${n > 1 ? "S" : ""} (SHOWN ONCE APPROVED)</p>` : ""}
       ${n && !note ? `${rule("-", 200)}<p class="mmb-hdr"><span>ATTACHED:</span> ${n} PHOTO${n > 1 ? "S" : ""}</p>
         <div class="mmb-photos">${postShots.map((u, i) => `<button type="button" class="mmb-photo" data-i="${i}" aria-label="Open photo ${i + 1} of ${n}"><img src="${u}" alt="Photo ${i + 1} of ${n}" loading="lazy"><span>[ PHOTO ${i + 1}/${n} &middot; CLICK TO ENLARGE ]</span></button>`).join("")}</div>` : ""}
@@ -458,7 +595,7 @@
       box.outerHTML = `<form class="mmb-eform" novalidate>
         <div class="mmb-field"><span class="mmb-k">CATEGORY&gt;</span>${picker("category", false, curPost.category || "general")}</div>
         <label class="mmb-field"><span class="mmb-k">SUBJECT&gt;</span><input name="subject" maxlength="${LIM.subject}" value="${esc(curPost.subject)}"></label>
-        <label class="mmb-field mmb-tall"><span class="mmb-k">POST&gt;</span><textarea name="body" maxlength="${LIM.body}" rows="7">${esc(curPost.body || "")}</textarea></label>
+        <label class="mmb-field mmb-tall mmb-boxed"><span class="mmb-k">POST&gt;</span><span class="mmb-box">${TOOLS}<textarea name="body" maxlength="${LIM.body}" rows="7">${esc(curPost.body || "")}</textarea></span></label>
         <p class="mmb-hint mmb-ehint">SAVING SENDS YOUR POST BACK TO THE SYSOP FOR APPROVAL.</p>
         <p class="mmb-actions"><button type="submit" class="mmb-btn">[ SAVE ]</button><button type="button" class="mmb-btn mmb-ecancel">[ CANCEL ]</button></p></form>`;
       $postIn.querySelector(".mmb-eform textarea").focus({ preventScroll:true }); return fitPost();
@@ -723,6 +860,9 @@
   // and the whole monitor slides up to tuck it away (style.css); the same show/hide triggers drive it.
   const desk = matchMedia("(min-width: 900px)"), pin = () => { if(desk.matches) root.classList.add("mm-bar-on"); };
   pin(); desk.addEventListener("change", pin);
+  // phone: the page opens with the bar showing (html starts with .mm-bar-on in meetme.html), then the monitor rides up to
+  // tuck it away after a moment (Chef, Oct 2026)
+  if(!desk.matches && root.classList.contains("mm-bar-on")) hideT = setTimeout(() => hide(), 2000);
   const hide = () => { hideT = 0; if(desk.matches || bar.contains(document.activeElement)) return; root.classList.remove("mm-bar-on"); };
   // mouse / trackpad: near the top shows it; moving away (or leaving the window) hides it after a beat
   addEventListener("pointermove", e => { if(e.pointerType !== "mouse") return;
