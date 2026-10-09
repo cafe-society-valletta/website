@@ -359,7 +359,7 @@ body.about-body{ --tile:170px; --paper:url('../img/p-bg-about-paper.jpg'); backg
 .about-head{ display:flex; justify-content:center; height:172px; padding-top:20px; }
 .about-head img{ width:110px; height:143px; }
 .about-sections{ display:flex; flex-direction:column; padding-bottom:40px; }
-.banner{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:100%; aspect-ratio:3/1; padding:0 6px; overflow:hidden; border:0; cursor:pointer; color:var(--white); background:#333 center/cover no-repeat; transition:opacity .35s; }
+.banner{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:100%; aspect-ratio:3/1; padding:0 6px; overflow:hidden; border:0; border-radius:6px; cursor:pointer; color:var(--white); background:#333 center/cover no-repeat; transition:opacity .35s; }
 .banner::before{ content:""; position:absolute; inset:0; background:rgba(10,10,10,.1); }
 .banner:hover::before{ background:rgba(10,10,10,.22); }
 .banner .t{ position:relative; font-family:var(--font-display); font-size:16px; font-weight:700; letter-spacing:-.02em; line-height:15px; text-align:center; text-shadow:0 1px 5px rgba(0,0,0,.7); }
@@ -383,7 +383,7 @@ body.about-body{ --tile:170px; --paper:url('../img/p-bg-about-paper.jpg'); backg
 .sec-4 .sec-body{ padding-bottom:40px; animation:none; }
 .sec-4 .gal-title{ font-size:16px; height:32px; }   /* same size as the section headings (banner titles) — Chef */   /* always open, so no fold-out animation on load */
 .press-list{ list-style:none; margin:0; padding:0; align-self:stretch; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.press-tile{ position:relative; display:block; aspect-ratio:16/9; overflow:hidden; background:#000; color:var(--white); text-decoration:none; }
+.press-tile{ position:relative; display:block; aspect-ratio:16/9; overflow:hidden; border-radius:6px; background:#000; color:var(--white); text-decoration:none; }
 .press-tile picture, .press-tile img{ display:block; width:100%; height:100%; }
 .press-video img{ object-fit:cover; transition:transform .4s ease; }
 .press-video:hover img, .press-video:focus-visible img{ transform:scale(1.04); }
@@ -406,7 +406,7 @@ body.about-body{ --tile:170px; --paper:url('../img/p-bg-about-paper.jpg'); backg
 .gal-title{ display:flex; align-items:center; justify-content:center; height:44px; padding-bottom:2px; margin:0; font-family:var(--font-display); font-size:26px; font-weight:700; letter-spacing:.08em; line-height:15px; }
 .gal-grid{ display:flex; flex-wrap:wrap; gap:4px; width:100%; }
 /* each gallery: a square thumbnail with its name small and centred over it; line breaks chosen per name in the markup */
-.gal-grid .gal{ position:relative; width:calc(33.3333% - 2.6667px); aspect-ratio:1; overflow:hidden; }
+.gal-grid .gal{ position:relative; width:calc(33.3333% - 2.6667px); aspect-ratio:1; overflow:hidden; border-radius:6px; }   /* rounded like the calendar + menu tabs (6px phone / 8px desktop) — Chef */
 .gal-grid .gal-img{ position:absolute; inset:0; background:#D9D9D9 center/cover no-repeat; }
 /* no dark overlay on the tiles; full-brightness photos (Chef) — the titles rely on their text-shadow */
 .gal-grid .gal h3{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; margin:0; padding:12%; }
@@ -613,12 +613,36 @@ body.lostsouls-body{ background:var(--black); }
 .lsfx.lsfx-go .ls-head img{ opacity:1; transform:none; }
 .lsfx .ls-head .l1{ transition-delay:.25s; } .lsfx .ls-head .l2{ transition-delay:.7s; } .lsfx .ls-head .l3{ transition-delay:1.05s; }
 /* scroll (ls-fx.js sets --p 0→1): the text box shrinks toward its top, fades and blurs; the tagline grows, fades and
-   blurs on the same timing; the logo sticks under the menu bar (translate from JS) above everything; the body text is
+   blurs on the same timing, growing upward; the logo sticks under the menu bar above everything; the body text is
    masked to transparent where it passes under the logo (--m0/--m1 from JS) */
 .lsfx .ls-head .l1{ position:relative; z-index:0; transform-origin:50% 0; scale:calc(1 - var(--p, 0) * .35); filter:blur(calc(var(--p, 0) * 8px)) opacity(calc(1 - var(--p, 0) * .97)); will-change:transform, filter; }
-.lsfx .ls-head .l3{ position:relative; z-index:1; scale:calc(1 + var(--p, 0) * .6); filter:blur(calc(var(--p, 0) * 6px)) opacity(calc(1 - var(--p, 0))); will-change:transform, filter; }
-.lsfx .ls-head .l2{ position:relative; z-index:3; will-change:translate; }
-.lsfx .ls-copy{ z-index:1; -webkit-mask-image:linear-gradient(to bottom, transparent var(--m0, -200px), #000 var(--m1, -100px)); mask-image:linear-gradient(to bottom, transparent var(--m0, -200px), #000 var(--m1, -100px)); }
+.lsfx .ls-head .l3{ position:relative; z-index:1; transform-origin:50% 100%; scale:calc(1 + var(--p, 0) * .6); filter:blur(calc(var(--p, 0) * 6px)) opacity(calc(1 - var(--p, 0))); will-change:transform, filter; }
+/* the logo sticks with real position:sticky (smooth, no scroll-event jitter). For that its sticky parent must be the
+   whole page, so the headline wrapper steps aside (display:contents) and the three pieces become .page items,
+   spaced exactly as before */
+.lsfx .ls-head{ display:contents; }
+.lsfx .ls-head img{ display:block; align-self:center; flex-shrink:0; }
+.lsfx .ls-head .l1{ margin-top:34px; } .lsfx .ls-head .l2{ margin-top:23px; } .lsfx .ls-head .l3{ margin:23px 0 7px; }
+.lsfx .ls-head .l2{ position:sticky; top:45px; z-index:3; }   /* 10px under the 35px menu bar */
+.lsfx .ls-copy{ z-index:1; -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.28) var(--m0), #000 calc(var(--m0) + 60px)); mask-image:linear-gradient(to bottom, rgba(0,0,0,.28) var(--m0), #000 calc(var(--m0) + 60px)); }
+/* behind the stuck logo and the menu bar the body text stays faintly visible (28%, above) and out of focus: a frosted
+   veil (blur only, no tint) covers the top of the window, between the text and the logo, feathered at its lower edge.
+   It fades in just before the logo sticks. */
+.ls-veil{ position:fixed; left:0; right:0; top:0; height:106px; z-index:2; pointer-events:none; opacity:0;
+  -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+  -webkit-mask-image:linear-gradient(#000 calc(100% - 44px), transparent); mask-image:linear-gradient(#000 calc(100% - 44px), transparent); }
+.lsfx-sda .ls-veil{ animation:lsVeil linear both; animation-timeline:scroll(root); animation-range:var(--vs, 0px) var(--ms, 1px); }
+@keyframes lsVeil{ from{ opacity:0; } to{ opacity:1; } }
+/* scroll-driven versions (html.lsfx-sda, set by ls-fx.js when supported): tied to the scroll position itself, so they
+   move in the same frame as the page. ls-fx.js supplies the distances (--bg-end, --reach, --drift, --u0, --ms, --span). */
+@property --p{ syntax:'<number>'; inherits:false; initial-value:0; }
+@property --m0{ syntax:'<length>'; inherits:false; initial-value:-999px; }
+.lsfx-sda .ls-art{ animation:lsBg linear both; animation-timeline:scroll(root); }
+.lsfx-sda .ls-head .l1, .lsfx-sda .ls-head .l3{ animation:lsDrift linear both; animation-timeline:scroll(root); animation-range:0px var(--reach, 300px); }
+.lsfx-sda .ls-copy{ animation:lsMask linear both; animation-timeline:scroll(root); animation-range:var(--ms, 0px) 100%; }
+@keyframes lsBg{ from{ background-position-y:0; } to{ background-position-y:var(--bg-end, 0px); } }
+@keyframes lsDrift{ from{ --p:0; translate:0 0; } to{ --p:1; translate:0 var(--drift, 0px); } }
+@keyframes lsMask{ from{ --m0:var(--u0, -999px); } to{ --m0:calc(var(--u0, -999px) + var(--span, 0px)); } }
 
 /* =========================================================
    SOCIETY COLLECTION  (artboard "06 Society Collection")
@@ -829,7 +853,7 @@ body.menu-body{ background:var(--black); }
   .about-sec{ width:var(--col); margin-inline:auto; padding:0; }
   .about-sec:first-child{ padding-top:0; }
   .about-sec + .about-sec{ margin-top:20px; }
-  .banner{ gap:10px; }
+  .banner{ gap:10px; border-radius:8px; }
   .banner .t{ font-size:28px; line-height:28px; }
   .banner .t-wide{ font-size:32px; line-height:30px; }
   .about-sec.open{ padding-top:24px; }
@@ -843,7 +867,7 @@ body.menu-body{ background:var(--black); }
   .about-sec.sec-3.open{ width:min(1100px, calc(100% - 80px)); padding:56px 0 40px; }   /* galleries run wider than the 720 column (Chef) */
   .gal-title{ height:44px; padding:0; font-size:40px; line-height:44px; }
   .gal-grid{ gap:8px; }
-  .gal-grid .gal{ width:calc((100% - 16px) / 3); }
+  .gal-grid .gal{ width:calc((100% - 16px) / 3); border-radius:8px; } .press-tile{ border-radius:8px; }
   .gal-grid .gal h3 b{ font-size:30px; }
 
   /* EVENT CALENDAR (D03) */
@@ -888,6 +912,8 @@ body.menu-body{ background:var(--black); }
 
   /* LOST SOULS CLUB (D05) */
   .ls-head{ height:auto; gap:36px; padding-top:56px; }
+  .ls-veil{ height:178px; }
+  .lsfx .ls-head .l1{ margin-top:56px; } .lsfx .ls-head .l2{ margin-top:36px; } .lsfx .ls-head .l3{ margin:36px 0 0; } .lsfx .ls-head .l2{ top:66px; }
   .ls-head .l1{ width:350px; height:396px; }
   .ls-head .l2{ width:508px; height:102px; }
   .ls-head .l3{ width:224px; height:50px; }
