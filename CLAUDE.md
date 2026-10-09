@@ -66,7 +66,8 @@ assets/js/meetme.js    Meet Me at Society board on the green screen. Home: [ WRI
                         layout FROM/SENT/SUBJ, body, photos in real colour; click a photo = lightbox outside the bent glass), then a
                         reddit-style COMMENTS thread (replies nest; every comment vetted in the SYSOP CONSOLE). The poster's browser
                         keeps an owner key (localStorage "mm-keys") → [ EDIT POST ] (back to the queue) / [ DELETE ] (immediate). Intro: boot prompt typed live, wipe, logo clip.
-                        Mouse over the screen = 8-bit green pointer drawn inside the screen (bent by the CRT filter). [FULLSCREEN] =
+                        Mouse over the screen = 8-bit green pointer drawn inside the screen (bent by the CRT filter). Touch screens: the curve relaxes to
+                        flat while a text box is focused (native caret/handles sit on the flat text), bends back on leaving it. [FULLSCREEN] =
                         flat full-window terminal (screen moved to <body>), <- GO BACK returns.
                         All screen copy is written as the 8-bit terminal would print it (Chef's rule; only exception: photo
                         attachments on posts). Screen content is bent with the same CRT barrel as the clips: SVG
