@@ -466,7 +466,7 @@ body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
 .mo-sda .thumb{ animation:thumbLift linear both; animation-timeline:view(); }   /* nearer layer: drifts against the calendar as you scroll */
 @keyframes thumbLift{ from{ translate:0 14px; } to{ translate:0 -14px; } }
 /* lighter grey calendar (Chef): the photos behind it are blurred (backdrop-filter on .month); text, lines + posters keep a light shadow */
-.m-head, .m-days, .week{ filter:drop-shadow(0 1px 1px rgba(0,0,0,.45)); }
+.m-head, .m-days span, .day .n, .day .hol-name, .day .shut{ text-shadow:0 1px 1px rgba(0,0,0,.45); }   /* text shadow, not a filter on the rows: filters on the rows made iPhones redraw the posters blurry */
 .ev-panel{ display:flex; flex-direction:column; gap:12px; padding:14px; background:rgba(10,10,10,.92); border-top:2px solid #fff; border-bottom:1px solid rgba(255,255,255,.3); }
 .ev-panel .top{ display:flex; align-items:center; justify-content:space-between; }
 .ev-panel .when{ font-size:10px; font-weight:700; letter-spacing:.14em; line-height:12px; text-transform:uppercase; color:rgba(255,255,255,.7); }
@@ -506,10 +506,16 @@ body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
 .ev-layout.snap, .ev-layout.snap *, body.ev-snap .ev-head{ transition:none !important; }
 .ev-layout .cal, .ev-head{ transition:filter .45s ease, transform .5s cubic-bezier(.2,.8,.2,1), opacity .45s ease; }
 .ev-layout .cal .month{ transition:backdrop-filter .45s ease, -webkit-backdrop-filter .45s ease; }
-.ev-layout.dim .cal .month > *, body.ev-dim .ev-head{ filter:brightness(.72) blur(1.5px); }
+body.ev-dim .ev-head{ filter:brightness(.72) blur(1.5px); }
+/* the calendar's dim + blur while a poster is open is a frosted pane laid over the month (no filter on the calendar or its
+   rows: a filter on .cal cut the month off from the photos behind it, and filters on the rows left iPhones showing the
+   posters blurry after closing) */
+.month{ position:relative; }
+.month::after{ content:""; position:absolute; inset:0; z-index:5; pointer-events:none; border-radius:inherit; display:none; }
+.ev-layout.dim .cal .month::after{ display:block; -webkit-backdrop-filter:blur(1.5px) brightness(.72); backdrop-filter:blur(1.5px) brightness(.72); animation:paneIn .45s ease both; }
+@keyframes paneIn{ from{ -webkit-backdrop-filter:blur(0) brightness(1); backdrop-filter:blur(0) brightness(1); } }   /* pane only exists while a poster is open — nothing left behind when it closes */
 /* (the dim + blur goes on the month's contents, not on .cal: a filter on .cal would cut the month off from the photos behind
    it and its frosted-glass blur would vanish while the poster is open — Chef) */
-.ev-layout .cal .month > *{ transition:filter .45s ease; }
 .ev-layout.dim .cal .month{ -webkit-backdrop-filter:blur(6px) brightness(.72); backdrop-filter:blur(6px) brightness(.72); }
 :is(.ev-detail,.df-zoom,.doorframe,.df-up) .inner{ position:relative; width:100%; background:#0D0D0D; }
 /* masking tape across each corner, pressed on as the poster lands (angles/offsets per event, set in events.js) */
