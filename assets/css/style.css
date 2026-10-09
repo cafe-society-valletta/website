@@ -615,7 +615,7 @@ body.lostsouls-body{ background:var(--black); }
 /* scroll (ls-fx.js sets --p 0→1): the text box shrinks toward its top, fades and blurs; the tagline grows, fades and
    blurs on the same timing, growing upward; the logo sticks under the menu bar above everything; the body text is
    masked to transparent where it passes under the logo (--m0/--m1 from JS) */
-.lsfx .ls-head .l1{ position:relative; z-index:0; transform-origin:50% 0; scale:calc(1 - var(--p, 0) * .35); filter:blur(calc(var(--p, 0) * 8px)) opacity(calc(1 - var(--p, 0) * .97)); will-change:transform, filter; }
+.lsfx .ls-head .l1{ position:relative; z-index:0; transform-origin:50% 0; scale:calc(1 - var(--p, 0) * .35); filter:blur(calc(var(--q, 0) * 8px)) opacity(calc(1 - var(--q, 0)));   /* fades + blurs on the tagline's timing (--q) — Chef */ will-change:transform, filter; }
 /* tagline: grows at a steady rate in step with the text box contracting (--p, same range), its centre always halfway
    between the logo and the body text; it fades and blurs from the first scroll and is gone when they meet (--q) */
 .lsfx .ls-head .l3{ position:relative; z-index:1; scale:calc(1 + var(--p, 0) * 2.2); filter:blur(calc(var(--q, 0) * 8px)) opacity(calc(1 - var(--q, 0))); will-change:transform, filter; }
@@ -640,7 +640,7 @@ body.lostsouls-body{ background:var(--black); }
 @property --p{ syntax:'<number>'; inherits:false; initial-value:0; }
 @property --m0{ syntax:'<length>'; inherits:false; initial-value:-999px; }
 .lsfx-sda .ls-art{ animation:lsBg linear both; animation-timeline:scroll(root); }
-.lsfx-sda .ls-head .l1{ animation:lsDrift linear both; animation-timeline:scroll(root); animation-range:0px var(--reach, 300px); }
+.lsfx-sda .ls-head .l1{ animation:lsDrift linear both, lsTagFx linear both; animation-timeline:scroll(root), scroll(root); animation-range:0px var(--reach, 300px), var(--qs, 0px) var(--qe, 1px); }
 .lsfx-sda .ls-head .l3{ animation:lsP linear both, lsTagMove linear both, lsTagFx linear both; animation-timeline:scroll(root), scroll(root), scroll(root);
   animation-range:0px var(--reach, 300px), var(--ms, 0px) var(--meet, 1px), var(--qs, 0px) var(--qe, 1px); }
 .lsfx-sda .ls-copy{ animation:lsMask linear both; animation-timeline:scroll(root); animation-range:var(--ms, 0px) 100%; }
@@ -1869,8 +1869,8 @@ html.df-open .doorframe, html.df-open .ev-head, html.df-open .ev-layout{ transit
    their photos drift gently as they cross the screen (a layer inside each thumbnail, .banner::after) */
 .about .banner{ isolation:isolate; }
 .about .banner::after{ content:""; position:absolute; inset:-8% 0; z-index:-1; background:inherit; background-size:cover; background-position:center; }
-.mo .about .banner{ opacity:0; filter:blur(8px); transition:opacity .75s ease, filter .75s ease; }
-.mo .about .banner.in{ opacity:1; filter:none; }
+.mo .about .banner, .mo .about .press-tile{ opacity:0; filter:blur(8px); translate:-18px 18px; transition:opacity .5s ease-out, filter .5s ease-out, translate .55s cubic-bezier(.2,.8,.2,1); }   /* drift in from the bottom left */
+.mo .about .banner.in, .mo .about .press-tile.in{ opacity:1; filter:none; translate:0 0; }
 .mo-sda .about .banner::after{ animation:bnPar linear both; animation-timeline:view(); }
 @keyframes bnPar{ from{ transform:translateY(-6%); } to{ transform:translateY(6%); } }
 /* hover (mouse only): the photo quick-cuts to a slightly zoomed (1.08×) crop of its bottom-right corner, then zooms and pans at an even rate (12s)
