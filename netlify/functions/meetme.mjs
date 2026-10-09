@@ -17,6 +17,7 @@
    Public:
      GET                                   → { posts: live without body }  (photos = count)
      GET ?post=<id>                        → { post, comments } (live posts only; approved comments, oldest first)
+     GET ?q=<words>                        → { ids } live posts whose subject, author or text contains the words (feed search)
      POST { kind:"comment", post, parent, author, body, website }  → { ok:true, id, pending:true }   (comments are vetted too)
      GET ?photo=<id>-<n>                   → the image          (live posts only, or admin key)
      POST { subject, author, body, category, photos:[{type,data(base64)}], website }  → { ok:true, id, pending:true }
@@ -91,6 +92,11 @@ export default async (req, context) => {
       all.sort((a, b) => b.at.localeCompare(a.at));
       const subj = Object.fromEntries(live.map(p => [p.id, p.subject]));
       return out(200, { pending: await get("pending"), live, cpending: (await get("cpending")).map(c => ({ ...c, subject: subj[c.post] || "?" })), comments: all.slice(0, 100) });
+    }
+    if (q.q !== undefined) {   // feed search: subject, author and post text, case-insensitive → the matching post ids
+      const t = String(q.q).toLowerCase().trim().slice(0, 60);
+      const ids = t ? (await get("live")).filter(p => [p.subject, p.author, p.body].some(f => String(f || "").toLowerCase().includes(t))).map(p => p.id) : [];
+      return out(200, { ids });
     }
     return out(200, { posts: (await get("live")).map(({ id, at, author, subject, photos, category }) => ({ id, at, author, subject, photos: photos || 0, category: category || "general" })) });
   }
