@@ -1,33 +1,73 @@
 /* =========================================================
    swipeNav (Chef, Oct 2026) — every full-screen photo viewer with ← → arrows (About galleries, Photo Lab rolls,
-   Barney Book photos, Meet Me attachments) can also be swiped: the photo follows a finger on phones, or a
-   two-finger sideways swipe on a laptop trackpad, and lets go to the next/previous photo (or springs back).
-   swipeNav(overlay, getCard, go, canGo)
-     overlay  element that receives the gestures       getCard()  the element that moves with the gesture
-     go(d, true)  step d = ±1 (the photo has already slid off; skip the exit animation, must reset card
-                  style.translate/opacity) — may return a promise      canGo()  false when there's only one photo
-   The arrows keep working as before. Shop product photos already scroll natively (scroll-snap).
+   Barney Book photos, Meet Me attachments) works like frames on one roll of film: the next photo sits one screen
+   to the side, and swiping (finger on phones, two-finger sideways swipe on a trackpad) slides the current photo off
+   while the next one slides in, in sync, following the gesture. Let go past the threshold (or flick) and it carries
+   on; otherwise both spring back. The arrows / ← → keys run the same slide.
+   nav = swipeNav(overlay, getCard, peek, land, canGo)
+     overlay   element that receives the gestures        getCard()  the photo element that moves
+     peek(d)   → Promise of { src, R?, rot? } for the neighbour d = ±1 (R = its resting box left/top/width/height)
+     land(d, info)  make it the current photo (index, counter, card at its rest box) — no animation
+     canGo()   false when there's only one photo
+     nav.slide(d)   arrow / key step with the same film-advance motion
+   Shop product photos already scroll natively (scroll-snap).
    ========================================================= */
-window.swipeNav = function(overlay, getCard, go, canGo){
+window.swipeNav = function(overlay, getCard, peek, land, canGo){
   "use strict";
   const still = matchMedia("(prefers-reduced-motion: reduce)");
-  let dx = 0, busy = false, x0 = 0, y0 = 0, t0 = 0, mode = null, quietUntil = 0, wheelT = null, eatClick = 0;
-  const far = () => Math.min(innerWidth * .9, 640), thr = () => Math.max(60, innerWidth * .12);
-  const show = x => { const c = getCard(); if (!c) return;
-    c.style.translate = x ? x.toFixed(1) + "px 0" : ""; c.style.opacity = x ? (1 - Math.min(.65, Math.abs(x) / far())).toFixed(3) : ""; };
+  let dx = 0, dir = 0, ghost = null, info = null, wait = null, busy = false;
+  let x0 = 0, y0 = 0, t0 = 0, mode = null, quietUntil = 0, wheelT = null, eatClick = 0;
+  const W = () => innerWidth, thr = () => Math.max(60, innerWidth * .12);
+  function place(){
+    const c = getCard(); if (c) c.style.translate = dx ? dx.toFixed(1) + "px 0" : "";
+    if (ghost) ghost.style.translate = (dir * W() + dx).toFixed(1) + "px 0";
+  }
+  function drop(){ if (ghost) ghost.remove(); ghost = null; info = null; wait = null; dir = 0; }
+  function want(d){                                     // the neighbour frame, waiting one screen to the side
+    if (ghost && dir === d) return wait;
+    drop(); dir = d;
+    const c = getCard(); if (!c) return Promise.resolve(null);
+    const g = c.cloneNode(true); g.classList.add("swipe-ghost"); g.removeAttribute("id"); g.style.visibility = "hidden"; g.getAnimations && g.getAnimations().forEach(a => a.cancel());
+    if (getComputedStyle(c).position === "static" || getComputedStyle(c).position === "relative")
+      Object.assign(g.style, { position: "absolute", left: c.offsetLeft + "px", top: c.offsetTop + "px", width: c.offsetWidth + "px", height: c.offsetHeight + "px", margin: "0" });
+    c.after(g); ghost = g; place();
+    return wait = peek(d).then(inf => {
+      if (ghost !== g) return null; info = inf;
+      const im = g.tagName === "IMG" ? g : g.querySelector("img"); if (im) im.src = inf.src;
+      if (inf.R) Object.assign(g.style, { left: inf.R.left + "px", top: inf.R.top + "px", width: inf.R.width + "px", height: inf.R.height + "px" });
+      if (inf.rot != null) g.style.transform = `rotate(${inf.rot}deg)`;
+      g.style.visibility = ""; return inf;
+    });
+  }
+  function run(from, to, ms){                            // both frames move together
+    const c = getCard(), a = [];
+    const k = x => ({ translate: x.toFixed(1) + "px 0" });
+    if (c) a.push(c.animate([k(from), k(to)], { duration: ms, easing: "cubic-bezier(.25,.8,.25,1)", fill: "forwards" }));
+    if (ghost) a.push(ghost.animate([k(dir * W() + from), k(dir * W() + to)], { duration: ms, easing: "cubic-bezier(.25,.8,.25,1)", fill: "forwards" }));
+    return Promise.all(a.map(x => x.finished.catch(() => {}))).then(() => a);
+  }
+  function commit(d){
+    busy = true; const p = want(d);
+    return p.then(inf => {
+      if (!inf){ busy = false; dx = 0; place(); drop(); return; }
+      const from = dx, to = -d * W(), ms = still.matches ? 0 : Math.max(180, 420 * Math.abs(to - from) / W());
+      return run(from, to, ms).then(a => {
+        dx = 0; land(d, inf);
+        const c = getCard(); if (c){ c.style.translate = ""; c.style.opacity = ""; }
+        a.forEach(x => x.cancel()); drop(); busy = false;
+      });
+    }).catch(() => { busy = false; dx = 0; place(); drop(); });
+  }
   function release(vel){
-    const c = getCard(), x = dx; dx = 0; if (!c) return;
-    if (Math.abs(x) > thr() || (Math.abs(vel) > .45 && Math.abs(x) > 24)){
-      const d = x < 0 ? 1 : -1; busy = true; eatClick = Date.now() + 450;
-      const out = still.matches ? Promise.resolve() :
-        c.animate([{ translate: x + "px 0", opacity: c.style.opacity || 1 }, { translate: (-d * far()) + "px 0", opacity: 0 }], { duration: 150, easing: "ease-in" }).finished.catch(() => {});
-      out.then(() => { c.style.translate = "-9999px 0"; c.style.opacity = "0"; return go(d, true); })
-         .then(() => { busy = false; }, () => { busy = false; show(0); });
-    } else {
-      if (x && !still.matches) c.animate([{ translate: x + "px 0", opacity: c.style.opacity || 1 }, { translate: "0px 0", opacity: 1 }], { duration: 240, easing: "cubic-bezier(.2,.8,.2,1)" });
-      show(0); if (Math.abs(x) > 8) eatClick = Date.now() + 450;
+    if (!dir){ dx = 0; place(); return; }
+    if (Math.abs(dx) > thr() || (Math.abs(vel) > .45 && Math.abs(dx) > 24)){ eatClick = Date.now() + 450; commit(dir); }
+    else {
+      const from = dx; if (Math.abs(from) > 8) eatClick = Date.now() + 450;
+      busy = true;
+      run(from, 0, still.matches ? 0 : 260).then(a => { dx = 0; place(); a.forEach(x => x.cancel()); drop(); busy = false; });
     }
   }
+  function move(x){ dx = x; const d = dx < 0 ? 1 : dx > 0 ? -1 : dir; if (d && d !== dir) want(d); place(); }
   // touch (phones, tablets): follow the finger once the gesture is clearly sideways
   overlay.addEventListener("touchstart", e => {
     if (busy || e.touches.length !== 1 || (canGo && !canGo())) { mode = "no"; return; }
@@ -37,25 +77,26 @@ window.swipeNav = function(overlay, getCard, go, canGo){
     if (mode === "no" || e.touches.length !== 1) { if (mode === "h") { mode = "no"; release(0); } return; }
     const mx = e.touches[0].clientX - x0, my = e.touches[0].clientY - y0;
     if (!mode && Math.hypot(mx, my) > 8) mode = Math.abs(mx) > Math.abs(my) ? "h" : "v";
-    if (mode === "h") { e.preventDefault(); dx = mx; show(dx); }
+    if (mode === "h") { e.preventDefault(); move(mx); }
   }, { passive: false });
-  overlay.addEventListener("touchend", e => {
+  overlay.addEventListener("touchend", () => {
     if (mode !== "h") { mode = null; return; }
-    mode = null; const v = dx / Math.max(1, performance.now() - t0); release(v);
+    mode = null; release(dx / Math.max(1, performance.now() - t0));
   });
   overlay.addEventListener("touchcancel", () => { if (mode === "h") { mode = null; release(0); } });
-  // trackpad: horizontal wheel. Follows the fingers, commits past the threshold, then ignores the glide (momentum)
+  // trackpad: horizontal wheel follows the fingers, commits past the threshold, then ignores the glide (momentum)
   overlay.addEventListener("wheel", e => {
     if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || e.ctrlKey) return;
     e.preventDefault();                                    // no browser back/forward swipe while in the viewer
     const now = Date.now();
     if (busy || now < quietUntil || (canGo && !canGo())) { quietUntil = Math.max(quietUntil, now + 160); return; }
-    dx -= e.deltaX * (e.deltaMode === 1 ? 16 : 1); show(dx); clearTimeout(wheelT);
+    move(dx - e.deltaX * (e.deltaMode === 1 ? 16 : 1)); clearTimeout(wheelT);
     if (Math.abs(dx) > thr() * 1.3) { quietUntil = now + 260; release(0); }
     else wheelT = setTimeout(() => release(0), 140);
   }, { passive: false });
   // a swipe that ends over the backdrop must not count as a click (which would close the viewer)
   overlay.addEventListener("click", e => { if (Date.now() < eatClick) { e.stopPropagation(); e.preventDefault(); } }, true);
+  return { slide: d => { if (busy || (canGo && !canGo())) return Promise.resolve(); dx = 0; return commit(d); }, reset: () => { dx = 0; place(); drop(); busy = false; } };
 };
 
 /* =========================================================
@@ -309,7 +350,7 @@ window.swipeNav = function(overlay, getCard, go, canGo){
     el.querySelector(".gp-prev").addEventListener("click", e => { e.stopPropagation(); stepPhoto(-1); });
     el.querySelector(".gp-next").addEventListener("click", e => { e.stopPropagation(); stepPhoto(1); });
     el.addEventListener("click", e => { if (e.target === el) closePhoto(); });
-    window.swipeNav(el, () => photo.card, (d, dragged) => stepPhoto(d, dragged), () => current.length > 1);   // swipe / trackpad
+    photo.nav = window.swipeNav(el, () => photo.card, peekPhoto, landPhoto, () => current.length > 1);   // film-roll swipe / trackpad / arrows
   }
   // where the photo rests: as big as fits, keeping its shape
   function restBox(w, h){
@@ -354,22 +395,21 @@ window.swipeNav = function(overlay, getCard, go, canGo){
     photo.el.classList.remove("flying");
     photo.el.querySelector(".gp-x").focus({ preventScroll:true });
   }
-  async function stepPhoto(d, dragged){
-    if (!photo.open || current.length < 2) return;
+  // neighbouring frame (for the film-roll slide) and landing on it
+  function peekPhoto(d){
     const i = (photo.i + d + current.length) % current.length;
-    grid.children[photo.i].style.visibility = "";
-    grid.children[i].style.visibility = "hidden";
-    const [w, h] = await size(current[i]);
-    photo.i = i; setCount();
-    const R = restBox(w, h), rot = tilt(), card = photo.card;
-    if (!still.matches && !dragged) await card.animate([{ transform: card.style.transform, opacity: 1 }, { transform: `translateX(${-d * 60}px) ${card.style.transform}`, opacity: 0 }], { duration: 140, easing: "ease-in" }).finished.catch(() => {});
-    hiRes(i);
-    Object.assign(card.style, { left: R.left + "px", top: R.top + "px", width: R.width + "px", height: R.height + "px", transform: `rotate(${rot}deg)`, translate: "", opacity: "" });
-    if (!still.matches) card.animate([{ transform: `translateX(${d * 60}px) rotate(${rot - d * 6}deg) scale(1.04)`, opacity: 0 }, { transform: `rotate(${rot}deg)`, opacity: 1 }], { duration: 280, easing: EASE });
+    return size(current[i]).then(([w, h]) => ({ i, src: current[i], R: restBox(w, h), rot: tilt() }));
   }
+  function landPhoto(d, inf){
+    grid.children[photo.i].style.visibility = "";
+    grid.children[inf.i].style.visibility = "hidden";
+    photo.i = inf.i; setCount(); hiRes(inf.i);
+    Object.assign(photo.card.style, { left: inf.R.left + "px", top: inf.R.top + "px", width: inf.R.width + "px", height: inf.R.height + "px", transform: `rotate(${inf.rot}deg)`, translate: "", opacity: "" });
+  }
+  function stepPhoto(d){ if (photo.open && current.length > 1) return photo.nav.slide(d); }
   function closePhoto(instant){
     if (!photo.open) return;
-    photo.open = false;
+    photo.open = false; if (photo.nav) photo.nav.reset();
     const frame = grid.children[photo.i];
     const done = () => { photo.el.classList.remove("open", "flying"); if (frame) frame.style.visibility = ""; };
     view.classList.remove("photo-dim");

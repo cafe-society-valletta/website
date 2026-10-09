@@ -612,10 +612,10 @@
     const ph = e.target.closest(".mmb-photo"); if(ph) openLightbox(+ph.dataset.i);
   });
 
-  let lb = null, lbAt = 0;
+  let lb = null, lbAt = 0, lbNav = null;
   function lbShow(){ const n = postShots.length;
     lb.querySelector(".mm-lb-t").textContent = `ATTACHMENT ${lbAt + 1}/${n}`;
-    lb.querySelector(".mm-lb-img").src = postShots[lbAt];
+    lb.querySelector(".mm-lb-img:not(.swipe-ghost)").src = postShots[lbAt];
     lb.querySelectorAll(".mm-lb-nav").forEach(b => b.hidden = n < 2); }
   function openLightbox(i){
     closeLightbox(); lbAt = i;
@@ -625,20 +625,19 @@
       <img class="mm-lb-img" alt=""></div>`;
     document.body.appendChild(lb); lbShow();
     lb.addEventListener("click", e => {
-      const nav = e.target.closest(".mm-lb-nav"); if(nav){ lbAt = (lbAt + +nav.dataset.d + postShots.length) % postShots.length; return lbShow(); }
+      const nav = e.target.closest(".mm-lb-nav"); if(nav){ if(lbNav) return lbNav.slide(+nav.dataset.d); lbAt = (lbAt + +nav.dataset.d + postShots.length) % postShots.length; return lbShow(); }
       if(e.target.closest(".mm-lb-x") || e.target === lb) closeLightbox(); });
     lb.querySelector(".mm-lb-x").focus({ preventScroll:true });
-    const me = lb;   // swipe / trackpad between attachments (main.js swipeNav): the picture follows the gesture
-    if(window.swipeNav) window.swipeNav(lb, () => me.querySelector(".mm-lb-img"), d => {
-      if(lb !== me) return; lbAt = (lbAt + d + postShots.length) % postShots.length; lbShow();
-      const im = me.querySelector(".mm-lb-img"); im.style.translate = ""; im.style.opacity = "";
-      im.animate([{ translate: (d * 60) + "px 0", opacity: 0 }, { translate: "0 0", opacity: 1 }], { duration: 220, easing: "cubic-bezier(.2,.8,.2,1)" });
-    }, () => postShots.length > 1);
+    const me = lb;   // film-roll swipe / trackpad / arrows (main.js swipeNav): frames slide past in the window
+    lbNav = window.swipeNav ? window.swipeNav(lb, () => me.querySelector(".mm-lb-img:not(.swipe-ghost)"),
+      d => Promise.resolve({ src: postShots[(lbAt + d + postShots.length) % postShots.length] }),
+      d => { if(lb !== me) return; lbAt = (lbAt + d + postShots.length) % postShots.length; lbShow(); },
+      () => postShots.length > 1) : null;
   }
-  function closeLightbox(){ if(lb){ lb.remove(); lb = null; } }
+  function closeLightbox(){ if(lb){ lb.remove(); lb = null; lbNav = null; } }
   addEventListener("keydown", e => {
     if(lb){ if(e.key === "Escape"){ e.stopImmediatePropagation(); closeLightbox(); }
-      else if(e.key === "ArrowRight" || e.key === "ArrowLeft"){ lbAt = (lbAt + (e.key === "ArrowRight" ? 1 : -1) + postShots.length) % postShots.length; lbShow(); }
+      else if(e.key === "ArrowRight" || e.key === "ArrowLeft"){ const d = e.key === "ArrowRight" ? 1 : -1; if(lbNav) lbNav.slide(d); else { lbAt = (lbAt + d + postShots.length) % postShots.length; lbShow(); } }
       return; }
     if(!$post.hidden && e.key === "Escape"){ e.stopImmediatePropagation(); closePost(); }
   }, true);
