@@ -575,14 +575,15 @@
     const twin = svg.querySelector("filter").cloneNode(true); twin.id = id + "-b"; svg.appendChild(twin);   // identical copy: Safari redraw switches between the two
     document.body.appendChild(svg);
     const fs = [...svg.querySelectorAll("filter")], img = svg.querySelector("feImage");
+    let bendK = 1, kick = () => {};   // bendK = how much of the curve is applied (1 = full, 0 = flat); kick = WebKit full redraw
     const size = () => { const w = glass.clientWidth, h = glass.clientHeight; if(!w || !h) return;
       for(const f of fs){ for(const el of [f, f.querySelector("feImage")]) for(const [k, v] of Object.entries({ x:0, y:0, width:w, height:h })) el.setAttribute(k, v);
-        f.querySelector("feDisplacementMap").setAttribute("scale", (RANGE * w).toFixed(1)); } };
+        f.querySelector("feDisplacementMap").setAttribute("scale", (RANGE * w * bendK).toFixed(1)); } };
     // the page preloads the map (<link rel=preload>), so this is normally instant
     fetch(url).then(r => r.blob()).then(b => new Promise(ok => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); }))
       .then(data => { fs.forEach(f => f.querySelector("feImage").setAttribute("href", data)); size(); warp = `url(#${id})`; glass.style.filter = warp; new ResizeObserver(size).observe(glass);
         const im = new Image(); im.onload = () => { const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight;
-          const g = c.getContext("2d"); g.drawImage(im, 0, 0); warpMap = { w:c.width, h:c.height, px:g.getImageData(0, 0, c.width, c.height).data, range:RANGE }; };
+          const g = c.getContext("2d"); g.drawImage(im, 0, 0); warpMap = { w:c.width, h:c.height, px:g.getImageData(0, 0, c.width, c.height).data, range:RANGE * bendK }; };
         im.src = data;
         // Safari/WebKit only re-filters the small patch that changed (one typed letter, one printed line, a hover), but
         // the bend moves pixels further than that patch, so bits of text went missing. After any change on the screen,
@@ -594,12 +595,28 @@
           let queued = 0, flip = false;
           const redraw = () => { if(queued) return; queued = requestAnimationFrame(() => { queued = 0; flip = !flip;   // switching to the twin filter repaints the whole layer
             glass.style.filter = flip ? `url(#${id}-b)` : warp; }); };   // (adding a CSS filter function moved Safari's origin again)
+          kick = redraw;
           new MutationObserver(redraw).observe(glass, { subtree:true, childList:true, characterData:true, attributes:true });
           for(const ev of ["scroll", "animationend", "animationstart", "transitionend", "transitionrun", "pointerover", "pointerout", "focusin", "focusout", "input"])
             glass.addEventListener(ev, redraw, { capture:true, passive:true });
           redraw();
         } })
       .catch(() => {});
+    // Typing on a phone/tablet: iOS and Android draw their own caret, selection highlight and drag handles at the FLAT
+    // position of the text, which the bend moves away from what you see. So while a text box is focused on a touch
+    // screen the curve relaxes to flat (still inside the monitor), and bends back when you leave the box (Chef, Oct 2026).
+    // warpMap.range follows, so tap re-aiming and the pointer bend stay in step with what is drawn.
+    const touch = matchMedia("(hover: none), (pointer: coarse)");
+    const isField = el => !!(el && el.matches && el.matches("input:not([type=file]):not([type=checkbox]):not([type=radio]), textarea"));
+    let anim = 0;
+    const setBend = to => { if(bendK === to) return; cancelAnimationFrame(anim); const from = bendK, t0 = performance.now(), D = 380;
+      const step = t => { const p = Math.min(1, (t - t0) / D), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        bendK = from + (to - from) * e; size(); if(warpMap) warpMap.range = RANGE * bendK; kick();
+        if(p < 1) anim = requestAnimationFrame(step); };
+      anim = requestAnimationFrame(step); };
+    document.addEventListener("focusin", e => { if(touch.matches && isField(e.target) && screen.contains(e.target)) setBend(0); });
+    document.addEventListener("focusout", e => { if(!touch.matches || !isField(e.target)) return;
+      setTimeout(() => { const a = document.activeElement; if(!(isField(a) && screen.contains(a))) setBend(1); }, 80); });
   })();
 
   // BOOT (html.mm-boot, set by the page): type "C:\>stayhuman.exe" in the board font, wipe the screen,
