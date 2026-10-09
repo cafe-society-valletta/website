@@ -377,6 +377,25 @@ body.about-body{ --tile:170px; --paper:url('../img/p-bg-about-paper.jpg'); backg
 .sec-2 .sec-body{ gap:13px; padding-bottom:40px; }
 .sec-body p a{ color:inherit; text-decoration:none; font-family:'CS Josefin', var(--font-display); font-weight:600; }   /* inline links in About copy: same Josefin face as the copy, just bolder (Chef) */
 .sec-body > p{ align-self:stretch; margin:0; font-family:var(--font-display); font-size:12px; font-weight:300; line-height:120%; text-align:justify; }
+/* About · AS FEATURED ON: (Chef, Oct 2026) — a grid of same-size 16:9 tiles, each a link out: a publication's logo on
+   black, or a video thumbnail with a play button */
+.banner-press{ background:#000; }
+.sec-4 .sec-body{ padding-bottom:40px; }
+.press-list{ list-style:none; margin:0; padding:0; align-self:stretch; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.press-tile{ position:relative; display:block; aspect-ratio:16/9; overflow:hidden; background:#000; color:var(--white); text-decoration:none; }
+.press-tile picture, .press-tile img{ display:block; width:100%; height:100%; }
+.press-video img{ object-fit:cover; transition:transform .4s ease; }
+.press-video:hover img, .press-video:focus-visible img{ transform:scale(1.04); }
+/* Time Out tile — Chef's Paper version (Oct 2026): logo 43% tall, heavy 2-line headline, small CTA */
+.press-logo-tile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; padding:3px 0; }
+.press-logo-tile picture{ width:auto; height:43%; flex-shrink:0; } .press-logo-tile img{ width:auto; height:100%; }
+.press-cta{ font-family:var(--font-display); font-size:6px; font-weight:400; line-height:8px; letter-spacing:.12em; text-transform:uppercase; color:#fff; border-bottom:1px solid #e00; padding-bottom:1px; transition:border-color .2s; }
+.press-cta b{ color:#e00; font-weight:inherit; }
+.press-tile:hover .press-cta, .press-tile:focus-visible .press-cta{ border-bottom-color:#fff; }
+.press-cap{ font-family:var(--font-display); font-size:11px; line-height:12px; font-weight:900; letter-spacing:.05em; text-transform:uppercase; text-align:center; padding:0 6px; }
+.press-play{ position:absolute; left:50%; top:50%; width:34px; height:34px; margin:-17px 0 0 -17px; border-radius:50%; background:rgba(0,0,0,.6); box-shadow:0 0 0 1.5px rgba(255,255,255,.9); transition:background .2s; }
+.press-play::after{ content:""; position:absolute; left:13px; top:10px; border-style:solid; border-width:7px 0 7px 11px; border-color:transparent transparent transparent #fff; }
+.press-video:hover .press-play, .press-video:focus-visible .press-play{ background:#e00; }
 .fig{ margin:0; width:100%; }
 .fig img{ width:100%; height:auto; }
 .fig figcaption{ padding:3.5px 0; font-family:var(--font-display); font-size:6px; font-weight:400; letter-spacing:-.03em; line-height:7px; color:#6E6E6E; }
@@ -801,6 +820,8 @@ body.menu-body{ background:var(--black); }
   .sec-1 .sec-body, .sec-2 .sec-body{ padding-bottom:56px; }
   .sec-body > .chev{ margin-top:12px; }
   .sec-body > p{ font-size:17px; }
+  .press-list{ gap:16px; } .press-logo-tile{ gap:11px; padding:6px 0; } .press-cap{ font-size:24px; line-height:26px; } .press-cta{ font-size:13px; line-height:17px; border-bottom-width:2px; padding-bottom:3px; } .press-cta b{ font-size:15px; } .press-play{ width:56px; height:56px; margin:-28px 0 0 -28px; } .press-play::after{ left:22px; top:17px; border-width:11px 0 11px 17px; }
+  .sec-4 .sec-body{ padding-bottom:56px; }
   .fig figcaption{ padding:4px 0 0; font-size:10px; letter-spacing:-.01em; line-height:14px; }
   .about-sec.sec-3.open{ width:min(1100px, calc(100% - 80px)); padding:56px 0 40px; }   /* galleries run wider than the 720 column (Chef) */
   .gal-title{ height:44px; padding:0; font-size:40px; line-height:44px; }
