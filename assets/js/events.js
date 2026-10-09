@@ -205,14 +205,18 @@
     const s = T.width / S.width;
     return `translate(${T.left - S.left}px, ${T.top + T.height / 2 - S.height * s / 2 - S.top}px) scale(${s})`;
   }
+  let closing = false;
   function hideDetail(instant){
     if (!layout || !layout.classList.contains("open")){ return; }
+    if (closing) return;                      // already flying back (the × click also reaches the click-outside handler)
     const cell = openCell, thumb = thumbOf(cell), slap = detail.querySelector(".slap");
     const finish = () => {
       layout.classList.remove("open", "dim", "flying");
       document.body.classList.remove("ev-open", "ev-dim");
-      if (thumb) thumb.classList.remove("away");
-      if (cell) cell.classList.remove("sel");
+      // every thumbnail comes back and every day is deselected — a second close call (e.g. the click on × also counting
+      // as a click outside) used to arrive with no cell and leave the poster's thumbnail hidden until a refresh
+      layout.querySelectorAll(".thumb.away").forEach(t => t.classList.remove("away"));
+      layout.querySelectorAll(".day.sel").forEach(c => c.classList.remove("sel"));
     };
     if (openCell === cell) openCell = null;
     if (flight) flight.cancel();
@@ -225,7 +229,9 @@
     slap.style.transform = "";
     flight = slap.animate([{ transform: from, transformOrigin: "0 0", opacity: 1 }, { transform: to, transformOrigin: "0 0", opacity: 1 }],
       { duration: 380, easing: "cubic-bezier(.5,0,.75,.4)", fill: "forwards" });
-    flight.onfinish = () => { flight = null; finish(); calFlip(false); };
+    closing = true;
+    flight.onfinish = () => { flight = null; closing = false; finish(); calFlip(false); };
+    flight.oncancel = () => { flight = null; closing = false; finish(); };
   }
   // calendar slides (desktop) from where it was to where the new layout puts it
   function calFlip(open, before){
