@@ -505,7 +505,12 @@ body.ev-dim .events::before{ filter:brightness(.72) blur(3px); }
 .form-btn{ max-width:100%; box-sizing:border-box; text-align:center; text-wrap:balance; }
 .ev-layout.snap, .ev-layout.snap *, body.ev-snap .ev-head{ transition:none !important; }
 .ev-layout .cal, .ev-head{ transition:filter .45s ease, transform .5s cubic-bezier(.2,.8,.2,1), opacity .45s ease; }
-.ev-layout.dim .cal, body.ev-dim .ev-head{ filter:brightness(.72) blur(1.5px); }
+.ev-layout .cal .month{ transition:backdrop-filter .45s ease, -webkit-backdrop-filter .45s ease; }
+.ev-layout.dim .cal .month > *, body.ev-dim .ev-head{ filter:brightness(.72) blur(1.5px); }
+/* (the dim + blur goes on the month's contents, not on .cal: a filter on .cal would cut the month off from the photos behind
+   it and its frosted-glass blur would vanish while the poster is open — Chef) */
+.ev-layout .cal .month > *{ transition:filter .45s ease; }
+.ev-layout.dim .cal .month{ -webkit-backdrop-filter:blur(6px) brightness(.72); backdrop-filter:blur(6px) brightness(.72); }
 :is(.ev-detail,.df-zoom,.doorframe,.df-up) .inner{ position:relative; width:100%; background:#0D0D0D; }
 /* masking tape across each corner, pressed on as the poster lands (angles/offsets per event, set in events.js) */
 :is(.ev-detail,.df-zoom,.doorframe,.df-up) .tape{ position:absolute; z-index:2; width:var(--tw,88px); height:var(--th,24px); pointer-events:none;
