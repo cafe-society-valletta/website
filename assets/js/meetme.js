@@ -710,7 +710,7 @@
   }
 })();
 
-/* Meet Me page only: the site menu bar stays hidden until it's wanted — the mouse comes near the top, the top edge is
+/* Meet Me page only (phone): the site menu bar stays tucked away until it's wanted — the mouse comes near the top, the top edge is
    tapped, a finger swipes down from the top, or keyboard focus reaches it. It slides away again when no longer needed. */
 (function(){
   const bar = document.querySelector(".mm-bar"); if(!bar) return;
@@ -719,7 +719,11 @@
   const edge = () => { const r = bar.getBoundingClientRect(), on = root.classList.contains("mm-bar-on");
     return Math.max(ZONE, r.bottom + (on ? 0 : 1.3 * r.height) + ZONE); };   // where the bar's bottom is when shown (+ margin)
   const show = ms => { clearTimeout(hideT); hideT = 0; root.classList.add("mm-bar-on"); if(ms) hideT = setTimeout(hide, ms); };
-  const hide = () => { hideT = 0; if(bar.contains(document.activeElement)) return; root.classList.remove("mm-bar-on"); };
+  // desktop (>=900px): no auto-hide — the bar just stays on the monitor (Chef, Oct 2026). Phone: the bar rides on the casing
+  // and the whole monitor slides up to tuck it away (style.css); the same show/hide triggers drive it.
+  const desk = matchMedia("(min-width: 900px)"), pin = () => { if(desk.matches) root.classList.add("mm-bar-on"); };
+  pin(); desk.addEventListener("change", pin);
+  const hide = () => { hideT = 0; if(desk.matches || bar.contains(document.activeElement)) return; root.classList.remove("mm-bar-on"); };
   // mouse / trackpad: near the top shows it; moving away (or leaving the window) hides it after a beat
   addEventListener("pointermove", e => { if(e.pointerType !== "mouse") return;
     if(e.clientY < edge()) show(); else if(root.classList.contains("mm-bar-on") && !hideT) hideT = setTimeout(hide, 500); }, { passive:true });
@@ -735,8 +739,10 @@
   bar.addEventListener("focusout", () => setTimeout(() => { if(!bar.contains(document.activeElement)) hide(); }, 50));
 })();
 
-/* Meet Me sticky note: hover (CSS) or keyboard focus shows it; a click / tap pins it open or closed; on touch screens a swipe
-   in from the right edge (or across the note) pulls it out, a swipe back to the right tucks it away; a tap elsewhere closes it. */
+/* Meet Me sticky note: hover (CSS) or keyboard focus shows it; a click / tap opens it; on touch screens a swipe in from the
+   right edge (or across the note) pulls it out, a swipe back to the right tucks it away; a tap elsewhere closes it.
+   It never stays out: once opened it slides back to its peeking spot by itself (Chef, Oct 2026) — 5s after a tap/swipe,
+   or 1.2s after the mouse leaves it. Only the [x] removes it (for this visit). */
 (function(){
   const note = document.querySelector(".mm-note"); if(!note) return;
   try{ if(sessionStorage.getItem("mm-note-off")) document.documentElement.classList.add("mm-note-off"); }catch(e){}
@@ -744,7 +750,12 @@
     e.stopPropagation(); document.documentElement.classList.add("mm-note-off");
     try{ sessionStorage.setItem("mm-note-off", "1"); }catch(err){}
   });
-  const set = on => { note.classList.toggle("open", on); note.setAttribute("aria-expanded", String(on)); };
+  let retT = 0; const mouse = matchMedia("(hover: hover)");
+  const set = (on, ms = 5000) => { clearTimeout(retT); retT = 0; note.classList.toggle("open", on); note.setAttribute("aria-expanded", String(on));
+    if(on && !(mouse.matches && note.matches(":hover"))) retT = setTimeout(() => set(false), ms); };
+  note.addEventListener("mouseenter", () => { clearTimeout(retT); retT = 0; });
+  note.addEventListener("mouseleave", () => { if(note.classList.contains("open")){ clearTimeout(retT); retT = setTimeout(() => set(false), 1200); } });
+  note.addEventListener("focusout", () => setTimeout(() => { if(!note.contains(document.activeElement)) set(false); }, 50));
   note.addEventListener("click", e => { e.stopPropagation(); set(!note.classList.contains("open")); });
   note.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); set(!note.classList.contains("open")); } else if(e.key === "Escape") set(false); });
   document.addEventListener("click", e => { if(!note.contains(e.target)) set(false); });
