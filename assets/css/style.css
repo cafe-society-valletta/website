@@ -612,8 +612,13 @@ body.lostsouls-body{ background:var(--black); }
 .lsfx .ls-head img{ will-change:transform, opacity; opacity:0; transform:translateY(18px); transition:opacity 1s ease, transform 1.2s cubic-bezier(.2,.75,.25,1); }
 .lsfx.lsfx-go .ls-head img{ opacity:1; transform:none; }
 .lsfx .ls-head .l1{ transition-delay:.25s; } .lsfx .ls-head .l2{ transition-delay:.7s; } .lsfx .ls-head .l3{ transition-delay:1.05s; }
-.lsfx .ls-copy > *{ opacity:0; transform:translateY(26px); transition:opacity .9s ease, transform .9s cubic-bezier(.2,.75,.25,1); }
-.lsfx .ls-copy > .in{ opacity:1; transform:none; }
+/* scroll (ls-fx.js sets --p 0→1): the text box shrinks toward its top, fades and blurs; the tagline grows, fades and
+   blurs on the same timing; the logo sticks under the menu bar (translate from JS) above everything; the body text is
+   masked to transparent where it passes under the logo (--m0/--m1 from JS) */
+.lsfx .ls-head .l1{ position:relative; z-index:0; transform-origin:50% 0; scale:calc(1 - var(--p, 0) * .35); filter:blur(calc(var(--p, 0) * 8px)) opacity(calc(1 - var(--p, 0) * .97)); will-change:transform, filter; }
+.lsfx .ls-head .l3{ position:relative; z-index:1; scale:calc(1 + var(--p, 0) * .6); filter:blur(calc(var(--p, 0) * 6px)) opacity(calc(1 - var(--p, 0))); will-change:transform, filter; }
+.lsfx .ls-head .l2{ position:relative; z-index:3; will-change:translate; }
+.lsfx .ls-copy{ z-index:1; -webkit-mask-image:linear-gradient(to bottom, transparent var(--m0, -200px), #000 var(--m1, -100px)); mask-image:linear-gradient(to bottom, transparent var(--m0, -200px), #000 var(--m1, -100px)); }
 
 /* =========================================================
    SOCIETY COLLECTION  (artboard "06 Society Collection")
