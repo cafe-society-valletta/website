@@ -26,7 +26,8 @@ shop.html         The Society Collection — categories open inline in place (pr
                   (SHOP_COMING_SOON false) or at shop.html?preview; otherwise the placeholders show.
 meetme.html       Meet Me at Society — UNLISTED (noindex, not in nav), served at /meetme (_redirects sends the old /meetmeatsociety there).
                   Menu bar: desktop = always on (no auto-hide); phone = sits on the casing's top band and the whole monitor slides
-                  up (--mmh) to tuck both away; tap/swipe at the top slides it back (Chef, Oct 2026).
+                  up (--mmh) to tuck both away; tap/swipe at the top slides it back. The page opens with the bar showing
+                  (<html class="mm-bar-on"> in meetme.html) and tucks it 2s later (Chef, Oct 2026).
                   Sticky note (.mm-note): never stays out — retracts to its peek 5s after a tap/swipe or 1.2s after the mouse
                   leaves; hover opens it only on real-mouse devices; [x] removes it for the visit (sessionStorage). Background = the beige
                   computer (assets/img/p-meetme-computer.webp/.png); .mm-screen sits exactly over its green screen for content.
@@ -61,9 +62,15 @@ assets/js/grain.js     Film-grain layer (8 tiles in assets/img/grain/, 12 fps, m
 assets/js/chars.js     Home "Characters" parade frame clock — keeps the line's step and every
                         figure's pose change on the same 1.5 fps frame (one jump per frame).
 assets/js/meetme.js    Meet Me at Society board on the green screen. Home: [ WRITE A POST ] button (typing anywhere also opens it)
-                        + POST FEED (newest first, rows link to #p/<id>; post pages not built yet). #new = NEW POST screen:
+                        + POST FEED (newest first, rows link to #p/<id>; post pages not built yet).
+                        Feed: the magnifying glass at the end of SHOW> folds out SEARCH> (hidden otherwise; folding away clears it); it filters as you type (subject + author in the browser, post text via GET ?q=); the DATE header opens
+                        a month calendar ([<] [>], days with posts underlined) — picking a day scrolls to it (or the next earlier day with posts). #new = NEW POST screen:
                         NAME (remembered in localStorage "mm-name"), SUBJECT (44 chars = one feed line), POST (5000), PHOTOS
                         (max 4; shrunk in the browser to a JPEG <= 1 MB, long side <= 1600 px). VT323 font.
+                        POST box (new + edit) has a toolbar on top: [B] [I] [U] [H] + [☺] 8-bit emoji pop-up (library in assets/js/mm-emoji.js,
+                        stored as :name: codes) + [ SIZE v ] drop-down (SMALL/NORMAL/LARGE/X-LARGE); they
+                        wrap the selection in markers **bold** *italic* __underline__ ==highlight== [SMALL]/[BIG]/[HUGE]..[/..] (comments: plain, no tools);
+                        the body is stored as plain text and rich() (meetme.js + mmadmin.html) turns markers into <b>/<i>/<u> after escaping.
                         Posts are shared via netlify/functions/meetme.mjs (Netlify Blobs; photos stored as img/<id>-<n>); new posts
                         wait in a queue until approved on mmadmin.html ("SYSOP CONSOLE", unlisted, key = Netlify env MEETME_ADMIN_KEY;
                         shows body + photos; reject/delete also deletes the photos). #p/<id> = POST WINDOW over the feed (email

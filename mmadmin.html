@@ -35,6 +35,7 @@
   ol.df li > span:nth-child(2){ grid-column:2; grid-row:1; } ol.df li > span:nth-child(3){ grid-column:3; grid-row:1; }
   ol.df a.out{ color:inherit; word-break:break-all; }
   @media (max-width:600px){ li{ grid-template-columns:1fr; } li .s, li .b, li .ph{ grid-column:1; } }
+  img.e{ width:1.1em; height:1.1em; vertical-align:-.16em; margin:0 .08em; }   /* 8-bit emoji in post bodies */
 </style>
 </head>
 <body>
@@ -60,10 +61,17 @@
     <p class="muted">AUTO-REFRESH EVERY 20 SEC. <button type="button" id="out" class="no">[LOGOFF]</button></p>
   </section>
 </main>
+<script src="assets/js/mm-emoji.js"></script>
 <script>
 (function(){
   const API = "/.netlify/functions/meetme", $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const rich = s => emo(esc(s).replace(/\*\*(\S(?:[^\n]*?\S)?)\*\*/g, "<b>$1</b>").replace(/__(\S(?:[^\n]*?\S)?)__/g, "<u>$1</u>")
+    .replace(/==([^=\s](?:[^\n]*?[^=\s])?)==/g, '<mark style="background:#7dff7d;color:#06140a">$1</mark>')
+    .replace(/(^|[^*])\*([^*\s](?:[^*\n]*?[^*\s])?)\*(?!\*)/g, "$1<i>$2</i>")
+    .replace(/\[(SMALL|BIG|HUGE)\]([^\n]+?)\[\/\1\]/g, function sz(_, z, t){   // same markers as meetme.js
+      return `<span style="font-size:${({ SMALL:".78em", BIG:"1.45em", HUGE:"2em" })[z]}">${t.replace(/\[(SMALL|BIG|HUGE)\]([^\n]+?)\[\/\1\]/g, sz)}</span>`; }));
+  const emo = h => window.MM_EMOJI ? window.MM_EMOJI.swap(h, "e") : h;   // :name: → 8-bit emoji
   const when = at => at.replace("T", " ");
   const CAT = { general:"GENERAL INQUIRY OR ANNOUNCEMENT", meetup:"MEETUP / ACTIVITY BUDDY", staff:"LOOKING FOR STAFF", job:"LOOKING FOR A JOB", flat:"LOOKING FOR A FLAT",
     rent:"FLAT FOR RENT", flatmate:"LOOKING FOR A FLATMATE", art:"ARTWORK/HOMEMADE PRODUCT FOR SALE", sale:"ITEM FOR SALE OR SWAP", free:"FREE / GIVEAWAY",
@@ -74,7 +82,7 @@
   const photo = id => { if(pics[id]) return Promise.resolve(pics[id]);
     return fetch(API + "?photo=" + encodeURIComponent(id), { headers:{ "x-mm-key":key } }).then(r => r.ok ? r.blob() : null).then(b => b ? (pics[id] = URL.createObjectURL(b)) : ""); };
   const row = (p, btns) => `<li><span>${esc(when(p.at))}</span><span>&lt;${esc(p.author)}&gt;</span><span>${btns}</span><span class="s">SUBJ: ${esc(p.subject)}${p.edited ? " (EDITED BY POSTER)" : ""}</span><span class="s">CAT: ${esc(CAT[p.category] || CAT.general)}</span>`
-    + (p.body ? `<p class="b">${esc(p.body)}</p>` : "")
+    + (p.body ? `<p class="b">${rich(p.body)}</p>` : "")
     + (p.photos ? `<span class="ph">${Array.from({ length:p.photos }, (_, n) => `<a target="_blank" data-ph="${esc(p.id)}-${n}"><img alt="PHOTO ${n+1}"></a>`).join("")}</span>` : "")
     + `</li>`;
   const fillPhotos = () => document.querySelectorAll("a[data-ph]").forEach(a => photo(a.dataset.ph).then(u => { if(u){ a.href = u; a.firstChild.src = u; } }));
