@@ -356,7 +356,7 @@ html.tab-leaving .site-bar .tab::before{ animation:tab-lift .16s cubic-bezier(.5
    transparent menu bar's backing (same tile, same attachment) lines up with it exactly */
 body.about-body{ --tile:170px; --paper:url('../img/p-bg-about-paper.jpg'); background:#fbfaf7 var(--paper) 0 0/var(--tile) auto repeat fixed; }
 .about{ background:transparent; color:var(--black); }
-.about-head{ display:flex; justify-content:center; height:172px; padding-top:20px; }
+.about-head{ display:flex; justify-content:center; height:163px; padding-top:20px; }   /* was 172px: a bit less space under the illustration (Chef) */
 .about-head img{ width:110px; height:143px; }
 .about-sections{ display:flex; flex-direction:column; padding-bottom:40px; }
 .banner{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:100%; aspect-ratio:3/1; padding:0 6px; overflow:hidden; border:0; border-radius:6px; cursor:pointer; color:var(--white); background:#333 center/cover no-repeat; transition:opacity .35s; }
@@ -616,7 +616,9 @@ body.lostsouls-body{ background:var(--black); }
    blurs on the same timing, growing upward; the logo sticks under the menu bar above everything; the body text is
    masked to transparent where it passes under the logo (--m0/--m1 from JS) */
 .lsfx .ls-head .l1{ position:relative; z-index:0; transform-origin:50% 0; scale:calc(1 - var(--p, 0) * .35); filter:blur(calc(var(--p, 0) * 8px)) opacity(calc(1 - var(--p, 0) * .97)); will-change:transform, filter; }
-.lsfx .ls-head .l3{ position:relative; z-index:1; transform-origin:50% 100%; scale:calc(1 + var(--p, 0) * .6); filter:blur(calc(var(--p, 0) * 6px)) opacity(calc(1 - var(--p, 0))); will-change:transform, filter; }
+/* tagline: grows at a steady rate in step with the text box contracting (--p, same range), its centre always halfway
+   between the logo and the body text; it fades and blurs from the first scroll and is gone when they meet (--q) */
+.lsfx .ls-head .l3{ position:relative; z-index:1; scale:calc(1 + var(--p, 0) * 2.2); filter:blur(calc(var(--q, 0) * 8px)) opacity(calc(1 - var(--q, 0))); will-change:transform, filter; }
 /* the logo sticks with real position:sticky (smooth, no scroll-event jitter). For that its sticky parent must be the
    whole page, so the headline wrapper steps aside (display:contents) and the three pieces become .page items,
    spaced exactly as before */
@@ -624,13 +626,13 @@ body.lostsouls-body{ background:var(--black); }
 .lsfx .ls-head img{ display:block; align-self:center; flex-shrink:0; }
 .lsfx .ls-head .l1{ margin-top:34px; } .lsfx .ls-head .l2{ margin-top:23px; } .lsfx .ls-head .l3{ margin:23px 0 7px; }
 .lsfx .ls-head .l2{ position:sticky; top:45px; z-index:3; }   /* 10px under the 35px menu bar */
-.lsfx .ls-copy{ z-index:1; -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.28) var(--m0), #000 calc(var(--m0) + 60px)); mask-image:linear-gradient(to bottom, rgba(0,0,0,.28) var(--m0), #000 calc(var(--m0) + 60px)); }
-/* behind the stuck logo and the menu bar the body text stays faintly visible (28%, above) and out of focus: a frosted
+.lsfx .ls-copy{ z-index:1; -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.15) calc(var(--m0) + 30px), #000 calc(var(--m0) + 100px)); mask-image:linear-gradient(to bottom, rgba(0,0,0,.15) calc(var(--m0) + 30px), #000 calc(var(--m0) + 100px)); }   /* faint (15%) from 30px below the logo, fully back 100px below — Chef */
+/* behind the stuck logo and the menu bar the body text stays faintly visible (15%, above) and out of focus: a frosted
    veil (blur only, no tint) covers the top of the window, between the text and the logo, feathered at its lower edge.
    It fades in just before the logo sticks. */
-.ls-veil{ position:fixed; left:0; right:0; top:0; height:106px; z-index:2; pointer-events:none; opacity:0;
+.ls-veil{ position:fixed; left:0; right:0; top:0; height:150px; z-index:2; pointer-events:none; opacity:0;
   -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
-  -webkit-mask-image:linear-gradient(#000 calc(100% - 44px), transparent); mask-image:linear-gradient(#000 calc(100% - 44px), transparent); }
+  -webkit-mask-image:linear-gradient(#000 calc(100% - 70px), transparent); mask-image:linear-gradient(#000 calc(100% - 70px), transparent); }
 .lsfx-sda .ls-veil{ animation:lsVeil linear both; animation-timeline:scroll(root); animation-range:var(--vs, 0px) var(--ms, 1px); }
 @keyframes lsVeil{ from{ opacity:0; } to{ opacity:1; } }
 /* scroll-driven versions (html.lsfx-sda, set by ls-fx.js when supported): tied to the scroll position itself, so they
@@ -638,10 +640,16 @@ body.lostsouls-body{ background:var(--black); }
 @property --p{ syntax:'<number>'; inherits:false; initial-value:0; }
 @property --m0{ syntax:'<length>'; inherits:false; initial-value:-999px; }
 .lsfx-sda .ls-art{ animation:lsBg linear both; animation-timeline:scroll(root); }
-.lsfx-sda .ls-head .l1, .lsfx-sda .ls-head .l3{ animation:lsDrift linear both; animation-timeline:scroll(root); animation-range:0px var(--reach, 300px); }
+.lsfx-sda .ls-head .l1{ animation:lsDrift linear both; animation-timeline:scroll(root); animation-range:0px var(--reach, 300px); }
+.lsfx-sda .ls-head .l3{ animation:lsP linear both, lsTagMove linear both, lsTagFx linear both; animation-timeline:scroll(root), scroll(root), scroll(root);
+  animation-range:0px var(--reach, 300px), var(--ms, 0px) var(--meet, 1px), var(--qs, 0px) var(--qe, 1px); }
 .lsfx-sda .ls-copy{ animation:lsMask linear both; animation-timeline:scroll(root); animation-range:var(--ms, 0px) 100%; }
 @keyframes lsBg{ from{ background-position-y:0; } to{ background-position-y:var(--bg-end, 0px); } }
 @keyframes lsDrift{ from{ --p:0; translate:0 0; } to{ --p:1; translate:0 var(--drift, 0px); } }
+@property --q{ syntax:'<number>'; inherits:false; initial-value:0; }
+@keyframes lsTagFx{ from{ --q:0; } to{ --q:1; } }
+@keyframes lsP{ from{ --p:0; } to{ --p:1; } }
+@keyframes lsTagMove{ from{ translate:0 var(--toff, 0px); } to{ translate:0 var(--tdrift, 0px); } }
 @keyframes lsMask{ from{ --m0:var(--u0, -999px); } to{ --m0:calc(var(--u0, -999px) + var(--span, 0px)); } }
 
 /* =========================================================
@@ -847,7 +855,7 @@ body.menu-body{ background:var(--black); }
   .chev svg{ width:22px; height:13px; }
 
   /* ABOUT (D02) */
-  .about-head{ height:auto; padding:56px 0 40px; }
+  .about-head{ height:auto; padding:56px 0 20px; }
   .about-head img{ width:200px; height:260px; }
   .about-sections{ padding-bottom:72px; }
   .about-sec{ width:var(--col); margin-inline:auto; padding:0; }
@@ -912,7 +920,7 @@ body.menu-body{ background:var(--black); }
 
   /* LOST SOULS CLUB (D05) */
   .ls-head{ height:auto; gap:36px; padding-top:56px; }
-  .ls-veil{ height:178px; }
+  .ls-veil{ height:222px; }
   .lsfx .ls-head .l1{ margin-top:56px; } .lsfx .ls-head .l2{ margin-top:36px; } .lsfx .ls-head .l3{ margin:36px 0 0; } .lsfx .ls-head .l2{ top:66px; }
   .ls-head .l1{ width:350px; height:396px; }
   .ls-head .l2{ width:508px; height:102px; }
@@ -1835,3 +1843,46 @@ html.df-open .doorframe, html.df-open .ev-head, html.df-open .ev-layout{ transit
 /* About: photos + text multiply onto the paper so its grain shows through, as if printed on it (Chef) */
 .about .about-head, .about .about-sections, .about .site-footer{ mix-blend-mode:multiply; }
 @media (min-width:900px){ body.about-body{ --tile:272px; } }   /* paper tile: phone 170px, desktop 272px (Chef) */
+
+
+/* =========================================================
+   PAGE MOTION (Chef, Oct 2026) — main.js adds html.mo (and .mo-sda where the browser has scroll-driven animations).
+   Nothing here runs with prefers-reduced-motion.
+   ========================================================= */
+/* background parallax: Events, Photo Lab, Collection — the background moves at 65% of the page's speed.
+   --par-end (main.js) = 35% of the page's scroll length; --par = the same thing live, for browsers without
+   scroll-driven animations */
+.mo .events::before{ translate:0 var(--par, 0px); }
+.mo .gallery{ --par-y0:-28px; background-position-y:calc(var(--par-y0) + var(--par, 0px)); }
+.mo .shop{ --par-y0:0px; background-position-y:calc(var(--par-y0) + var(--par, 0px)); }
+@media (min-width:700px){ .mo .gallery{ --par-y0:-56px; } }
+.mo-sda .events::before{ animation:parT linear both; animation-timeline:scroll(root); }
+.mo-sda .gallery, .mo-sda .shop{ animation:parBg linear both; animation-timeline:scroll(root); }
+@keyframes parT{ from{ translate:0 0; } to{ translate:0 var(--par-end, 0px); } }
+@keyframes parBg{ from{ background-position-y:var(--par-y0); } to{ background-position-y:calc(var(--par-y0) + var(--par-end, 0px)); } }
+
+/* About — the title illustration grows, blurs and fades as it scrolls out of view */
+.mo-sda .about-head img{ animation:aboutHeadOut linear both; animation-timeline:view(); animation-range:exit 0% exit 100%; }
+.about-reading .about-head img, .about-reading .about .banner::after{ animation:none !important; }   /* a section is open: reads like a magazine */
+@keyframes aboutHeadOut{ to{ scale:1.45; filter:blur(10px); opacity:0; } }
+/* About — the collapsed-section thumbnails come into focus one after another (main.js adds .in, 140ms apart) and
+   their photos drift gently as they cross the screen (a layer inside each thumbnail, .banner::after) */
+.about .banner{ isolation:isolate; }
+.about .banner::after{ content:""; position:absolute; inset:-8% 0; z-index:-1; background:inherit; background-size:cover; background-position:center; }
+.mo .about .banner{ opacity:0; filter:blur(8px); transition:opacity .75s ease, filter .75s ease; }
+.mo .about .banner.in{ opacity:1; filter:none; }
+.mo-sda .about .banner::after{ animation:bnPar linear both; animation-timeline:view(); }
+@keyframes bnPar{ from{ transform:translateY(-6%); } to{ transform:translateY(6%); } }
+/* hover (mouse only): the photo quick-cuts to a slightly zoomed (1.08×) crop of its bottom-right corner, then zooms and pans at an even rate (12s)
+   back out to the full picture (Ken Burns); the title grows as a button cue. Same on the gallery thumbnails. Once a
+   section is open it reads like a magazine: no scroll motion inside it. */
+.about .banner .t, .about .banner svg, .gal-grid .gal h3 b{ transition:scale .45s cubic-bezier(.2,.8,.2,1); }
+.about .banner::after, .gal-grid .gal-img{ transform-origin:100% 100%; }
+@media (hover:hover){
+  .mo .about .banner:hover::after{ animation:kenBurnsOut 12s linear both; }
+  .mo-sda .about .banner:hover::after{ animation:bnPar linear both, kenBurnsOut 12s linear both; animation-timeline:view(), auto; }
+  .mo .about .banner:hover .t{ scale:1.12; transition-duration:0s; } .mo .about .banner:hover svg{ scale:1.25; transition-duration:0s; }   /* title snaps big on hover, eases back on leave */
+  .mo .gal-grid .gal:hover .gal-img{ animation:kenBurnsOut 12s linear both; }
+  .mo .gal-grid .gal:hover h3 b{ scale:1.15; transition-duration:0s; }
+}
+@keyframes kenBurnsOut{ from{ scale:1.08; } to{ scale:1; } }   /* gentle, even, documentary-style (Chef) */
