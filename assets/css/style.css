@@ -1341,6 +1341,40 @@ html.mm-wk .mm-screen:not(.full){ overflow:hidden; }
 .mmb-hdr{ margin:.15em 0; overflow-wrap:anywhere; } .mmb-hdr span{ display:inline-block; min-width:5.5em; opacity:.75; }
 .mmb-note{ margin:.6em 0; }
 .mmb-text{ white-space:pre-wrap; overflow-wrap:anywhere; margin:.6em 0 .8em; line-height:1.25; }
+.mmb-text b, .mmb-tool b{ font-weight:700; }   /* VT323 has one weight: the browser fakes the bold, which reads as a heavier phosphor line */
+.mmb-text i, .mmb-tool i{ font-style:italic; }
+.mmb-hl{ background:#7dff7d; color:#06140a; text-shadow:none; padding:0 .12em; }   /* highlight: black on phosphor green */
+.mmb-text u, .mmb-tool u{ text-decoration:underline; text-decoration-thickness:.08em; text-underline-offset:.12em; }
+.mmb-box{ flex:1; min-width:0; display:flex; flex-direction:column; }   /* POST column: toolbar right on top of the box */
+.mmb-box > textarea{ flex:none; width:100%; box-sizing:border-box; }
+.mmb-tool-row{ position:relative; display:flex; justify-content:flex-end; align-items:baseline; gap:.3em; margin-bottom:.1em; }   /* grouped tight, flush with the box's right edge */
+.mmb-boxed > .mmb-k, .mmb-boxed > .mmb-n{ margin-top:1.45em; }   /* POST> and the counter line up with the box, not the toolbar */
+
+@property --mmb-base{ syntax:'<length>'; inherits:true; initial-value:16px; }
+.mmb-text{ --mmb-base:1em; }   /* the post's normal size, frozen as a length, so a size inside a size doesn't multiply */
+.mm-screen img.mmb-emo, .mmb-emo{ display:inline-block; max-width:none; height:1.1em; width:1.1em; vertical-align:-.16em; margin:0 .08em; filter:drop-shadow(0 0 .12em rgba(110,255,110,.55)); }   /* 8-bit emoji, sized with the text (.mm-screen beats the monitor's "img = 100% wide" rule) */
+.mmb-emoji{ position:static; }   /* the pop-up anchors to the whole toolbar row, so it lines up with the box's right edge */
+.mmb-emo-pop{ position:absolute; right:0; top:100%; z-index:4; display:grid; grid-template-columns:repeat(8, auto); max-height:15em; overflow-y:auto; scrollbar-width:none; gap:.15em; margin-top:.2em; padding:.35em;
+  background:#06140a; border:1px dashed rgba(125,255,125,.55); width:max-content; }
+.mmb-emo-pop[hidden]{ display:none; }
+.mmb-emo-opt{ padding:.2em; line-height:0; }
+.mm-screen .mmb-emo-opt img, .mmb-emo-opt img{ display:block; max-width:none; width:1.5em; height:1.5em; filter:drop-shadow(0 0 .12em rgba(110,255,110,.55)); }
+.mmb-emo-opt:hover, .mmb-emo-opt:focus-visible{ background:#7dff7d; outline:none; }
+.mmb-emo-opt:hover img, .mmb-emo-opt:focus-visible img{ filter:brightness(0); }   /* dark emoji on green, like the other buttons */
+.mmb-emo-btn:hover, .mmb-emo-btn:focus-visible, .mmb-emo-btn[aria-expanded="true"]{ background:#7dff7d; outline:none; }
+.mmb-emo-btn:hover .mmb-emo, .mmb-emo-btn[aria-expanded="true"] .mmb-emo{ filter:brightness(0); }
+.mmb-text .mmb-sz-small{ font-size:calc(var(--mmb-base) * .78); }
+.mmb-text .mmb-sz-big{ font-size:calc(var(--mmb-base) * 1.45); line-height:1.1; }
+.mmb-text .mmb-sz-huge{ font-size:calc(var(--mmb-base) * 2); line-height:1.05; }
+/* [ SIZE v ] drop-down: the list floats over the post box (so the box doesn't jump), terminal-styled like the category list */
+.mmb-size{ position:relative; margin-left:.3em; }
+.mmb-size-btn:hover, .mmb-size-btn:focus-visible, .mmb-size-btn[aria-expanded="true"]{ background:#7dff7d; color:#06140a; text-shadow:none; outline:none; }
+.mmb-size-list{ position:absolute; right:0; top:100%; z-index:4; list-style:none; margin:.2em 0 0; padding:.25em 0; min-width:9em; background:#06140a; border:1px dashed rgba(125,255,125,.55); }
+.mmb-size-list[hidden]{ display:none; }
+.mmb-size-opt{ display:block; width:100%; text-align:left; padding:.1em .6em; }
+.mmb-size-opt:hover, .mmb-size-opt:focus-visible{ background:#7dff7d; color:#06140a; text-shadow:none; outline:none; }
+/* each size option is printed at the size it gives (like the iPhone Notes format menu) */
+.mmb-size-opt[data-sz="SMALL"]{ font-size:.78em; } .mmb-size-opt[data-sz="BIG"]{ font-size:1.45em; line-height:1.1; } .mmb-size-opt[data-sz="HUGE"]{ font-size:2em; line-height:1.05; }
 .mmb-photos{ display:flex; flex-direction:column; gap:1em; margin:.6em 0 .8em; }
 .mmb-photo{ display:block; padding:0; border:1px solid rgba(125,255,125,.6); background:#000; color:inherit; font:inherit; text-shadow:inherit; cursor:pointer; text-align:center; }
 .mmb-photo img{ display:block; width:100%; height:auto; }   /* real colours: photos are the one thing not drawn in green (Chef) */
@@ -1436,6 +1470,31 @@ html.mm-note-off .mm-note{ display:none; }
 .mmb-k{ flex:0 0 5.2em; }
 /* category drop-down (8-bit): [ LABEL v ] + a numbered list printed underneath */
 .mmb-pick{ flex:1; min-width:0; }
+/* feed search + DATE calendar (Chef, Oct 2026) */
+.mmb-search input{ flex:1; }
+.mmb-search input::-webkit-search-cancel-button{ -webkit-appearance:none; display:none; }   /* our own [X] */
+.mmb-qx{ flex:0 0 auto; }
+.mmb-search[hidden]{ display:none; }
+.mm-screen .mmb-inbox > .mmb-search{ animation:none; }   /* never part of the line-by-line print: it must be focusable the moment it folds out */
+.mmb-qbtn{ flex:0 0 auto; margin-left:auto; }   /* magnifying glass at the end of the SHOW> line */
+.mmb-qbtn:hover, .mmb-qbtn:focus-visible, .mmb-qbtn[aria-expanded="true"]{ background:#7dff7d; outline:none; }
+.mmb-qbtn:hover .mmb-emo, .mmb-qbtn:focus-visible .mmb-emo, .mmb-qbtn[aria-expanded="true"] .mmb-emo{ filter:brightness(0); }
+.mmb-cal-wrap{ position:relative; }
+.mmb-date-btn{ padding:0; text-decoration:underline dotted; text-underline-offset:.2em; }   /* DATE header = a button */
+.mmb-date-btn:hover, .mmb-date-btn:focus-visible, .mmb-date-btn[aria-expanded="true"]{ background:#7dff7d; color:#06140a; text-shadow:none; outline:none; }
+.mmb-cal{ position:absolute; left:0; top:100%; z-index:5; margin-top:.3em; padding:.4em .5em .5em; background:#06140a; border:1px dashed rgba(125,255,125,.6);
+  width:max-content; letter-spacing:0; font-weight:normal; }
+.mmb-cal[hidden]{ display:none; }
+.mmb-cal-h{ display:flex; align-items:center; justify-content:space-between; gap:.8em; margin:0 0 .3em; }
+.mmb-cal-g{ display:grid; grid-template-columns:repeat(7, minmax(2.6ch, auto)); gap:.1em .25em; text-align:center; }
+.mmb-cal-d, .mmb-cal-w, .mmb-cal-h span{ white-space:nowrap; }
+.mmb-cal-w{ opacity:.6; font-size:.8em; align-self:end; }
+.mmb-cal-d{ padding:.05em 0; opacity:.45; }
+.mmb-cal-d.has{ opacity:1; text-decoration:underline; text-underline-offset:.15em; }   /* days with posts */
+.mmb-cal-d.today{ outline:1px dashed rgba(125,255,125,.7); outline-offset:-1px; }
+.mmb-cal-d:hover, .mmb-cal-d:focus-visible, .mmb-cal-nav:hover, .mmb-cal-nav:focus-visible{ background:#7dff7d; color:#06140a; text-shadow:none; outline:none; opacity:1; }
+.mmb-list li.mmb-hit > .mmb-row{ animation:mmb-hit 2.4s steps(1) 1; }   /* the picked day's rows blink */
+@keyframes mmb-hit{ 0%, 20%, 40%{ background:rgba(125,255,125,.3); } 10%, 30%{ background:transparent; } 60%{ background:rgba(125,255,125,.18); } 100%{ background:transparent; } }
 .mmb-pick-btn{ text-align:left; }
 .mmb-pick-btn:hover, .mmb-pick-btn:focus-visible, .mmb-pick-btn[aria-expanded="true"]{ background:#7dff7d; color:#06140a; text-shadow:none; outline:none; }
 .mmb-pick-list{ list-style:none; margin:.3em 0 .2em; padding:.25em 0; border:1px dashed rgba(125,255,125,.55); }
@@ -1474,6 +1533,9 @@ a.mmb-row:hover, a.mmb-row:focus-visible{ background:rgba(125,255,125,.16); outl
   .mmb-row > span{ overflow-wrap:anywhere; }
   .mmb-field{ flex-wrap:wrap; }
   .mmb-k{ flex-basis:100%; }
+  .mmb-boxed > .mmb-k{ margin-top:0; }
+  .mmb-filter > .mmb-k, .mmb-search > .mmb-k{ flex-basis:auto; }   /* phone feed: SHOW> / SEARCH> stay beside their menu / box (more room for the feed) */
+  .mm-screen .mmb-emo-opt img{ width:1.2em; height:1.2em; } .mmb-emo-pop{ max-height:11em; }   /* phone: 56 emoji in a tighter grid that scrolls */   /* phone: POST> on its own line above the toolbar + box */
   .mmb-thumbs{ margin-left:0; }
   .mm-screen:not(.full) .mmb-post{ top:9cqw; left:12cqw; right:12cqw; }   /* phone glass bends harder: its own safe margins */
   .mm-screen:not(.full) .mmb-write-row{ grid-template-columns:1fr 1fr; row-gap:1.6em; margin-top:.6em; }   /* phone: logo centred above the two buttons */
