@@ -27,5 +27,6 @@
   const req = () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };
   addEventListener("scroll", req, { passive: true }); addEventListener("resize", req);
   frame();
-  requestAnimationFrame(() => root.classList.add("lsfx-go"));   // start the arrival
+  const go = () => root.classList.add("lsfx-go");   // start the arrival
+  requestAnimationFrame(go); setTimeout(go, 60);    // (rAF alone waits forever in a background tab)
 })();
