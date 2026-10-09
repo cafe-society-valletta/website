@@ -24,7 +24,11 @@ shop.html         The Society Collection — categories open inline in place (pr
                   Storefront API (Netlify env SHOPIFY_STOREFRONT_TOKEN + SHOPIFY_STORE_DOMAIN — never in the repo) and makes the
                   cart at checkout. Collections map to categories by name; products in no matching collection are guessed from product type/title (GUESS in shop.mjs), else Retail. Bag drawer + live products only when the shop is open
                   (SHOP_COMING_SOON false) or at shop.html?preview; otherwise the placeholders show.
-meetme.html       Meet Me at Society — UNLISTED (noindex, not in nav), served at /meetme (_redirects sends the old /meetmeatsociety there). Background = the beige
+meetme.html       Meet Me at Society — UNLISTED (noindex, not in nav), served at /meetme (_redirects sends the old /meetmeatsociety there).
+                  Menu bar: desktop = always on (no auto-hide); phone = sits on the casing's top band and the whole monitor slides
+                  up (--mmh) to tuck both away; tap/swipe at the top slides it back (Chef, Oct 2026).
+                  Sticky note (.mm-note): never stays out — retracts to its peek 5s after a tap/swipe or 1.2s after the mouse
+                  leaves; hover opens it only on real-mouse devices; [x] removes it for the visit (sessionStorage). Background = the beige
                   computer (assets/img/p-meetme-computer.webp/.png); .mm-screen sits exactly over its green screen for content.
                   The tube plays assets/video/mm-intro[-desk] (once) then mm-idle[-desk] (loop), .mp4 H.264 or .webm VP9, pre-rendered
                   with the glass curve/mask/shading as drop-ins for the screen rectangle.
