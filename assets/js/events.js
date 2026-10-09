@@ -230,8 +230,10 @@
     flight = slap.animate([{ transform: from, transformOrigin: "0 0", opacity: 1 }, { transform: to, transformOrigin: "0 0", opacity: 1 }],
       { duration: 380, easing: "cubic-bezier(.5,0,.75,.4)", fill: "forwards" });
     closing = true;
-    flight.onfinish = () => { flight = null; closing = false; finish(); calFlip(false); };
-    flight.oncancel = () => { flight = null; closing = false; finish(); };
+    const f = flight, done = () => { if (!closing) return; closing = false; if (flight === f) flight = null; finish(); };
+    f.onfinish = () => { done(); calFlip(false); };
+    f.oncancel = done;
+    setTimeout(done, 700);   // safety: animations don't run in a background tab, the thumbnail must still come back
   }
   // calendar slides (desktop) from where it was to where the new layout puts it
   function calFlip(open, before){
@@ -288,6 +290,7 @@
     const thumb = thumbOf(cell);
     const wasOpen = layout.classList.contains("open");
     const calBefore = layout.querySelector(".cal").getBoundingClientRect();
+    closing = false;                          // a fly-back still running must not tidy up over this new poster
     if (flight){ flight.cancel(); flight = null; }
     layout.querySelectorAll(".thumb.away").forEach(t => t.classList.remove("away"));
     // snap to the final layout (no transitions) so the end positions can be measured
