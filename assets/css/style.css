@@ -599,11 +599,21 @@ body.lostsouls-body{ background:var(--black); }
 .ls-head .l2{ width:254px; height:51px; }
 .ls-head .l3{ width:112px; height:25px; }
 .ls-copy{ position:relative; display:flex; flex-direction:column; align-items:center; gap:14px; padding:17px 32px 40px; }
-.ls-copy p{ align-self:stretch; margin:0; font-size:12px; line-height:120%; text-align:justify; }
+.ls-copy p{ align-self:center; width:175px; margin:0; font-size:12px; line-height:120%; text-align:justify; hyphens:auto; -webkit-hyphens:auto; }   /* same width as the headline graphic (.l1) — Chef */
 .ls-ig{ display:flex; flex-direction:column; align-items:center; gap:6px; padding-top:6px; }
 .ls-ig svg{ filter:drop-shadow(0 1px 4px rgba(0,0,0,.85)); }
 .ls-ig span{ font-size:8px; font-weight:700; letter-spacing:.14em; line-height:10px; text-shadow:0 1px 4px rgba(0,0,0,.85); }
 .ls-ig:hover{ opacity:.75; }
+
+/* ---- LSC motion "Drift" (assets/js/ls-fx.js; Chef picked option A, Oct 2026) — only when html.lsfx is set ---- */
+.lsfx .lostsouls{ overflow-x:clip; }
+.lsfx .ls-art{ will-change:background-position, transform, opacity; opacity:0; transform:scale(1.06); transition:opacity 1.6s ease, transform 2.4s cubic-bezier(.2,.7,.2,1); }
+.lsfx.lsfx-go .ls-art{ opacity:.92; transform:none; }
+.lsfx .ls-head img{ will-change:transform, opacity; opacity:0; transform:translateY(18px); transition:opacity 1s ease, transform 1.2s cubic-bezier(.2,.75,.25,1); }
+.lsfx.lsfx-go .ls-head img{ opacity:1; transform:none; }
+.lsfx .ls-head .l1{ transition-delay:.25s; } .lsfx .ls-head .l2{ transition-delay:.7s; } .lsfx .ls-head .l3{ transition-delay:1.05s; }
+.lsfx .ls-copy > *{ opacity:0; transform:translateY(26px); transition:opacity .9s ease, transform .9s cubic-bezier(.2,.75,.25,1); }
+.lsfx .ls-copy > .in{ opacity:1; transform:none; }
 
 /* =========================================================
    SOCIETY COLLECTION  (artboard "06 Society Collection")
@@ -877,7 +887,7 @@ body.menu-body{ background:var(--black); }
   .ls-head .l2{ width:508px; height:102px; }
   .ls-head .l3{ width:224px; height:50px; }
   .ls-copy{ width:var(--col); margin-inline:auto; gap:20px; padding:40px 0 72px; }
-  .ls-copy p{ font-size:17px; }
+  .ls-copy p{ width:350px; font-size:17px; }
   .ls-ig{ gap:10px; padding-top:16px; }
   .ls-ig svg{ width:44px; height:44px; }
   .ls-ig span{ font-size:12px; line-height:14px; }
