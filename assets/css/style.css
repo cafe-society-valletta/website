@@ -1877,8 +1877,33 @@ html.df-open .doorframe, html.df-open .ev-head, html.df-open .ev-layout{ transit
 .mo .gallery{ --par-y0:-28px; background-position-y:calc(var(--par-y0) + var(--par, 0px)); }
 .mo .shop{ --par-y0:0px; background-position-y:calc(var(--par-y0) + var(--par, 0px)); }
 @media (min-width:700px){ .mo .gallery{ --par-y0:-56px; } }
-.mo-sda .events::before{ animation:parT linear both; animation-timeline:scroll(root); }
-.mo-sda .gallery, .mo-sda .shop{ animation:parBg linear both; animation-timeline:scroll(root); }
+/* arrival (Chef: same as Lost Souls Club): the background fades in out of black (Events: also eases out of a 6% zoom).
+   html.mo is set by an inline script in each page's <head>, so this runs from the very first paint. The arrival is listed
+   first so it isn't restarted when main.js adds .mo-sda */
+.mo .events::before{ animation:bgArrive 2.2s cubic-bezier(.2,.7,.2,1) both; }
+.mo-sda .events::before{ animation:bgArrive 2.2s cubic-bezier(.2,.7,.2,1) both, parT linear both; animation-timeline:auto, scroll(root); }
+.mo .gallery, .mo .shop{ isolation:isolate; }
+.mo .gallery::before, .mo .shop::before{ content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; background:#0A0A0A; animation:curtain 1.6s ease both; }
+.mo .shop::before{ background:#12305C; }
+.mo .gallery{ animation:bgZoom 2.4s cubic-bezier(.2,.7,.2,1) both; }
+.mo-sda .gallery{ animation:bgZoom 2.4s cubic-bezier(.2,.7,.2,1) both, parBg linear both; animation-timeline:auto, scroll(root); }
+.mo-sda .shop{ animation:parBg linear both; animation-timeline:scroll(root); }
+/* arrival of the page's own elements (Chef: same as the Lost Souls Club headline): each rises 18px and fades in, one after
+   another. fill:backwards only, so nothing is held afterwards (the calendar/menu keep their own transitions) */
+.mo .ev-head > *, .mo .ev-layout .cal, .mo .lab-head > *, .mo .rolls > .roll, .mo .shop-head, .mo .shop-cats > li{
+  animation:riseIn .6s cubic-bezier(.2,.75,.25,1) backwards; }
+.mo .ev-head > :nth-child(1), .mo .lab-head > :nth-child(1), .mo .shop-head{ animation-delay:.1s; }
+.mo .ev-head > :nth-child(2), .mo .lab-head > :nth-child(2){ animation-delay:.22s; }
+.mo .ev-layout .cal{ animation-delay:.3s; } .mo .lab-head > :nth-child(3){ animation-delay:.34s; }
+.mo .rolls > .roll:nth-child(1), .mo .shop-cats > li:nth-child(1){ animation-delay:.4s; }
+.mo .rolls > .roll:nth-child(2), .mo .shop-cats > li:nth-child(2){ animation-delay:.48s; }
+.mo .rolls > .roll:nth-child(3), .mo .shop-cats > li:nth-child(3){ animation-delay:.56s; }
+.mo .rolls > .roll:nth-child(4), .mo .shop-cats > li:nth-child(4){ animation-delay:.64s; }
+.mo .rolls > .roll:nth-child(n+5), .mo .shop-cats > li:nth-child(n+5){ animation-delay:.72s; }
+@keyframes riseIn{ from{ opacity:0; translate:0 18px; } }
+@keyframes bgArrive{ from{ opacity:0; scale:1.06; } to{ opacity:1; scale:1; } }
+@keyframes curtain{ from{ opacity:1; } to{ opacity:0; } }
+@keyframes bgZoom{ from{ background-size:106% auto; } to{ background-size:100% auto; } }
 @keyframes parT{ from{ translate:0 0; } to{ translate:0 var(--par-end, 0px); } }
 @keyframes parBg{ from{ background-position-y:var(--par-y0); } to{ background-position-y:calc(var(--par-y0) + var(--par-end, 0px)); } }
 
