@@ -1,4 +1,64 @@
 /* =========================================================
+   swipeNav (Chef, Oct 2026) — every full-screen photo viewer with ← → arrows (About galleries, Photo Lab rolls,
+   Barney Book photos, Meet Me attachments) can also be swiped: the photo follows a finger on phones, or a
+   two-finger sideways swipe on a laptop trackpad, and lets go to the next/previous photo (or springs back).
+   swipeNav(overlay, getCard, go, canGo)
+     overlay  element that receives the gestures       getCard()  the element that moves with the gesture
+     go(d, true)  step d = ±1 (the photo has already slid off; skip the exit animation, must reset card
+                  style.translate/opacity) — may return a promise      canGo()  false when there's only one photo
+   The arrows keep working as before. Shop product photos already scroll natively (scroll-snap).
+   ========================================================= */
+window.swipeNav = function(overlay, getCard, go, canGo){
+  "use strict";
+  const still = matchMedia("(prefers-reduced-motion: reduce)");
+  let dx = 0, busy = false, x0 = 0, y0 = 0, t0 = 0, mode = null, quietUntil = 0, wheelT = null, eatClick = 0;
+  const far = () => Math.min(innerWidth * .9, 640), thr = () => Math.max(60, innerWidth * .12);
+  const show = x => { const c = getCard(); if (!c) return;
+    c.style.translate = x ? x.toFixed(1) + "px 0" : ""; c.style.opacity = x ? (1 - Math.min(.65, Math.abs(x) / far())).toFixed(3) : ""; };
+  function release(vel){
+    const c = getCard(), x = dx; dx = 0; if (!c) return;
+    if (Math.abs(x) > thr() || (Math.abs(vel) > .45 && Math.abs(x) > 24)){
+      const d = x < 0 ? 1 : -1; busy = true; eatClick = Date.now() + 450;
+      const out = still.matches ? Promise.resolve() :
+        c.animate([{ translate: x + "px 0", opacity: c.style.opacity || 1 }, { translate: (-d * far()) + "px 0", opacity: 0 }], { duration: 150, easing: "ease-in" }).finished.catch(() => {});
+      out.then(() => { c.style.translate = "-9999px 0"; c.style.opacity = "0"; return go(d, true); })
+         .then(() => { busy = false; }, () => { busy = false; show(0); });
+    } else {
+      if (x && !still.matches) c.animate([{ translate: x + "px 0", opacity: c.style.opacity || 1 }, { translate: "0px 0", opacity: 1 }], { duration: 240, easing: "cubic-bezier(.2,.8,.2,1)" });
+      show(0); if (Math.abs(x) > 8) eatClick = Date.now() + 450;
+    }
+  }
+  // touch (phones, tablets): follow the finger once the gesture is clearly sideways
+  overlay.addEventListener("touchstart", e => {
+    if (busy || e.touches.length !== 1 || (canGo && !canGo())) { mode = "no"; return; }
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = performance.now(); mode = null; dx = 0;
+  }, { passive: true });
+  overlay.addEventListener("touchmove", e => {
+    if (mode === "no" || e.touches.length !== 1) { if (mode === "h") { mode = "no"; release(0); } return; }
+    const mx = e.touches[0].clientX - x0, my = e.touches[0].clientY - y0;
+    if (!mode && Math.hypot(mx, my) > 8) mode = Math.abs(mx) > Math.abs(my) ? "h" : "v";
+    if (mode === "h") { e.preventDefault(); dx = mx; show(dx); }
+  }, { passive: false });
+  overlay.addEventListener("touchend", e => {
+    if (mode !== "h") { mode = null; return; }
+    mode = null; const v = dx / Math.max(1, performance.now() - t0); release(v);
+  });
+  overlay.addEventListener("touchcancel", () => { if (mode === "h") { mode = null; release(0); } });
+  // trackpad: horizontal wheel. Follows the fingers, commits past the threshold, then ignores the glide (momentum)
+  overlay.addEventListener("wheel", e => {
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || e.ctrlKey) return;
+    e.preventDefault();                                    // no browser back/forward swipe while in the viewer
+    const now = Date.now();
+    if (busy || now < quietUntil || (canGo && !canGo())) { quietUntil = Math.max(quietUntil, now + 160); return; }
+    dx -= e.deltaX * (e.deltaMode === 1 ? 16 : 1); show(dx); clearTimeout(wheelT);
+    if (Math.abs(dx) > thr() * 1.3) { quietUntil = now + 260; release(0); }
+    else wheelT = setTimeout(() => release(0), 140);
+  }, { passive: false });
+  // a swipe that ends over the backdrop must not count as a click (which would close the viewer)
+  overlay.addEventListener("click", e => { if (Date.now() < eatClick) { e.stopPropagation(); e.preventDefault(); } }, true);
+};
+
+/* =========================================================
    CAFE SOCIETY — shared behaviour (modal + toast helpers)
    ========================================================= */
 
@@ -249,13 +309,7 @@
     el.querySelector(".gp-prev").addEventListener("click", e => { e.stopPropagation(); stepPhoto(-1); });
     el.querySelector(".gp-next").addEventListener("click", e => { e.stopPropagation(); stepPhoto(1); });
     el.addEventListener("click", e => { if (e.target === el) closePhoto(); });
-    let x0 = null, y0 = 0;                                   // swipe on phones
-    el.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive:true });
-    el.addEventListener("touchend", e => {
-      if (x0 === null) return;
-      const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
-      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) stepPhoto(dx < 0 ? 1 : -1);
-    });
+    window.swipeNav(el, () => photo.card, (d, dragged) => stepPhoto(d, dragged), () => current.length > 1);   // swipe / trackpad
   }
   // where the photo rests: as big as fits, keeping its shape
   function restBox(w, h){
@@ -300,7 +354,7 @@
     photo.el.classList.remove("flying");
     photo.el.querySelector(".gp-x").focus({ preventScroll:true });
   }
-  async function stepPhoto(d){
+  async function stepPhoto(d, dragged){
     if (!photo.open || current.length < 2) return;
     const i = (photo.i + d + current.length) % current.length;
     grid.children[photo.i].style.visibility = "";
@@ -308,9 +362,9 @@
     const [w, h] = await size(current[i]);
     photo.i = i; setCount();
     const R = restBox(w, h), rot = tilt(), card = photo.card;
-    if (!still.matches) await card.animate([{ transform: card.style.transform, opacity: 1 }, { transform: `translateX(${-d * 60}px) ${card.style.transform}`, opacity: 0 }], { duration: 140, easing: "ease-in" }).finished.catch(() => {});
+    if (!still.matches && !dragged) await card.animate([{ transform: card.style.transform, opacity: 1 }, { transform: `translateX(${-d * 60}px) ${card.style.transform}`, opacity: 0 }], { duration: 140, easing: "ease-in" }).finished.catch(() => {});
     hiRes(i);
-    Object.assign(card.style, { left: R.left + "px", top: R.top + "px", width: R.width + "px", height: R.height + "px", transform: `rotate(${rot}deg)` });
+    Object.assign(card.style, { left: R.left + "px", top: R.top + "px", width: R.width + "px", height: R.height + "px", transform: `rotate(${rot}deg)`, translate: "", opacity: "" });
     if (!still.matches) card.animate([{ transform: `translateX(${d * 60}px) rotate(${rot - d * 6}deg) scale(1.04)`, opacity: 0 }, { transform: `rotate(${rot}deg)`, opacity: 1 }], { duration: 280, easing: EASE });
   }
   function closePhoto(instant){

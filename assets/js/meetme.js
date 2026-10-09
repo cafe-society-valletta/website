@@ -628,6 +628,12 @@
       const nav = e.target.closest(".mm-lb-nav"); if(nav){ lbAt = (lbAt + +nav.dataset.d + postShots.length) % postShots.length; return lbShow(); }
       if(e.target.closest(".mm-lb-x") || e.target === lb) closeLightbox(); });
     lb.querySelector(".mm-lb-x").focus({ preventScroll:true });
+    const me = lb;   // swipe / trackpad between attachments (main.js swipeNav): the picture follows the gesture
+    if(window.swipeNav) window.swipeNav(lb, () => me.querySelector(".mm-lb-img"), d => {
+      if(lb !== me) return; lbAt = (lbAt + d + postShots.length) % postShots.length; lbShow();
+      const im = me.querySelector(".mm-lb-img"); im.style.translate = ""; im.style.opacity = "";
+      im.animate([{ translate: (d * 60) + "px 0", opacity: 0 }, { translate: "0 0", opacity: 1 }], { duration: 220, easing: "cubic-bezier(.2,.8,.2,1)" });
+    }, () => postShots.length > 1);
   }
   function closeLightbox(){ if(lb){ lb.remove(); lb = null; } }
   addEventListener("keydown", e => {

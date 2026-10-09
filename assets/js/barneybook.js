@@ -301,7 +301,7 @@
   });
 
   /* ---------- photo detail pop-up: same look as the About gallery photos (main.js) — the photo zooms out of its thumbnail,
-     slightly askew, arrows / swipe / ← → step through the recipe's photos, × or Esc or a click outside closes ---------- */
+     slightly askew, arrows / swipe (finger or trackpad, follows the gesture — main.js swipeNav) / ← → step through the recipe's photos, × or Esc or a click outside closes ---------- */
   const lb = (() => {
     const still = matchMedia("(prefers-reduced-motion: reduce)"), EASE = "cubic-bezier(.2,.8,.2,1)";
     let el, card, img, count, list = [], i = 0, isOpen = false;
@@ -318,10 +318,7 @@
       el.querySelector(".gp-prev").addEventListener("click", e => { e.stopPropagation(); step(-1); });
       el.querySelector(".gp-next").addEventListener("click", e => { e.stopPropagation(); step(1); });
       el.addEventListener("click", e => { if(e.target === el) close(); });
-      let x0 = null, y0 = 0;
-      el.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive:true });
-      el.addEventListener("touchend", e => { if(x0 === null) return; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
-        if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1); });
+      if(window.swipeNav) window.swipeNav(el, () => card, (d, dragged) => step(d, dragged), () => list.length > 1);   // swipe / trackpad (main.js)
       document.addEventListener("keydown", e => { if(!isOpen) return;
         if(e.key === "Escape") close(); else if(e.key === "ArrowLeft") step(-1); else if(e.key === "ArrowRight") step(1); });
     }
@@ -347,11 +344,11 @@
       if(!still.matches) await card.animate([box(F, 0), box(R, rot)], { duration:460, easing:EASE }).finished.catch(() => {});
       a.style.visibility = ""; el.classList.remove("flying"); el.querySelector(".gp-x").focus({ preventScroll:true });
     }
-    async function step(d){
+    async function step(d, dragged){
       if(!isOpen || list.length < 2) return;
       i = (i + d + list.length) % list.length; const [w, h] = await sizeOf(list[i].src), R = rest(w, h), rot = tilt();
-      if(!still.matches) await card.animate([{ transform:card.style.transform, opacity:1 }, { transform:`translateX(${-d * 60}px) ${card.style.transform}`, opacity:0 }], { duration:140, easing:"ease-in" }).finished.catch(() => {});
-      show(); Object.assign(card.style, box(R, rot));
+      if(!still.matches && !dragged) await card.animate([{ transform:card.style.transform, opacity:1 }, { transform:`translateX(${-d * 60}px) ${card.style.transform}`, opacity:0 }], { duration:140, easing:"ease-in" }).finished.catch(() => {});
+      show(); Object.assign(card.style, box(R, rot), { translate:"", opacity:"" });
       if(!still.matches) card.animate([{ transform:`translateX(${d * 60}px) rotate(${rot - d * 6}deg) scale(1.04)`, opacity:0 }, { transform:`rotate(${rot}deg)`, opacity:1 }], { duration:280, easing:EASE });
     }
     function close(){
