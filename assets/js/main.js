@@ -496,7 +496,8 @@ window.swipeNav = function(overlay, getCard, peek, land, canGo){
 
 /* =========================================================
    Page motion (Chef, Oct 2026) — see style.css "PAGE MOTION". Off with prefers-reduced-motion.
-   · Events / Photo Lab / Collection: background parallax (scroll-driven where supported, else on scroll)
+   · Menu: background follows the mouse / phone tilt
+   · Events / Photo Lab / Collection / Menu: background parallax (scroll-driven where supported, else on scroll)
    · About: thumbnails (section banners + press tiles) drift in from the bottom left and come into focus one after
      another, 110ms apart, starting just after the page opens; title illustration exits (pure CSS)
    ========================================================= */
@@ -506,7 +507,7 @@ window.swipeNav = function(overlay, getCard, peek, land, canGo){
   const root = document.documentElement, SDA = !!(window.CSS && CSS.supports("animation-timeline: scroll()"));
   root.classList.add("mo"); if (SDA) root.classList.add("mo-sda");
 
-  const par = document.querySelector(".page.events, .page.gallery, .page.shop");
+  const par = document.querySelector(".page.events, .page.gallery, .page.shop, .page.menu-page");
   if (par) {
     const K = .35;
     const set = () => root.style.setProperty("--par-end", (Math.max(0, root.scrollHeight - innerHeight) * K).toFixed(1) + "px");
@@ -532,5 +533,27 @@ window.swipeNav = function(overlay, getCard, peek, land, canGo){
     // a section is open → reading mode: no scroll motion at all (Chef: "read like a book or magazine")
     const upd = () => root.classList.toggle("about-reading", !!about.querySelector(".about-sec.open:not(.sec-4)"));
     new MutationObserver(upd).observe(about, { subtree: true, attributes: true, attributeFilter: ["class"] }); upd();
+  }
+
+  // Menu: the room behind the book shifts with the mouse (desktop) or with how the phone is tilted (Chef, Oct 2026), the
+  // opposite way, like looking past the book. Eased every frame; --mx/--my feed .menu-page::before's transform (style.css).
+  const menu = document.querySelector(".page.menu-page");
+  if (menu) {
+    const R = matchMedia("(min-width: 900px)").matches ? 22 : 16;   // max shift, px
+    let tx = 0, ty = 0, x = 0, y = 0, raf = 0;
+    const tick = () => { x += (tx - x) * .08; y += (ty - y) * .08;
+      menu.style.setProperty("--mx", x.toFixed(2) + "px"); menu.style.setProperty("--my", y.toFixed(2) + "px");
+      raf = Math.abs(tx - x) + Math.abs(ty - y) > .05 ? requestAnimationFrame(tick) : 0; };
+    const aim = (fx, fy) => { tx = -Math.max(-1, Math.min(1, fx)) * R; ty = -Math.max(-1, Math.min(1, fy)) * R; if (!raf) raf = requestAnimationFrame(tick); };
+    if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      addEventListener("pointermove", e => aim(e.clientX / innerWidth * 2 - 1, e.clientY / innerHeight * 2 - 1), { passive: true });
+      document.documentElement.addEventListener("pointerleave", () => aim(0, 0));
+    } else if (window.DeviceOrientationEvent) {
+      let g0 = null, b0 = null;   // the first reading = how they're holding it = centre
+      const on = e => { if (e.gamma == null) return; if (g0 === null) { g0 = e.gamma; b0 = e.beta; }
+        aim((e.gamma - g0) / 20, (e.beta - b0) / 20); };
+      const start = () => addEventListener("deviceorientation", on);
+      if (typeof DeviceOrientationEvent.requestPermission !== "function") start();   // iPhone would have to ask permission → no tilt there (Chef)
+    }
   }
 })();

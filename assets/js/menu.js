@@ -55,8 +55,23 @@
   });
   pf.loadFromHTML(pages);
 
+  // page edges: a thin stack of paper under each side of the spread (Chef, Oct 2026: "very subtle"). Each side is as thick
+  // as the pages it holds, so the left grows and the right shrinks as the menu is read. Drawn as stepped box-shadows on
+  // two empty boxes behind the pages (style.css .bk-edge); they move and zoom with the book.
+  const edges = ["l", "r"].map(k => { const e = document.createElement("div"); e.className = "bk-edge " + k; e.setAttribute("aria-hidden", "true"); zoomer.insertBefore(e, book); return e; });
+  const stack = (px, dir) => { const out = [];
+    for (let k = .5; k <= px + .01; k += .5) out.push(`${(dir * k).toFixed(1)}px ${(k * .6).toFixed(2)}px 0 ${(k * 2) % 2 ? "#d8d1c2" : "#b7af9f"}`);
+    if (out.length) out.push(`${(dir * (px + .5)).toFixed(1)}px ${((px + .5) * .6).toFixed(2)}px 0 rgba(0,0,0,.35)`);   // a dark hairline under the last sheet
+    return out.join(", ") || "none"; };
+  function thick(i){
+    const last = N - 1, l = i % 2 ? i : i - 1;
+    const onLeft = i === 0 ? 0 : i >= last ? N : l + 1, T = matchMedia("(min-width: 900px)").matches ? 5 : 3;   // max thickness, px
+    edges[0].style.boxShadow = stack(Math.round(T * onLeft / N * 2) / 2, -1);
+    edges[1].style.boxShadow = stack(Math.round(T * (N - onLeft) / N * 2) / 2, 1);
+  }
+
   function show(i){
-    load(i);
+    load(i); thick(i);
     const last = N - 1;
     stage.classList.toggle("closed-front", i === 0);
     stage.classList.toggle("closed-back", i >= last);
@@ -72,12 +87,13 @@
   // arrival: the closed booklet slides in, settles, then opens itself to the first spread
   if (reduce) pf.turnToPage(1), show(1);
   else {
-    // slide straight to the open-book position (cover in the right half) so nothing re-centres or bounces back
+    // the closed book slides in to the middle (centred on its cover, tilted away), then glides across as it opens so the
+    // spread stays centred, straightening up as it goes (Chef, Oct 2026)
     stage.classList.add("arriving");
     book.classList.add("bk-enter");
     pf.on("flip", () => stage.classList.remove("arriving"));     // only once it has actually opened (a hidden tab can delay the turn)
-    setTimeout(() => { if (pf.getCurrentPageIndex() === 0) pf.flipNext(); }, 480);   // opens while still sliding in — just a glimpse of the cover
-    setTimeout(() => book.classList.remove("bk-enter"), 950);
+    setTimeout(() => { if (pf.getCurrentPageIndex() === 0){ stage.classList.remove("arriving", "closed-front"); pf.flipNext(); } }, 650);   // opens just as it lands
+    setTimeout(() => book.classList.remove("bk-enter"), 1300);
   }
 
   let z = 1, tx = 0, ty = 0, g = null, lastTap = 0;
