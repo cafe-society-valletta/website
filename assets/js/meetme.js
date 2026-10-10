@@ -524,8 +524,9 @@
       ${n && !note ? `${rule("-", 200)}<p class="mmb-hdr"><span>ATTACHED:</span> ${n} PHOTO${n > 1 ? "S" : ""}</p>
         <div class="mmb-photos">${postShots.map((u, i) => `<button type="button" class="mmb-photo" data-i="${i}" aria-label="Open photo ${i + 1} of ${n}"><img src="${u}" alt="Photo ${i + 1} of ${n}" loading="lazy"><span>[ PHOTO ${i + 1}/${n} &middot; CLICK TO ENLARGE ]</span></button>`).join("")}</div>` : ""}
       ${rule("=", 200)}
-      <h3 class="mmb-ch">C O M M E N T S</h3>
-      ${comments ? `<div class="mmb-thread"></div>
+      ${comments ? `<h3 class="mmb-ch"><button type="button" class="mmb-btn mmb-ctog" aria-expanded="false" aria-controls="mmb-cbox">[+] C O M M E N T S</button></h3>
+      <div class="mmb-cbox" id="mmb-cbox" hidden>
+      <div class="mmb-thread"></div>
       <form class="mmb-cform" novalidate>
         <p class="mmb-rto" hidden></p>
         <label class="mmb-field mmb-tall"><span class="mmb-k">COMMENT&gt;</span><textarea name="body" maxlength="${LIM.comment}" rows="3" autocapitalize="sentences"></textarea></label>
@@ -533,9 +534,10 @@
         <input class="mmb-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <p class="mmb-hint mmb-chint" aria-live="polite"></p>
         <p class="mmb-actions"><button type="submit" class="mmb-btn">[ SEND COMMENT ]</button></p>
-      </form>` : `<p class="mmb-note">${note ? "COMMENTS OPEN ONCE THIS POST IS APPROVED." : "COMMENTS ARE OFF ON THIS EXAMPLE POST."}</p>`}
-      ${rule("-", 200)}
-      <p class="mmb-actions"><button type="button" class="mmb-btn mmb-close2">[ BACK TO FEED ]</button></p>`;
+      </form>
+      </div>` : `<h3 class="mmb-ch">C O M M E N T S</h3>
+      <p class="mmb-note">${note ? "COMMENTS OPEN ONCE THIS POST IS APPROVED." : "COMMENTS ARE OFF ON THIS EXAMPLE POST."}</p>`}
+`;   // no [ BACK TO FEED ]: the [X] in the title bar closes the window (Chef)
     $postIn.querySelectorAll("img").forEach(im => im.addEventListener("load", fitPost));
     if(comments){ postComments = comments; postId = p.id; drawThread(); const f = $postIn.querySelector(".mmb-cform"); f.elements.author.value = store.get("mm-name", ""); }
     fitPost();
@@ -557,7 +559,8 @@
         ${(kids[c.id] || []).map(k => one(k, d + 1)).join("")}</div>`; };
     const top = kids._ || [];
     th.innerHTML = top.length ? top.map(c => one(c, 0)).join("") : `<p class="mmb-note">NO COMMENTS YET. BE THE FIRST.</p>`;
-    const h = $postIn.querySelector(".mmb-ch"); if(h) h.textContent = `C O M M E N T S   (${all.length})`;
+    const tog = $postIn.querySelector(".mmb-ctog");   // collapsed by default; the count shows either way
+    if(tog) tog.textContent = `${tog.getAttribute("aria-expanded") === "true" ? "[-]" : "[+]"} C O M M E N T S   (${all.length})`;
     fitPost();
   }
   function setReply(id, who){
@@ -568,6 +571,9 @@
     f.elements.body.focus({ preventScroll:true }); fitPost();
   }
   $postIn.addEventListener("click", e => {
+    const t = e.target.closest(".mmb-ctog");
+    if(t){ const open = t.getAttribute("aria-expanded") !== "true"; t.setAttribute("aria-expanded", open);
+      $postIn.querySelector(".mmb-cbox").hidden = !open; drawThread(); return; }
     const r = e.target.closest(".mmb-reply"); if(r) return setReply(r.dataset.id, r.dataset.a);
     if(e.target.closest(".mmb-rcancel")) setReply(null);
   });
@@ -646,7 +652,7 @@
       del.disabled = true; del.textContent = "DELETING...";
       return ownCall("own-delete").then(() => ownDone("POST DELETED.")).catch(() => { del.disabled = false; del.textContent = "?ERROR. [ DELETE ]"; });
     }
-    if(e.target.closest(".mmb-close, .mmb-close2")) return closePost();
+    if(e.target.closest(".mmb-close")) return closePost();
     const ph = e.target.closest(".mmb-photo"); if(ph) openLightbox(+ph.dataset.i);
   });
 
