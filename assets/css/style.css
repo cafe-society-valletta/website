@@ -819,20 +819,35 @@ body.bag-on{ overflow:hidden; }
    MENU — the A5 booklet as a 3D flip book (assets/js/menu.js)
    ========================================================= */
 body.menu-body{ background:var(--black); }
-.menu-page{ background:var(--black); color:var(--white); }
+.menu-page{ background:var(--black); color:var(--white); isolation:isolate; }
+/* background: the green banker's lamp on the LSC table (Chef, Oct 2026) — phone crop / desktop crop; its own layer so it can parallax */
+.menu-page::before{ content:""; position:absolute; inset:-40px; transform:translate(var(--mx, 0px), var(--my, 0px)); z-index:-1; background:var(--black) url('../img/p-bg-menu-mobile.jpg') 24px 19px/calc(100% - 48px) auto no-repeat; pointer-events:none; }   /* Chef's Paper crop: full width from 21px above the top (+16px spare each side for the tilt) */
+.menu-page .bk-zoom{ filter:drop-shadow(0 4px 10px rgba(0,0,0,.4)); }   /* very subtle lift off the background (Chef) */
+.menu-scrim{ position:absolute; top:0; left:0; right:0; height:190px; z-index:-1; background:linear-gradient(180deg, rgba(10,10,10,.85) 0%, rgba(10,10,10,.7) 55%, rgba(10,10,10,0) 100%); pointer-events:none; }
 .booklet{ display:flex; flex-direction:column; align-items:center; gap:14px; padding:20px 8px 40px; }   /* phone: open book nearly edge to edge (8px each side) */
 .bk-stage{ width:100%; transition:transform .9s cubic-bezier(.4,.1,.2,1); }
 /* closed on a cover the single page sits centred (StPageFlip draws the cover in one half of the spread) */
 .bk-stage.closed-front{ transform:translateX(-25%); }
 .bk-stage.closed-back{ transform:translateX(25%); }
-.bk-stage.arriving{ transform:none; transition:none; }
+.bk-stage.arriving{ transition:none; }   /* arrives already centred on the cover (Chef) */
 .bk-clip{ position:relative; touch-action:pan-y; }    /* pinch is handled in menu.js (zooms the book, not the page) */
 .bk-clip.zoomed{ z-index:70; touch-action:none; }   /* zoomed: the book spreads over the whole screen, above the title and menu bar */
 .bk-zoom{ transform-origin:0 0; will-change:transform; }
+.bk-zoom{ position:relative; }
+.bk-book{ position:relative; z-index:1; }
+/* page edges under each side (menu.js thick()): empty boxes the size of one page, only their stepped shadows show */
+.bk-edge{ position:absolute; top:0; bottom:0; width:50%; pointer-events:none; transition:box-shadow .45s ease, opacity .4s ease; }
+.bk-edge.l{ left:0; } .bk-edge.r{ right:0; }
+.bk-stage.arriving .bk-edge{ opacity:0; transition:none; }   /* the book slides in on its own; the edges join once it opens */
 .bk-book{ width:100%; margin:0 auto; -webkit-user-select:none; user-select:none; }
 /* arrival: the closed menu slides in from the right with a slight tilt, then opens (menu.js) */
-.bk-book.bk-enter{ animation:bk-in .9s cubic-bezier(.2,.8,.25,1) both; }
-@keyframes bk-in{ from{ transform:translateX(70vw) rotate(5deg); opacity:0; } 60%{ opacity:1; } to{ transform:none; opacity:1; } }
+/* it arrives tilted away like a book lying on the table (narrower at the top) and straightens up as it opens (Chef, Oct 2026) */
+.bk-book.bk-enter{ transform-origin:50% 100%; animation:bk-in 1.25s cubic-bezier(.25,.7,.25,1) both; }
+@keyframes bk-in{
+  from{ transform:perspective(900px) translateX(70vw) rotate(5deg) rotateX(34deg); opacity:0; }
+  35%{ opacity:1; }
+  45%{ transform:perspective(900px) translateX(0) rotate(0deg) rotateX(30deg); }
+  to{ transform:perspective(900px) translateX(0) rotate(0deg) rotateX(0deg); opacity:1; } }
 .bk-page{ background:#151515; overflow:hidden; }
 /* softer, matte shading on a turning page (the library's banded inner shadow reads glossy) */
 .stf__innerShadow, .stf__hardInnerShadow{ opacity:.4 !important; }
@@ -957,6 +972,9 @@ body.menu-body{ background:var(--black); }
   .booklet{ gap:22px; padding:36px 0 64px; }
   .bk-stage{ width:min(calc(100vw - 96px), calc((100vh - 280px) * 1.41)); }   /* as big as fits: whole spread + arrows stay on screen */
   /* menu page header: logo and "menu" side by side (one short row, so more of the big book is on screen) */
+  .menu-page::before{ background-image:url('../img/p-bg-menu-desktop.jpg'); background-position:calc(40px - 23.86vw) -69px; background-size:151.46vw auto; }   /* Chef's Paper crop (D03: photo 151% wide, 24% off the left, 109px above the top) */
+  .menu-page .bk-zoom{ filter:drop-shadow(0 8px 22px rgba(0,0,0,.4)); }
+  .menu-scrim{ height:260px; background:linear-gradient(180deg, rgba(10,10,10,.6) 0%, rgba(10,10,10,.35) 55%, rgba(10,10,10,0) 100%); }
   .menu-page .ev-head{ flex-direction:row; justify-content:center; align-items:center; gap:28px; padding:22px 0 0; }
   .menu-page .ev-head img{ width:200px; height:70px; }
   .menu-page .ev-head h1{ margin:0; font-size:76px; line-height:76px; transform:translateY(-6px); }
@@ -1880,15 +1898,15 @@ html.df-open .doorframe, html.df-open .ev-head, html.df-open .ev-layout{ transit
 /* background parallax: Events, Photo Lab, Collection — the background moves at 65% of the page's speed.
    --par-end (main.js) = 35% of the page's scroll length; --par = the same thing live, for browsers without
    scroll-driven animations */
-.mo .events::before{ translate:0 var(--par, 0px); }
+.mo .events::before, .mo .menu-page::before{ translate:0 var(--par, 0px); }
 .mo .gallery{ --par-y0:-28px; background-position-y:calc(var(--par-y0) + var(--par, 0px)); }
 .mo .shop{ --par-y0:0px; background-position-y:calc(var(--par-y0) + var(--par, 0px)); }
 @media (min-width:700px){ .mo .gallery{ --par-y0:-56px; } }
 /* arrival (Chef: same as Lost Souls Club): the background fades in out of black (Events: also eases out of a 6% zoom).
    html.mo is set by an inline script in each page's <head>, so this runs from the very first paint. The arrival is listed
    first so it isn't restarted when main.js adds .mo-sda */
-.mo .events::before{ animation:bgArrive 2.2s cubic-bezier(.2,.7,.2,1) both; }
-.mo-sda .events::before{ animation:bgArrive 2.2s cubic-bezier(.2,.7,.2,1) both, parT linear both; animation-timeline:auto, scroll(root); }
+.mo .events::before, .mo .menu-page::before{ animation:bgArrive 2.2s cubic-bezier(.2,.7,.2,1) both; }
+.mo-sda .events::before, .mo-sda .menu-page::before{ animation:bgArrive 2.2s cubic-bezier(.2,.7,.2,1) both, parT linear both; animation-timeline:auto, scroll(root); }
 .mo .gallery, .mo .shop{ isolation:isolate; }
 .mo .gallery::before, .mo .shop::before{ content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; background:#0A0A0A; animation:curtain 1.6s ease both; }
 .mo .shop::before{ background:#12305C; }
@@ -1897,11 +1915,11 @@ html.df-open .doorframe, html.df-open .ev-head, html.df-open .ev-layout{ transit
 .mo-sda .shop{ animation:parBg linear both; animation-timeline:scroll(root); }
 /* arrival of the page's own elements (Chef: same as the Lost Souls Club headline): each rises 18px and fades in, one after
    another. fill:backwards only, so nothing is held afterwards (the calendar/menu keep their own transitions) */
-.mo .ev-head > *, .mo .ev-layout .cal, .mo .lab-head > *, .mo .rolls > .roll, .mo .shop-head, .mo .shop-cats > li{
+.mo .ev-head > *, .mo .ev-layout .cal, .mo .menu-page .booklet, .mo .lab-head > *, .mo .rolls > .roll, .mo .shop-head, .mo .shop-cats > li{
   animation:riseIn .6s cubic-bezier(.2,.75,.25,1) backwards; }
 .mo .ev-head > :nth-child(1), .mo .lab-head > :nth-child(1), .mo .shop-head{ animation-delay:.1s; }
 .mo .ev-head > :nth-child(2), .mo .lab-head > :nth-child(2){ animation-delay:.22s; }
-.mo .ev-layout .cal{ animation-delay:.3s; } .mo .lab-head > :nth-child(3){ animation-delay:.34s; }
+.mo .ev-layout .cal, .mo .menu-page .booklet{ animation-delay:.3s; } .mo .lab-head > :nth-child(3){ animation-delay:.34s; }
 .mo .rolls > .roll:nth-child(1), .mo .shop-cats > li:nth-child(1){ animation-delay:.4s; }
 .mo .rolls > .roll:nth-child(2), .mo .shop-cats > li:nth-child(2){ animation-delay:.48s; }
 .mo .rolls > .roll:nth-child(3), .mo .shop-cats > li:nth-child(3){ animation-delay:.56s; }
