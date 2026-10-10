@@ -838,7 +838,17 @@ body.menu-body{ background:var(--black); }
 /* page edges under each side (menu.js thick()): empty boxes the size of one page, only their stepped shadows show */
 .bk-edge{ position:absolute; top:0; bottom:0; width:50%; pointer-events:none; transition:box-shadow .45s ease, opacity .4s ease; }
 .bk-edge.l{ left:0; } .bk-edge.r{ right:0; }
-.bk-stage.arriving .bk-edge{ opacity:0; transition:none; }   /* the book slides in on its own; the edges join once it opens */
+.bk-stage.arriving .bk-edge{ opacity:0; transition:none; }
+/* cast shadow on the table (menu.js): the lamp behind the book is smaller than the book, so its shadow spreads OUT as it
+   comes forward toward the viewer (Chef) — a trapezoid from the book's bottom edge, 30% wider on each side at its far end,
+   dark at the book and fading out. The blur sits on the box and the shape on ::before, so the edges stay soft. */
+.bk-cast{ position:absolute; top:calc(100% - 1px); left:-30%; right:-30%; height:55%; pointer-events:none; opacity:0; filter:blur(7px);
+  transition:opacity .45s ease, left .45s ease, right .45s ease; }
+.bk-cast::before{ content:""; position:absolute; inset:0; clip-path:polygon(18.75% 0, 81.25% 0, 100% 100%, 0 100%);
+  background:linear-gradient(180deg, rgba(0,0,0,.58) 0%, rgba(0,0,0,.32) 35%, rgba(0,0,0,.1) 72%, rgba(0,0,0,0) 100%); }   /* softer (Chef) */
+.bk-cast.on{ opacity:1; }
+.bk-cast.cover{ left:35%; right:-15%; } .bk-cast.back{ left:-15%; right:35%; }   /* closed: only the one page throws a shadow */
+.bk-stage.arriving .bk-cast{ opacity:0; transition:none; }   /* the book slides in on its own; the edges join once it opens */
 .bk-book{ width:100%; margin:0 auto; -webkit-user-select:none; user-select:none; }
 /* arrival: the closed menu slides in from the right with a slight tilt, then opens (menu.js) */
 /* it arrives tilted away like a book lying on the table (narrower at the top) and straightens up as it opens (Chef, Oct 2026) */
@@ -854,7 +864,7 @@ body.menu-body{ background:var(--black); }
 .bk-page img{ display:block; width:100%; height:100%; object-fit:cover; pointer-events:none; }
 .bk-page.ph{ display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.18); }
 .bk-page.ph::before{ content:"PAGE " attr(data-n); font-size:10px; font-weight:700; letter-spacing:.2em; color:rgba(255,255,255,.4); }
-.bk-nav{ display:flex; align-items:center; gap:22px; }
+.bk-nav{ display:flex; align-items:center; gap:22px; position:relative; z-index:2; }   /* above the cast shadow */
 .bk-nav button{ width:36px; height:36px; display:flex; align-items:center; justify-content:center; padding:0; border:1px solid rgba(255,255,255,.6); border-radius:50%; background:transparent; color:#fff; font:400 16px/1 var(--font-display); cursor:pointer; }
 .bk-nav button:disabled{ opacity:.25; cursor:default; }
 .bk-count{ min-width:96px; text-align:center; font-size:11px; font-weight:700; letter-spacing:.2em; line-height:14px; white-space:pre; }
@@ -974,6 +984,7 @@ body.menu-body{ background:var(--black); }
   /* menu page header: logo and "menu" side by side (one short row, so more of the big book is on screen) */
   .menu-page::before{ background-image:url('../img/p-bg-menu-desktop.jpg'); background-position:calc(40px - 23.86vw) -69px; background-size:151.46vw auto; }   /* Chef's Paper crop (D03: photo 151% wide, 24% off the left, 109px above the top) */
   .menu-page .bk-zoom{ filter:drop-shadow(0 8px 22px rgba(0,0,0,.4)); }
+  .bk-cast{ filter:blur(14px); } .bk-cast::before{ opacity:.7; }   /* desktop: softer still (Chef) */
   .menu-scrim{ height:260px; background:linear-gradient(180deg, rgba(10,10,10,.6) 0%, rgba(10,10,10,.35) 55%, rgba(10,10,10,0) 100%); }
   .menu-page .ev-head{ flex-direction:row; justify-content:center; align-items:center; gap:28px; padding:22px 0 0; }
   .menu-page .ev-head img{ width:200px; height:70px; }
