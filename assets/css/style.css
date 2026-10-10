@@ -1482,6 +1482,7 @@ html.mm-wk .mm-screen:not(.full){ overflow:hidden; }
 .mm-screen.full .mmb-post{ left:16px; right:16px; top:64px; }
 /* comments thread (reddit-style: replies indent under their parent with a dashed guide line) */
 .mmb-ch{ margin:.4em 0 .6em; font:inherit; font-size:1.15em; letter-spacing:.04em; white-space:pre; }
+.mmb-ctog{ font-size:inherit; letter-spacing:inherit; white-space:pre; margin-left:-.2em; }   /* comments fold: [+] closed / [-] open */
 .mmb-c{ margin:.7em 0 0; padding-left:calc(min(var(--d), 1) * .9em); border-left:calc(min(var(--d), 1) * 1px) dashed rgba(125,255,125,.45); }
 .mmb-c .mmb-c{ margin-left:.2em; }
 .mmb-c-h{ margin:0; } .mmb-c-h span{ opacity:.65; font-size:.9em; } .mmb-c-h em{ font-style:normal; opacity:.75; }
