@@ -74,6 +74,9 @@
     if(matchMedia("(prefers-reduced-motion: reduce)").matches){ intro.remove(); ready(); return; }
     const ext = intro.canPlayType('video/mp4; codecs="avc1.64001f"') ? ".mp4" : ".webm";   // H.264 where supported, else VP9
     const pick = v => v.dataset.src.replace(/\.mp4$/, ext);
+    // the intro plays once per browser session (Chef): coming back to /meetme later in the visit goes straight to the board
+    let seen = false; try{ seen = sessionStorage.getItem("mm-intro") === "1"; sessionStorage.setItem("mm-intro", "1"); }catch(e){}
+    if(seen){ intro.remove(); idle.src = pick(idle); idle.play().catch(() => {}); ready(); return; }
     intro.src = pick(intro); idle.src = pick(idle); idle.preload = "auto";
     let done = false;
     const toIdle = pause => { if(done) return; done = true; idle.play().catch(() => {}); intro.pause(); intro.classList.add("done"); setTimeout(ready, pause || 0); };
