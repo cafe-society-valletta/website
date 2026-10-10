@@ -496,7 +496,7 @@ window.swipeNav = function(overlay, getCard, peek, land, canGo){
 
 /* =========================================================
    Page motion (Chef, Oct 2026) — see style.css "PAGE MOTION". Off with prefers-reduced-motion.
-   · Menu: background follows the mouse / phone tilt
+   · Menu: background follows the phone tilt (not the mouse)
    · Events / Photo Lab / Collection / Menu: background parallax (scroll-driven where supported, else on scroll)
    · About: thumbnails (section banners + press tiles) drift in from the bottom left and come into focus one after
      another, 110ms apart, starting just after the page opens; title illustration exits (pure CSS)
@@ -535,8 +535,8 @@ window.swipeNav = function(overlay, getCard, peek, land, canGo){
     new MutationObserver(upd).observe(about, { subtree: true, attributes: true, attributeFilter: ["class"] }); upd();
   }
 
-  // Menu: the room behind the book shifts with the mouse (desktop) or with how the phone is tilted (Chef, Oct 2026), the
-  // opposite way, like looking past the book. Eased every frame; --mx/--my feed .menu-page::before's transform (style.css).
+  // Menu: the room behind the book shifts with how the phone is tilted (Chef, Oct 2026; Android etc. — never where it
+  // would need a permission prompt), the opposite way, like looking past the book. Eased every frame; --mx/--my feed .menu-page::before's transform (style.css).
   const menu = document.querySelector(".page.menu-page");
   if (menu) {
     const R = matchMedia("(min-width: 900px)").matches ? 22 : 16;   // max shift, px
@@ -545,10 +545,8 @@ window.swipeNav = function(overlay, getCard, peek, land, canGo){
       menu.style.setProperty("--mx", x.toFixed(2) + "px"); menu.style.setProperty("--my", y.toFixed(2) + "px");
       raf = Math.abs(tx - x) + Math.abs(ty - y) > .05 ? requestAnimationFrame(tick) : 0; };
     const aim = (fx, fy) => { tx = -Math.max(-1, Math.min(1, fx)) * R; ty = -Math.max(-1, Math.min(1, fy)) * R; if (!raf) raf = requestAnimationFrame(tick); };
-    if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
-      addEventListener("pointermove", e => aim(e.clientX / innerWidth * 2 - 1, e.clientY / innerHeight * 2 - 1), { passive: true });
-      document.documentElement.addEventListener("pointerleave", () => aim(0, 0));
-    } else if (window.DeviceOrientationEvent) {
+    // (the mouse version on desktop was removed — Chef didn't like it; phones that report tilt without asking keep it)
+    if (!matchMedia("(hover: hover) and (pointer: fine)").matches && window.DeviceOrientationEvent) {
       let g0 = null, b0 = null;   // the first reading = how they're holding it = centre
       const on = e => { if (e.gamma == null) return; if (g0 === null) { g0 = e.gamma; b0 = e.beta; }
         aim((e.gamma - g0) / 20, (e.beta - b0) / 20); };

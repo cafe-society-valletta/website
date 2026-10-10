@@ -63,11 +63,7 @@
     for (let k = .5; k <= px + .01; k += .5) out.push(`${(dir * k).toFixed(1)}px ${(k * .6).toFixed(2)}px 0 ${(k * 2) % 2 ? "#d8d1c2" : "#b7af9f"}`);
     if (out.length) out.push(`${(dir * (px + .5)).toFixed(1)}px ${((px + .5) * .6).toFixed(2)}px 0 rgba(0,0,0,.35)`);   // a dark hairline under the last sheet
     return out.join(", ") || "none"; };
-  // cast shadow: the banker's lamp behind the book throws the book's shadow forward onto the table (Chef, Oct 2026).
-  // Closed, it sits under the one cover only.
-  const cast = document.createElement("div"); cast.className = "bk-cast on"; cast.setAttribute("aria-hidden", "true"); zoomer.insertBefore(cast, edges[0]);
   function thick(i){
-    cast.classList.toggle("cover", i === 0); cast.classList.toggle("back", i >= N - 1);
     const last = N - 1, l = i % 2 ? i : i - 1;
     const onLeft = i === 0 ? 0 : i >= last ? N : l + 1, T = matchMedia("(min-width: 900px)").matches ? 5 : 3;   // max thickness, px
     edges[0].style.boxShadow = stack(Math.round(T * onLeft / N * 2) / 2, -1);
