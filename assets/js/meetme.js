@@ -211,26 +211,63 @@
   $form.addEventListener("input", counts);
 
   // ---- photos: shrink in the browser (JPEG, long side 1600 → 1400 → 1200 px until ≤ 1 MB) ----
+  // Decoding tries three ways, so big phone photos (50–200 MP), files with a wrong/missing type and cloud picks still work:
+  //   1. <img> from the file  2. createImageBitmap, decoded straight down to ≤ 1600 px (light on memory)  3. the raw bytes re-wrapped
   let shots = [];   // { type, data(base64), url }
-  const shrink = file => new Promise((ok, no) => {
-    const url = URL.createObjectURL(file), im = new Image();
-    im.onload = async () => {
-      for(const [side, q] of [[1600, .82], [1400, .74], [1200, .66], [1000, .6]]){
-        const k = Math.min(1, side / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement("canvas");
-        c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
-        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
-        const blob = await new Promise(r => c.toBlob(r, "image/jpeg", q));
-        if(blob && blob.size <= LIM.photoBytes){
-          URL.revokeObjectURL(url);
-          const data = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(String(fr.result).split(",")[1]); fr.readAsDataURL(blob); });
-          return ok({ type:"image/jpeg", data, url:URL.createObjectURL(blob) });
-        }
-      }
-      URL.revokeObjectURL(url); no(new Error("big"));
-    };
-    im.onerror = () => { URL.revokeObjectURL(url); no(new Error("type")); };
+  const viaImg = blob => new Promise((ok, no) => {
+    const url = URL.createObjectURL(blob), im = new Image();
+    im.onload = () => { URL.revokeObjectURL(url); ok({ src:im, w:im.naturalWidth, h:im.naturalHeight }); };
+    im.onerror = () => { URL.revokeObjectURL(url); no(new Error("decode")); };
     im.src = url;
   });
+  const viaBitmap = async blob => {
+    if(!window.createImageBitmap) throw new Error("decode");
+    const probe = await createImageBitmap(blob, { imageOrientation:"from-image", resizeWidth:64, resizeQuality:"low" });
+    const ratio = probe.height / probe.width; probe.close && probe.close();
+    const w = ratio > 1 ? Math.round(1600 / ratio) : 1600;
+    const bm = await createImageBitmap(blob, { imageOrientation:"from-image", resizeWidth:w, resizeHeight:Math.round(w * ratio), resizeQuality:"high" });
+    return { src:bm, w:bm.width, h:bm.height };
+  };
+  const kind = async file => {   // what the bytes really are (phones sometimes name HEIC photos .jpg)
+    const b = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+    const t = String.fromCharCode(...b.slice(4, 12));
+    if(/^ftyp(heic|heix|hevc|mif1|msf1|heim|heis)/.test(t)) return "heic";
+    if(b[0] === 0xFF && b[1] === 0xD8) return "jpeg";
+    return "other";
+  };
+  const decode = async file => {
+    try{ return await viaImg(file); }catch(e){}
+    try{ return await viaBitmap(file); }catch(e){}
+    let buf;
+    try{ buf = await file.arrayBuffer(); }catch(e){ throw new Error("unreadable"); }   // e.g. a cloud photo not on the phone
+    const k = await kind(file);
+    if(k === "heic") throw new Error("heic");
+    const blob = new Blob([buf], { type: k === "jpeg" ? "image/jpeg" : (file.type || "image/jpeg") });
+    try{ return await viaImg(blob); }catch(e){}
+    try{ return await viaBitmap(blob); }catch(e){}
+    throw new Error("decode");
+  };
+  const shrink = async file => {
+    const im = await decode(file);
+    for(const [side, q] of [[1600, .82], [1400, .74], [1200, .66], [1000, .6], [800, .55]]){
+      const k = Math.min(1, side / Math.max(im.w, im.h)), c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(im.w * k)); c.height = Math.max(1, Math.round(im.h * k));
+      c.getContext("2d").drawImage(im.src, 0, 0, c.width, c.height);
+      const blob = await new Promise(r => c.toBlob(r, "image/jpeg", q));
+      if(blob && blob.size <= LIM.photoBytes){
+        im.src.close && im.src.close();
+        const data = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(String(fr.result).split(",")[1]); fr.readAsDataURL(blob); });
+        return { type:"image/jpeg", data, url:URL.createObjectURL(blob) };
+      }
+    }
+    throw new Error("big");
+  };
+  const photoErr = {
+    heic:"?ERROR: HEIC PHOTO. SAVE IT AS JPEG FIRST.",
+    unreadable:"?ERROR: PHOTO NOT ON THIS DEVICE. DOWNLOAD IT FIRST.",
+    big:"?ERROR: PHOTO TOO BIG.",
+    decode:"?ERROR: CAN'T READ THAT IMAGE."
+  };
   const drawThumbs = () => {
     $thumbs.innerHTML = shots.map((s, i) => `<li><img src="${s.url}" alt="Attached photo ${i+1}"><button type="button" class="mmb-btn mmb-x" data-i="${i}" aria-label="Remove photo ${i+1}">[X]</button></li>`).join("");
     counts();
@@ -240,8 +277,9 @@
     const files = [...$file.files].slice(0, LIM.photos - shots.length); $file.value = "";
     if(!files.length) return;
     $hint.textContent = "PROCESSING IMAGE...";
-    for(const f of files){ try{ shots.push(await shrink(f)); drawThumbs(); }catch(e){ $hint.textContent = "?ERROR: CAN'T READ THAT IMAGE."; return; } }
-    $hint.textContent = "";
+    let err = "";   // one bad photo doesn't stop the rest
+    for(const f of files){ try{ shots.push(await shrink(f)); drawThumbs(); }catch(e){ err = photoErr[e.message] || photoErr.decode; } }
+    $hint.textContent = err;
   });
   $thumbs.addEventListener("click", e => { const b = e.target.closest(".mmb-x"); if(!b) return;
     const [gone] = shots.splice(+b.dataset.i, 1); URL.revokeObjectURL(gone.url); drawThumbs(); });
