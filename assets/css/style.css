@@ -1957,3 +1957,168 @@ html.df-open .doorframe, html.df-open .ev-head, html.df-open .ev-layout{ transit
   .mo .gal-grid .gal:hover h3 b{ scale:1.15; transition-duration:0s; }
 }
 @keyframes kenBurnsOut{ from{ scale:1.08; } to{ scale:1; } }   /* gentle, even, documentary-style (Chef) */
+
+/* =========================================================
+   TIP JAR (tip.html — unlisted, Chef Oct 2026; Paper "10 Tip Jar" / "D10 Tip Jar")
+   Background = the tip jar photo (placeholder glow until Chef's photo arrives), logo + "tip jar", one frosted window
+   with the € amount and TIP. Arrival like the other pages (bgArrive + riseIn, style.css PAGE MOTION).
+   ========================================================= */
+body.tip-body{ background:var(--black); }
+.tip-page{ position:relative; isolation:isolate; min-height:100vh; min-height:100svh; color:#fff; overflow:clip; display:flex; flex-direction:column; align-items:center; }
+.tip-page::before{ content:""; position:absolute; top:0; left:-24px; right:-24px; height:814px; z-index:-2; pointer-events:none;
+  background:linear-gradient(180deg, rgba(10,10,10,0) 447px, var(--black) 764px), url('../img/p-bg-tip-mobile2.jpg') 50% 0/auto 764px no-repeat; }   /* Chef's Paper phone: photo 450×764 at -24, long soft fade into black from 447, fully black by the photo's bottom edge */
+.tip-scrim{ position:absolute; top:0; left:0; right:0; height:190px; z-index:-1; pointer-events:none; background:linear-gradient(180deg, rgba(10,10,10,.85) 0%, rgba(10,10,10,.7) 55%, rgba(10,10,10,0) 100%); }
+.tip-head{ display:flex; flex-direction:column; align-items:center; padding:9px 0 0; color:#fff; text-decoration:none; }
+.tip-head img{ width:106px; height:37px; }
+.tip-head h1{ margin:-1px 0 0; font-family:var(--font-display); font-size:34px; font-weight:300; letter-spacing:.02em; line-height:42px; }
+/* the form (Chef's Paper redesign): a frosted pill holding "€ 10.00" + a round white TIP button, the payment marks + Stripe
+   line under it, then "100% of this amount goes to the staff". No box — it floats on the photo with shadows. */
+.tip-win{ position:absolute; left:0; right:0; top:371px; width:max-content; max-width:calc(100% - 32px); margin:0 auto; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; gap:3px;
+  text-shadow:0 1px 3px rgba(0,0,0,.75), 0 2px 14px rgba(0,0,0,.55); }
+.tip-win[hidden]{ display:none; }
+.tip-pill{ display:flex; align-items:center; gap:10px; width:260px; height:40px; box-sizing:border-box; padding-left:22px; border-radius:999px;
+  background:linear-gradient(175deg, rgba(255,255,255,.43) 15%, rgba(110,118,96,.63) 85%); box-shadow:17px 11px 28px 49px rgba(0,0,0,.41); }
+.tip-pill:focus-within{ background:linear-gradient(175deg, rgba(255,255,255,.55) 15%, rgba(110,118,96,.7) 85%); }
+.tip-eur, .tip-pill input{ color:#fff; font:600 29px/33px var(--font-display); }
+.tip-eur{ font-size:23px; letter-spacing:.03em; }
+.tip-pill input{ flex:1; min-width:0; width:4em; padding:0; border:0; background:none; text-align:left; outline:none; caret-color:#fff; text-shadow:inherit; }
+.tip-pill input::placeholder{ color:#fff; opacity:1; }
+.tip-pill input:focus::placeholder{ opacity:.5; }
+.tip-drop{ position:absolute; inset:0; pointer-events:none; } .tip-drop > *{ pointer-events:auto; }
+.tip-clr{ flex:none; margin-left:auto; margin-right:-4px; width:22px; height:22px; padding:0; border:0; border-radius:50%; background:rgba(255,255,255,.28); color:#fff; font:400 16px/22px var(--font-display); text-shadow:none; cursor:pointer; }
+.tip-clr[hidden]{ display:none; } .tip-clr:hover, .tip-clr:focus-visible{ background:rgba(255,255,255,.45); outline:none; }
+.tip-clr[hidden] + .tip-go{ margin-left:auto; }
+.tip-go{ flex:none; width:59px; height:40px; border:0; border-radius:999px; background:#fff; color:#0A0A0A; font:700 12px/1 var(--font-display); letter-spacing:.2em; text-indent:.2em; text-transform:uppercase; text-shadow:none; cursor:pointer;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.55)); }
+.tip-go:disabled{ opacity:.5; cursor:default; }
+.tip-pay{ display:flex; align-items:center; justify-content:center; gap:12px; height:28px; margin-top:6px; filter:drop-shadow(0 2px 15px #000); }
+.tip-pay svg{ height:16px; width:auto; fill:#fff; }
+.tip-pay svg[aria-label="Apple Pay"], .tip-pay svg[aria-label="Google Pay"]{ height:20px; }
+.tip-hint{ font:400 7px/13px var(--font-display); letter-spacing:.08em; color:#fff; }
+.tip-k{ margin:0; font:700 8px/18px var(--font-display); letter-spacing:.06em; text-transform:uppercase; text-align:center; text-shadow:0 1px 50px rgba(0,0,0,.98), 0 2px 14px rgba(0,0,0,.55); }
+.tip-say{ margin:0; min-height:13px; font:400 10px/13px var(--font-display); letter-spacing:.06em; text-align:center; }
+.tip-say.err{ color:#ffb3a8; }
+.tip-thanks{ gap:14px; }
+.tip-thanks .tip-k{ font-size:11px; letter-spacing:.2em; }
+.tip-msg{ margin:0; font:300 18px/24px var(--font-display); text-align:center; }
+.tip-again{ color:rgba(255,255,255,.85); font:400 11px/1 var(--font-display); letter-spacing:.08em; }
+@media (min-width:900px){   /* desktop = the phone layout scaled up (Chef, Oct 2026): stacked header, photo column on black, same pill */
+  .tip-scrim{ height:260px; background:linear-gradient(180deg, rgba(10,10,10,.6) 0%, rgba(10,10,10,.35) 55%, rgba(10,10,10,0) 100%); }
+  .tip-page::before{ left:0; right:0; height:auto; bottom:0;
+    background:linear-gradient(180deg, rgba(10,10,10,0) calc(100% - 125px), var(--black) 100%), var(--black) url('../img/p-bg-tip-desktop4.jpg') 50% 0/cover no-repeat; }   /* photo centred on black (baked into the jpg, set 150px down), long soft fade into black like the phone */
+  .tip-head{ padding-top:24px; }
+  .tip-head img{ width:160px; height:56px; }
+  .tip-head h1{ margin:-2px 0 0; font-size:52px; line-height:62px; }
+  .tip-win{ top:min(480px, calc(100svh - 280px)); gap:4px; }
+  .tip-pill{ width:340px; height:52px; padding-left:30px; gap:13px; }
+  .tip-eur{ font-size:30px; } .tip-pill input{ font-size:38px; line-height:44px; }
+  .tip-go{ width:77px; height:52px; font-size:14px; } .tip-clr{ width:28px; height:28px; font-size:20px; line-height:28px; }
+  .tip-pay{ gap:15px; height:36px; margin-top:8px; } .tip-pay svg{ height:20px; } .tip-pay svg[aria-label="Apple Pay"], .tip-pay svg[aria-label="Google Pay"]{ height:26px; }
+  .tip-hint{ font-size:9px; } .tip-k{ font-size:10.5px; line-height:22px; } .tip-say{ font-size:12px; line-height:16px; }
+}
+.mo .tip-page::before{ animation:bgArrive 2.2s cubic-bezier(.2,.7,.2,1) both; }
+.mo .tip-head, .mo .tip-win{ animation:riseIn .6s cubic-bezier(.2,.75,.25,1) backwards; }
+.mo .tip-head{ animation-delay:.1s; } .mo .tip-win{ animation-delay:.3s; }
+/* phone: parallax intro + tilt (Chef, Oct 2026). Layers arrive at different speeds/distances — the photo settles down from
+   above while the widget and the card rise into place over it — and then, on phones that report tilt WITHOUT asking
+   permission (Android etc.; never iPhone), the photo drifts against the tilt and the widget + card with it (tip.js sets
+   --mx/--my on the photo and --fx/--fy on the foreground). Desktop untouched for now. */
+@media (max-width:899px){
+  .tip-page::before{ transform:translate(var(--mx,0px), var(--my,0px)); }
+  .tip-drop{ transform:translate(var(--fx,0px), var(--fy,0px)); }
+  .cc-tab{ transform:translate(var(--fx,0px), var(--fy,0px)); }
+  .mo .tip-page::before{ animation:bgArrive 2.2s cubic-bezier(.2,.7,.2,1) both, tipBgIn 2.6s cubic-bezier(.2,.7,.2,1) both; }
+  .mo .tip-win{ animation:tipFgIn 1.4s .35s cubic-bezier(.16,.8,.24,1) backwards; }
+  .mo .cc-tab{ animation:tipCardIn 1.5s .7s cubic-bezier(.16,.8,.24,1) backwards; }
+}
+@keyframes tipBgIn{ from{ translate:0 -28px; } }
+@keyframes tipFgIn{ from{ opacity:0; translate:0 64px; } 40%{ opacity:1; } }
+@keyframes tipCardIn{ from{ opacity:0; translate:120px 90px; } 50%{ opacity:1; } }
+
+/* Tip Jar — comment card (Chef, Oct 2026; Paper "10b Tip Jar · comment card open"). The card is Chef's mint index card
+   photo, cut out and straightened (assets/img/p-comment-card.webp, 1100×665 — ruled lines level). It peeks in at the bottom
+   right corner, tilted; tapped, it comes up over the dimmed page. Writing sits ON the printed lines: the card is a size
+   container and everything on it is placed in cqw — header line at 10.69cqw, then a line every 5.496cqw. */
+.cc-tab{ position:fixed; left:calc(100% - 134px); bottom:60px; z-index:5; width:323px; aspect-ratio:1100/665; padding:0; border:0; background:url('../img/p-comment-card-s.webp') center/100% 100% no-repeat;
+  color:#1A1A1A; rotate:-5deg; transform-origin:0 0; filter:drop-shadow(0 4px 10px rgba(0,0,0,.5)); cursor:pointer; container-type:inline-size; transition:translate .3s cubic-bezier(.2,.8,.2,1); }   /* Chef's Paper: card 323 wide peeking 134px in from the right, -5° */
+.cc-tab:hover, .cc-tab:focus-visible{ translate:-10px 0; outline:none; }
+.cc-tab .cc-t{ position:absolute; left:4.6cqw; top:4.6cqw; font:400 7.1cqw/7.4cqw var(--font-display); letter-spacing:-.01em; text-transform:lowercase; text-align:left; white-space:nowrap; }
+.cc-t{ margin:0; font:italic 400 17px/20px 'Old Standard TT', Georgia, serif; color:#0A0A0A; }
+.cc-dim{ position:fixed; inset:0; z-index:20; background:rgba(10,10,10,.35); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); opacity:0; transition:opacity .3s ease; }
+body.cc-on .cc-dim{ opacity:1; }
+.cc-dim[hidden], .cc[hidden]{ display:none; }
+.cc{ position:fixed; z-index:21; inset:0; box-sizing:border-box; padding:20px 10px 28px; overflow-y:auto; overscroll-behavior:contain; display:flex; flex-direction:column; align-items:center; gap:14px;
+  translate:0 70vh; rotate:-8deg; opacity:0; transition:translate .45s cubic-bezier(.2,.8,.2,1), rotate .45s cubic-bezier(.2,.8,.2,1), opacity .3s; }
+.cc > *{ flex:none; } .cc > .cc-card{ margin-top:auto; } .cc > .cc-pics{ margin-bottom:auto; }   /* centred when it fits, scrolls when it doesn't */
+.cc.in{ translate:0 0; rotate:0deg; opacity:1; }
+.cc-card{ position:relative; width:min(540px, 100%); aspect-ratio:1100/665; container-type:inline-size; background:url('../img/p-comment-card.webp') center/100% 100% no-repeat;
+  filter:drop-shadow(0 10px 22px rgba(0,0,0,.55)); rotate:-1.5deg; color:#0A0A0A; }
+.cc-card .cc-t{ position:absolute; left:8cqw; top:4.3cqw; font-size:5.4cqw; line-height:6cqw; }   /* sits on the header line */
+.cc-x{ position:absolute; right:3.5cqw; top:2.2cqw; border:0; background:none; padding:0 1cqw; font:300 max(20px, 5cqw)/1 var(--font-display); color:rgba(10,10,10,.55); cursor:pointer; }
+.cc-sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+.cc-stars{ position:absolute; right:12cqw; top:5.2cqw; display:flex; flex-direction:row-reverse; gap:1.2cqw; margin:0; padding:0; border:0; }
+.cc-stars input{ position:absolute; opacity:0; width:1px; height:1px; }
+.cc-stars label{ font-size:max(20px, 4.6cqw); line-height:1; color:rgba(10,10,10,.18); cursor:pointer; transition:color .15s; }
+/* stars fill up to the chosen one (row-reverse: later siblings in the DOM are the earlier stars) */
+.cc-stars input:checked ~ label, .cc-stars label:hover, .cc-stars label:hover ~ label{ color:#0A0A0A; }
+.cc-stars:has(label:hover) input:checked ~ label:not(:hover):not(:hover ~ label){ color:rgba(10,10,10,.18); }
+.cc-stars input:focus-visible + label{ outline:1px dotted #0A0A0A; outline-offset:2px; }
+/* the message is written on six ruled lines (baselines 16.18 → 43.67cqw), name / email on the seventh (49.16cqw);
+   each box starts 0.72 of a line above its first baseline so the letters sit on the printed lines */
+.cc-msg{ position:absolute; left:8cqw; right:5cqw; top:12.22cqw; height:32.98cqw; box-sizing:border-box; padding:0; margin:0; border:0; background:none; resize:none; overflow:auto;
+  color:#0A0A0A; font:400 max(16px, 3.6cqw)/5.496cqw var(--font-display); outline:none; }
+.cc-msg::placeholder, .cc-who input::placeholder{ color:rgba(10,10,10,.42); }
+.cc-who{ position:absolute; left:8cqw; right:5cqw; top:45.2cqw; height:5.496cqw; display:flex; gap:4cqw; }
+.cc-who input{ flex:1; min-width:0; padding:0; border:0; background:none; color:#0A0A0A; font:400 max(16px, 3.4cqw)/5.496cqw var(--font-display); outline:none; }
+.cc-done{ position:absolute; left:8cqw; right:5cqw; top:17.7cqw; margin:0; font:italic 400 max(18px, 4.6cqw)/5.496cqw 'Old Standard TT', Georgia, serif; }
+.cc-hp{ position:absolute; left:-9999px; }
+.cc-pics{ display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:2px; }
+.cc-pics{ flex-direction:column; gap:8px; }
+/* UPLOAD PICS (Chef's Paper): a rounded square, same look as SEND CARD (white, black text) — arrow above the label */
+.cc-add{ width:120px; height:92px; box-sizing:border-box; padding:13px 0 12px; display:flex; flex-direction:column; align-items:center; justify-content:space-between;
+  border:0; border-radius:20px; background:#fff; color:#0A0A0A; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.3); transition:transform .2s; }
+.cc-add svg{ width:42px; height:42px; display:block; }
+.cc-add span{ font:700 11px/13px var(--font-display); letter-spacing:.2em; text-indent:.2em; text-transform:uppercase; }
+.cc-add:hover, .cc-add:focus-visible{ transform:translateY(-3px); outline:none; }
+.cc-add[hidden]{ display:none; } .cc-add:disabled{ opacity:.5; }
+.cc-pic-note{ max-width:340px; margin:0 12px; font:400 11px/16px var(--font-display); text-align:center; color:rgba(255,255,255,.8); }
+.cc-thumbs{ display:flex; gap:8px; margin:0; padding:0; list-style:none; } .cc-thumbs:empty{ display:none; }
+.cc-thumbs li{ position:relative; width:52px; height:52px; rotate:-2deg; } .cc-thumbs li:nth-child(even){ rotate:3deg; }
+.cc-thumbs img{ width:100%; height:100%; object-fit:cover; border:3px solid #fff; border-radius:2px; box-shadow:0 2px 8px rgba(0,0,0,.5); box-sizing:border-box; }
+.cc-thumbs button{ position:absolute; top:-8px; right:-8px; width:22px; height:22px; padding:0; border:0; border-radius:50%; background:#0A0A0A; color:#fff; font:400 15px/22px var(--font-display); cursor:pointer; }
+/* the photo section: set apart below the card by a rule, its own SEND PICS */
+.cc-rule{ width:min(220px, 60%); height:0; margin:16px 0 6px; border:0; border-top:1px solid rgba(255,255,255,.35); }
+.cc-pic-hint{ margin:0; font:400 11px/15px var(--font-display); color:rgba(255,255,255,.85); text-align:center; } .cc-pic-hint:empty{ display:none; } .cc-pic-hint.err{ color:#ffb3a8; }
+.cc-pic-send{ height:40px; padding:0 26px; border:0; border-radius:20px; background:#fff; color:#0A0A0A; font:700 11px/1 var(--font-display); letter-spacing:.2em; text-transform:uppercase; cursor:pointer; }
+.cc-pic-send[hidden]{ display:none; } .cc-pic-send:disabled{ opacity:.5; }
+/* after SEND PICS: a little multiple-choice pop-up — can we use them for content, or just for our eyes? */
+.cc-ask{ position:fixed; inset:0; z-index:2; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(10,10,10,.45); }
+.cc-ask[hidden]{ display:none; }
+.cc-ask-box{ width:min(320px, 100%); box-sizing:border-box; padding:22px 20px 18px; border-radius:10px; background:#F4F1EA; color:#0A0A0A; box-shadow:0 12px 34px rgba(0,0,0,.5); rotate:-1deg; display:flex; flex-direction:column; gap:10px; text-align:center; }
+.cc-ask-q{ margin:0 0 4px; font:italic 400 19px/24px 'Old Standard TT', Georgia, serif; }
+.cc-ask-box button{ height:42px; border:1px solid #0A0A0A; border-radius:21px; background:none; color:#0A0A0A; font:400 13px/1 var(--font-display); letter-spacing:.03em; cursor:pointer; }
+.cc-ask-box button[data-use="OK for content"]{ background:#0A0A0A; color:#fff; }
+.cc-ask-box .cc-ask-no{ height:auto; border:0; font-size:11px; opacity:.6; padding:4px; }
+.cc-pic-done{ margin:0; font:italic 400 16px/22px 'Old Standard TT', Georgia, serif; color:#fff; text-align:center; } .cc-pic-done[hidden]{ display:none; }
+.cc-note{ max-width:400px; margin:2px 12px 0; font:400 10px/16px var(--font-display); text-align:center; color:rgba(255,255,255,.8); rotate:-1deg; }   /* Chef's Paper: 10px, three lines, a slight tilt */
+.cc-hint{ margin:-6px 0 0; font:400 11px/15px var(--font-display); color:rgba(255,255,255,.85); } .cc-hint:empty{ display:none; }
+.cc-hint.err{ color:#ffb3a8; }
+.cc-send{ width:min(320px, calc(100% - 40px)); height:44px; border:0; border-radius:22px; background:#fff; color:#0A0A0A; font:700 12px/1 var(--font-display); letter-spacing:.2em; text-transform:uppercase; cursor:pointer; }
+.cc-send:disabled{ opacity:.5; }
+.cc.sent .cc-stars, .cc.sent .cc-msg, .cc.sent .cc-who, .cc.sent .cc-note{ visibility:hidden; }
+@media (min-width:900px){
+  /* Chef's Paper desktop: the card lies on the table just right of centre, its lower part off the bottom edge */
+  .cc-tab{ left:calc(50% - 17px); bottom:-98px; width:357px; aspect-ratio:357/253; }
+  .cc-tab .cc-t{ left:17.6cqw; top:11.2cqw; font-size:8.4cqw; line-height:8.7cqw; }
+  .cc-tab:hover, .cc-tab:focus-visible{ translate:0 -12px; }
+  .mo .cc-tab{ animation:ccRise 1.4s .75s cubic-bezier(.16,.8,.24,1) backwards; }
+  /* same layered parallax intro as the phone (no tilt/mouse parallax on desktop — Chef) */
+  .mo .tip-page::before{ animation:bgArrive 2.2s cubic-bezier(.2,.7,.2,1) both, tipBgIn 2.6s cubic-bezier(.2,.7,.2,1) both; }
+  .mo .tip-win{ animation:tipFgIn 1.4s .6s cubic-bezier(.16,.8,.24,1) backwards; }
+  .cc-card{ width:600px; }
+  .cc-note{ max-width:480px; font-size:11px; line-height:17px; }
+}
+@media (prefers-reduced-motion:reduce){ .cc, .cc-tab, .cc-dim{ transition:none; } }
+@keyframes ccPeek{ from{ translate:180px 0; } }
+@keyframes ccRise{ from{ opacity:0; translate:0 220px; } 45%{ opacity:1; } }
+.cc-dk{ display:none; } @media (min-width:900px){ .cc-ph{ display:none; } .cc-dk{ display:inline; } }
