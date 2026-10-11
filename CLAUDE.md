@@ -34,6 +34,15 @@ meetme.html       Meet Me at Society — UNLISTED (noindex, not in nav), served 
                   The tube plays assets/video/mm-intro[-desk] (once) then mm-idle[-desk] (loop), .mp4 H.264 or .webm VP9, pre-rendered
                   with the glass curve/mask/shading as drop-ins for the screen rectangle.
 
+tip.html          Tip Jar — UNLISTED (noindex, not in nav), served at /tip, for QR codes. Chef's Paper design: frosted pill (€ amount + round TIP), payment marks + Stripe line, "100% goes to the staff"; no box.
+                  assets/js/tip.js posts the amount to netlify/functions/tip.mjs, which makes a Stripe Checkout Session for exactly
+                  that amount (Netlify env STRIPE_SECRET_KEY = Stripe restricted key, Checkout Sessions: Write — set by Chef, never in
+                  the repo) and the browser goes to Stripe; Stripe returns to /tip?thanks=1. Without the key the function answers
+                  503 and TIP opens the fixed payment link https://buy.stripe.com/6oU5kE3PF3lef8t0TE9sk0t instead.
+                  Background = Chef's tip jar photo: p-bg-tip-mobile2.jpg (phone) / p-bg-tip-desktop4.jpg (photo centred on black, no blur
+                  ). Comment card tab (bottom corner) → netlify/functions/comment.mjs → Coda "Society Nightly Reports"
+                  → Comment Cards (CODA_API_TOKEN needs write access to that doc); listed in the next morning's Daily Society Report.
+
 assets/css/style.css   Single stylesheet for all 7 pages. Pages 2–6: phone (<700px) = Paper phone
                         artboards; 700–899px = phone column zoomed; ≥900px = Paper "Desktop 1440"
                         artboards (same layout, one centred 720px column). Rule: menu bar, body and
