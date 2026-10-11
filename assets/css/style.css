@@ -970,15 +970,15 @@ body.menu-body{ background:var(--black); }
 
   /* MENU — the open booklet nearly full width (Chef) */
   .booklet{ gap:22px; padding:36px 0 64px; }
-  .bk-stage{ width:min(calc(100vw - 96px), calc((100vh - 280px) * 1.41)); }   /* as big as fits: whole spread + arrows stay on screen */
+  .bk-stage{ width:min(calc(100vw - 96px), 82.3vh); }   /* Paper D03 exactly (Chef, Oct 11): spread 874×618 in a 1440×1062 window, scales with the window height; arrows may sit below the fold */
   /* menu page header: logo and "menu" side by side (one short row, so more of the big book is on screen) */
   .menu-page::before{ background-image:url('../img/p-bg-menu-desktop.jpg'); background-position:calc(40px - 30.89vw) -93px; background-size:165.53vw auto; }   /* Chef's Paper recrop (D03 cover, Oct 11): photo 165.5% wide, 30.9% off the left, 133px above the top */
   .menu-page .bk-zoom{ filter:drop-shadow(0 8px 22px rgba(0,0,0,.4)); }
   .menu-scrim{ height:260px; background:linear-gradient(180deg, rgba(10,10,10,.6) 0%, rgba(10,10,10,.35) 55%, rgba(10,10,10,0) 100%); }
-  .menu-page .ev-head{ flex-direction:row; justify-content:center; align-items:center; gap:28px; padding:22px 0 0; }
+  .menu-page .ev-head{ flex-direction:row; justify-content:center; align-items:center; gap:28px; padding:31px 0 0; }   /* Paper D03: 9px + 22px */
   .menu-page .ev-head img{ width:200px; height:70px; }
   .menu-page .ev-head h1{ margin:0; font-size:76px; line-height:76px; transform:translateY(-6px); }
-  .menu-page .booklet{ padding-top:18px; }   /* open, the spread runs nearly the full width of the window (48px each side) */
+  .menu-page .booklet{ padding-top:72px; padding-bottom:136px; }   /* book top 235px from the top of the page, as Paper D03 (cover + open) */
   .bk-count{ font-size:13px; }
 
   /* SOCIETY COLLECTION (D06) */
