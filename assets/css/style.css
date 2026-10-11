@@ -821,7 +821,7 @@ body.bag-on{ overflow:hidden; }
 body.menu-body{ background:var(--black); }
 .menu-page{ background:var(--black); color:var(--white); isolation:isolate; }
 /* background: the green banker's lamp on the LSC table (Chef, Oct 2026) — phone crop / desktop crop; its own layer so it can parallax */
-.menu-page::before{ content:""; position:absolute; inset:-40px; transform:translate(var(--mx, 0px), var(--my, 0px)); z-index:-1; background:var(--black) url('../img/p-bg-menu-mobile.jpg') 24px -16px/calc(100% - 48px) auto no-repeat; pointer-events:none; }   /* Chef's Paper crop, then raised 35px (Chef: book sits on the table, lamp light peeking out above it): full width from 56px above the top (+16px spare each side for the tilt) */
+.menu-page::before{ content:""; position:absolute; inset:-40px; transform:translate(var(--mx, 0px), var(--my, 0px)); z-index:-1; background:var(--black) url('../img/p-bg-menu-mobile.jpg') 50% -23px/calc((100% - 80px) * 1.0645) auto no-repeat; pointer-events:none; }   /* Chef's Paper recrop (03 Menu cover, Oct 11): photo 106.45% of the page wide, centred, 63px above the top */
 .menu-page .bk-zoom{ filter:drop-shadow(0 4px 10px rgba(0,0,0,.4)); }   /* very subtle lift off the background (Chef) */
 .menu-scrim{ position:absolute; top:0; left:0; right:0; height:190px; z-index:-1; background:linear-gradient(180deg, rgba(10,10,10,.85) 0%, rgba(10,10,10,.7) 55%, rgba(10,10,10,0) 100%); pointer-events:none; }
 .booklet{ display:flex; flex-direction:column; align-items:center; gap:14px; padding:20px 8px 40px; }   /* phone: open book nearly edge to edge (8px each side) */
@@ -972,7 +972,7 @@ body.menu-body{ background:var(--black); }
   .booklet{ gap:22px; padding:36px 0 64px; }
   .bk-stage{ width:min(calc(100vw - 96px), calc((100vh - 280px) * 1.41)); }   /* as big as fits: whole spread + arrows stay on screen */
   /* menu page header: logo and "menu" side by side (one short row, so more of the big book is on screen) */
-  .menu-page::before{ background-image:url('../img/p-bg-menu-desktop.jpg'); background-position:calc(40px - 23.86vw) -69px; background-size:151.46vw auto; }   /* Chef's Paper crop (D03: photo 151% wide, 24% off the left, 109px above the top) */
+  .menu-page::before{ background-image:url('../img/p-bg-menu-desktop.jpg'); background-position:calc(40px - 30.89vw) -93px; background-size:165.53vw auto; }   /* Chef's Paper recrop (D03 cover, Oct 11): photo 165.5% wide, 30.9% off the left, 133px above the top */
   .menu-page .bk-zoom{ filter:drop-shadow(0 8px 22px rgba(0,0,0,.4)); }
   .menu-scrim{ height:260px; background:linear-gradient(180deg, rgba(10,10,10,.6) 0%, rgba(10,10,10,.35) 55%, rgba(10,10,10,0) 100%); }
   .menu-page .ev-head{ flex-direction:row; justify-content:center; align-items:center; gap:28px; padding:22px 0 0; }
