@@ -2004,8 +2004,9 @@ body.tip-body{ background:var(--black); }
 .tip-again{ color:rgba(255,255,255,.85); font:400 11px/1 var(--font-display); letter-spacing:.08em; }
 @media (min-width:900px){   /* desktop = the phone layout scaled up (Chef, Oct 2026): stacked header, photo column on black, same pill */
   .tip-scrim{ height:260px; background:linear-gradient(180deg, rgba(10,10,10,.6) 0%, rgba(10,10,10,.35) 55%, rgba(10,10,10,0) 100%); }
-  .tip-page::before{ left:0; right:0; height:auto; bottom:0;
-    background:linear-gradient(180deg, rgba(10,10,10,0) calc(100% - 125px), var(--black) 100%), var(--black) url('../img/p-bg-tip-desktop4.jpg') 50% 0/cover no-repeat; }   /* photo centred on black (baked into the jpg, set 150px down), long soft fade into black like the phone */
+  /* Chef's Paper crop (D10, 74K-0): the photo canvas is 115.8% of the screen height, raised by 11.7%, cover-centred */
+  .tip-page::before{ left:0; right:0; top:-11.67svh; bottom:auto; height:115.78svh; background:var(--black) url('../img/p-bg-tip-desktop4.jpg') 50% 50%/cover no-repeat; }
+  .tip-page::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:125px; z-index:-2; pointer-events:none; background:linear-gradient(180deg, rgba(10,10,10,0), var(--black)); }   /* soft edge into black at the bottom */
   .tip-head{ padding-top:24px; }
   .tip-head img{ width:160px; height:56px; }
   .tip-head h1{ margin:-2px 0 0; font-size:52px; line-height:62px; }
