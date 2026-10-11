@@ -36,8 +36,10 @@
     const page = document.querySelector(".tip-page"), vw = page.clientWidth;
     let k, left, top;
     if (matchMedia("(min-width: 900px)").matches) {
-      const s = Math.max(vw / 2400, page.offsetHeight / 1500), f = 1350 / 1400;
-      k = s * f; left = (vw - 2400 * s) / 2 + 750 * s; top = 150 * s;
+      // matches style.css: canvas 115.78% of the screen height, raised 11.67%, cover-centred (Chef's Paper crop)
+      const vh = window.innerHeight, ch = vh * 1.1578, ct = -vh * 0.1167;
+      const s = Math.max(vw / 2400, ch / 1500), f = 1350 / 1400;
+      k = s * f; left = (vw - 2400 * s) / 2 + 750 * s; top = ct + (ch - 1500 * s) / 2 + 150 * s;
     } else {
       k = 764 / 1400; left = -24 + (vw + 48 - 933 * k) / 2; top = 0;
     }
