@@ -66,8 +66,12 @@ export default async (req, context) => {
         const r = await fetch(process.env.CC_PHOTO_URL, { method: "POST", signal: ctl.signal, headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ secret: process.env.CC_PHOTO_SECRET, serviceDate: day, name, message: message.slice(0, 200), photoUse, photos }) });
         clearTimeout(t);
-        const d = await r.json().catch(() => ({}));
-        photoNote = d.links && d.links.length ? d.links.join("\n") : `(${photos.length} photo(s) sent but not saved: ${d.error || r.status})`;
+        const txt = await r.text(); let d = {};
+        try { d = JSON.parse(txt); } catch {}
+        // not JSON = Google answered with a web page (usually: web app access isn't "Anyone", or it needs re-authorising)
+        const why = d.error || (/^\s*</.test(txt) ? `web page "${(txt.match(/<title>([^<]*)/i) || [, "untitled"])[1].trim().slice(0, 60)}" (check the Apps Script deployment: Execute as Me, access Anyone)` : r.status);
+        photoNote = d.links && d.links.length ? d.links.join("\n") : `(${photos.length} photo(s) sent but not saved: ${why})`;
+        if (!(d.links && d.links.length)) console.error("cc-photos", r.status, r.headers.get("content-type"), txt.slice(0, 300));
       } catch (e) {
         photoNote = `(${photos.length} photo(s) sent; upload didn't confirm in time — check Drive › Comment Card Photos › ${day})`;
       }
