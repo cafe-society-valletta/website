@@ -294,7 +294,7 @@
         <p class="df-lede">Something on around town the Society crowd should know about? Stick it on our doorframe. It goes up once we've had a look.</p>
         <div class="df-crop" tabindex="0" aria-label="Your poster, A3 portrait. Drag to move it, scroll or pinch to zoom.">
           <img alt="" draggable="false" hidden>
-          <label class="df-pick"><input type="file" accept="image/*"><b>+</b><span>Choose your artwork</span><small>A3 portrait. Any image works:<br>you frame it to fit.</small></label>
+          <label class="df-pick"><input type="file" accept="image/*,application/pdf,.pdf"><b>+</b><span>Choose your artwork</span><small>A3 portrait. JPG, PNG or PDF:<br>you frame it to fit.</small></label>
           <span class="df-hint" aria-hidden="true">Drag to move · pinch or scroll to zoom</span>
         </div>
         <div class="df-cropbar" hidden>
@@ -359,18 +359,41 @@
     const s = fit.cover * fit.z; fit.x = fit.W / 2 - fx * fit.w * s; fit.y = fit.H / 2 - fy * fit.h * s; paint();
   }
   addEventListener("resize", () => { if (upOpen) measure(true); });
-  file.addEventListener("change", () => {
+  // PDF posters: page 1 is drawn to an image in the browser with pdf.js (loaded only when a PDF is picked), then framed like any image
+  const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+  let pdfLib = null;
+  const loadPdfLib = () => pdfLib || (pdfLib = new Promise((res, rej) => {
+    const s = document.createElement("script"); s.src = PDFJS + "pdf.min.js";
+    s.onload = () => { const L = window.pdfjsLib; if (!L) return rej(); L.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js"; res(L); };
+    s.onerror = () => { pdfLib = null; rej(); }; document.head.appendChild(s); }));
+  const isPdf = f => f.type === "application/pdf" || /\.pdf$/i.test(f.name);
+  async function pdfToUrl(f){
+    const L = await loadPdfLib(), doc = await L.getDocument({ data: await f.arrayBuffer() }).promise, pg = await doc.getPage(1);
+    const v1 = pg.getViewport({ scale:1 }), k = Math.min(4, 2400 / Math.max(v1.width, v1.height)), v = pg.getViewport({ scale:k });
+    const c = document.createElement("canvas"); c.width = Math.round(v.width); c.height = Math.round(v.height);
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);   // PDFs are drawn on white paper
+    await pg.render({ canvasContext:x, viewport:v }).promise; doc.destroy();
+    const b = await new Promise(r => c.toBlob(r, "image/jpeg", .92)); if (!b) throw 0;
+    return URL.createObjectURL(b);
+  }
+  file.addEventListener("change", async () => {
     const f = file.files && file.files[0]; if (!f) return;
-    msg.textContent = "";
-    const url = URL.createObjectURL(f), im = new Image();
+    msg.textContent = ""; file.value = "";
+    let url;
+    if (isPdf(f)){
+      msg.textContent = "Opening your PDF…";
+      try { url = await pdfToUrl(f); msg.textContent = ""; }
+      catch(_){ msg.textContent = "Couldn't open that PDF. Try exporting it as a JPG."; return; }
+    } else url = URL.createObjectURL(f);
+    const im = new Image();
     im.onload = () => {
       if (fit.url) URL.revokeObjectURL(fit.url);
       Object.assign(fit, { img:im, w:im.naturalWidth, h:im.naturalHeight, z:1, url, W:0, H:0 });
       cimg.src = url; cimg.style.width = fit.w + "px"; cimg.style.height = fit.h + "px"; cimg.hidden = false;
       crop.classList.add("has"); bar.hidden = false; measure(false); crop.focus({ preventScroll:true });
     };
-    im.onerror = () => { URL.revokeObjectURL(url); msg.textContent = "Couldn't open that file. Try a JPG or PNG."; };
-    im.src = url; file.value = "";
+    im.onerror = () => { URL.revokeObjectURL(url); msg.textContent = "Couldn't open that file. Try a JPG, PNG or PDF."; };
+    im.src = url;
   });
   up.querySelector(".df-change").addEventListener("click", () => file.click());
   zr.addEventListener("input", () => zoomAt(+zr.value, fit.W / 2, fit.H / 2));
