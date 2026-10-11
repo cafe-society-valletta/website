@@ -372,7 +372,7 @@
     const v1 = pg.getViewport({ scale:1 }), k = Math.min(4, 2400 / Math.max(v1.width, v1.height)), v = pg.getViewport({ scale:k });
     const c = document.createElement("canvas"); c.width = Math.round(v.width); c.height = Math.round(v.height);
     const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);   // PDFs are drawn on white paper
-    await pg.render({ canvasContext:x, viewport:v }).promise; doc.destroy();
+    await pg.render({ canvasContext:x, viewport:v, intent:"print" }).promise; doc.destroy();   // "print" = no requestAnimationFrame, so it also finishes in a background tab
     const b = await new Promise(r => c.toBlob(r, "image/jpeg", .92)); if (!b) throw 0;
     return URL.createObjectURL(b);
   }
