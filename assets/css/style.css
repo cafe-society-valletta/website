@@ -2153,3 +2153,107 @@ body.cc-on .cc-dim{ opacity:1; }
 @keyframes ccPeek{ from{ translate:180px 0; } }
 @keyframes ccRise{ from{ opacity:0; translate:0 220px; } 45%{ opacity:1; } }
 .cc-dk{ display:none; } @media (min-width:900px){ .cc-ph{ display:none; } .cc-dk{ display:inline; } }
+
+/* =====================================================================================================================
+   SOCIETY TV (tv.html, /tv — unlisted). Chef's vintage TV fills the window on black, antennae off the top.
+   Everything on the TV is placed in the TV photo's own pixels (3618 × 3249): --ux / --uy = one photo pixel across / down
+   (Chef's Paper crops stretch the photo a little, so they differ), --u = the smaller, for type and shadows.
+   Desktop / landscape (Paper TV01): the crop always fills the window — TV 1664×1402 at −114,−381 in a 1440×900 frame,
+   scaled across and down separately so the body meets all four edges on any screen.
+   Phones / portrait (Paper TV03 → TV04): TV 579×484 at −38,−63 in a 402 frame; swipe left → 841×740 at −388,−184.
+   ===================================================================================================================== */
+.stv-body{ margin:0; background:#000; color:#fff; overflow:hidden; }
+@property --ux{ syntax:"<length>"; inherits:true; initial-value:0px; }
+@property --uy{ syntax:"<length>"; inherits:true; initial-value:0px; }
+.stv{ --ux:calc(100vw * 1664 / 1440 / 3618); --uy:calc(100vh * 1402 / 900 / 3249); --u:min(var(--ux), var(--uy)); position:relative; width:100%; height:100vh; height:100svh; overflow:hidden; background:#000; }
+.stv-tv{ position:absolute; left:calc(100vw * -114 / 1440); top:calc(100vh * -381 / 900); width:calc(var(--ux) * 3618); height:calc(var(--uy) * 3249); }
+.stv-img{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; user-select:none; -webkit-user-select:none; z-index:2; }
+/* the screen: a box just bigger than the glass hole (403,1053 → 2604,2778); the photo's bezel crops its corners */
+.stv-screen{ position:absolute; left:calc(var(--ux) * 395); top:calc(var(--uy) * 1045); width:calc(var(--ux) * 2217); height:calc(var(--uy) * 1741); overflow:hidden; background:#060606; z-index:1; cursor:pointer; }
+.stv-glass{ position:absolute; inset:0; overflow:hidden; transform:translate(0, 0); }   /* own 2D layer: the CRT filter measures from here */
+.stv-shade{ position:absolute; z-index:1; pointer-events:none; left:calc(var(--ux) * 293); top:calc(var(--uy) * 939); width:calc(var(--ux) * 2421); height:calc(var(--uy) * 1953); }   /* Meet Me's shadow: screen box + the same margin ratio */
+.stv-yt{ position:absolute; top:0; bottom:0; left:50%; width:calc(var(--uy) * 3095); transform:translateX(-50%); }   /* 16:9 video fills the 4:3 tube (sides cropped) */
+.stv-yt iframe, .stv-yt > div{ width:100%; height:100%; border:0; display:block; pointer-events:none; }   /* clicks go to the TV (play / pause), not YouTube's own buttons */
+.stv-static{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; mix-blend-mode:screen; opacity:.12; pointer-events:none; transition:opacity .5s ease; }
+.stv-screen.burst .stv-static{ opacity:.92; transition:none; }   /* changing channel: a burst of static */
+.stv-screen.nosig .stv-static{ opacity:.7; }
+.stv-nosig{ position:absolute; left:50%; top:50%; margin:0; transform:translate(-50%, -50%); font:400 calc(var(--u) * 150)/1 var(--font-mono-terminal); letter-spacing:.08em; color:#fff; text-shadow:0 0 calc(var(--u) * 20) rgba(255,255,255,.6); opacity:0; pointer-events:none; }
+.stv-screen.nosig .stv-nosig{ opacity:1; }
+/* on-screen display: channel top right, set name bottom left (white, Chef Oct 2026) */
+.stv-osd{ position:absolute; inset:0; pointer-events:none; font-family:var(--font-mono-terminal); text-transform:uppercase; color:#fff; text-shadow:0 0 calc(var(--u) * 14) rgba(255,255,255,.55), 0 calc(var(--u) * 4) 0 rgba(0,0,0,.5); opacity:0; transition:opacity .6s ease; }
+.stv-osd.on{ opacity:1; transition:none; }
+.stv-ch{ position:absolute; top:calc(var(--uy) * 110); right:calc(var(--ux) * 150); font-size:calc(var(--u) * 150); line-height:1; }
+.stv-info{ position:absolute; left:calc(var(--ux) * 150); bottom:calc(var(--uy) * 120); right:calc(var(--ux) * 150); font-size:calc(var(--u) * 78); line-height:1.05; white-space:pre-line; }
+/* ◀ ▶ (Chef, Oct 2026): white arrows on the picture's left and right edges — a random set in the chosen genres.
+   Faint until the mouse is over the screen or the OSD is up (a tap, a channel change); bent with the picture by the CRT curve. */
+.stv-arrow{ position:absolute; top:50%; z-index:2; display:flex; align-items:center; justify-content:center; width:calc(var(--u) * 190); height:calc(var(--u) * 300);
+  margin:0; padding:0; border:0; background:none; transform:translateY(-50%); cursor:pointer; -webkit-tap-highlight-color:transparent;
+  font:400 calc(var(--u) * 150)/1 var(--font-mono-terminal); color:#fff; text-shadow:0 0 calc(var(--u) * 14) rgba(255,255,255,.55), 0 calc(var(--u) * 4) 0 rgba(0,0,0,.5);
+  opacity:.28; transition:opacity .4s ease; }
+.stv-prev{ left:calc(var(--ux) * 40); }
+.stv-next{ right:calc(var(--ux) * 40); }
+.stv-screen:hover .stv-arrow, .stv-osd.on ~ .stv-arrow{ opacity:.9; }
+.stv-arrow:hover, .stv-arrow:focus-visible{ opacity:1; outline:none; }
+.stv-arrow:active{ transform:translateY(-50%) scale(.9); }
+.stv-screen.guide-on .stv-arrow{ display:none; }   /* guide open: you pick a set there, no scanning (Chef) */
+/* GUIDE: a retro TV-listings page over the picture */
+.stv-guide{ position:absolute; inset:7% 8%; display:flex; flex-direction:column; text-transform:uppercase; padding:calc(var(--u) * 60) calc(var(--u) * 70); background:rgba(14,22,150,.9); color:#fff; font-family:var(--font-mono-terminal); font-size:calc(var(--u) * 64); line-height:1.15; box-shadow:0 0 0 calc(var(--u) * 6) rgba(255,255,255,.85) inset; cursor:default; }
+.stv-guide[hidden]{ display:none; }
+.stv-guide-h{ display:flex; justify-content:space-between; gap:1em; margin:0 0 .5em; color:#ffe04a; }
+.stv-guide-x{ margin:0; padding:0 .15em; border:0; background:none; color:#ffe04a; font:inherit; line-height:1; cursor:pointer; }   /* close the guide (Chef) */
+.stv-guide-x:hover, .stv-guide-x:focus-visible{ background:#ffe04a; color:#0e1696; outline:none; }
+.stv-guide-t{ display:flex; gap:.6em; margin:0 0 .45em; }
+.stv-guide-t button{ text-transform:inherit; padding:.05em .4em; border:0; background:none; color:#fff; font:inherit; letter-spacing:.06em; cursor:pointer; opacity:.7; }
+.stv-guide-t button:hover{ opacity:1; }
+.stv-guide-t button[aria-selected="true"]{ background:#fff; color:#0e1696; opacity:1; }
+.stv-guide-l .grp{ margin:.55em 0 .1em; color:#ffe04a; letter-spacing:.06em; }
+.stv-guide-l .grp:first-child{ margin-top:0; }
+.stv-guide-l ol{ margin:0; padding:0; list-style:none; }
+.stv-guide-l{ flex:1; min-height:0; margin:0; padding:0; list-style:none; overflow-y:auto; scrollbar-width:none; }
+.stv-guide-l button{ text-transform:inherit; display:grid; grid-template-columns:1fr auto; gap:1ch; width:100%; padding:.12em .3em; border:0; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+.stv-guide-l button:hover, .stv-guide-l button:focus-visible{ background:rgba(255,255,255,.18); outline:none; }
+.stv-guide-l li.cur button{ background:#ffe04a; color:#0e1696; }
+.stv-guide-l .d{ opacity:.8; }
+/* label-maker tapes (GUIDE, and spare genre tapes) */
+.stv-tape{ display:inline-flex; align-items:center; justify-content:center; padding:0 .55em; border:0; border-radius:calc(var(--u) * 3); background:#0b0b0b; color:#f2f2f2;
+  font:700 calc(var(--u) * 30)/1 "Courier New", Courier, monospace; letter-spacing:.3em; text-transform:uppercase; white-space:nowrap;
+  text-shadow:0 1px 0 rgba(255,255,255,.18); box-shadow:0 calc(var(--u) * 3) calc(var(--u) * 6) rgba(0,0,0,.45); cursor:pointer; }
+.stv-tv > .stv-tape{ position:absolute; z-index:3; height:calc(var(--uy) * 51); transform:translate(-50%, -50%); }
+.stv-tv .stv-guide-b{ left:calc(var(--ux) * 3079); top:calc(var(--uy) * 1849); }   /* on the AFT strip above VOLUME (Chef, Paper TV02) */
+/* Chef's Society TV logo on the brand plate (his Paper TV02): straight on the plate, no backing, a slight tilt, a touch see-through */
+.stv-tv .stv-brand{ position:absolute; z-index:3; left:calc(var(--ux) * 3016); top:calc(var(--uy) * 2773); width:calc(var(--ux) * 168); height:calc(var(--uy) * 46);
+  transform:translate(-50%, -50%) rotate(-2deg); opacity:.88; pointer-events:none; user-select:none; }
+.stv-logo{ display:none; }
+.stv-tape[aria-pressed="true"], .stv-tape:active{ color:#ffcf3f; text-shadow:0 0 calc(var(--u) * 8) rgba(255,190,40,.8); }
+/* the 8 channel buttons = genre filters: each row (number window, push key, label) is one toggle */
+.stv-tv .stv-genres{ position:absolute; inset:0; z-index:3; pointer-events:none; }
+.stv-g{ position:absolute; padding:0; border:0; background:none; cursor:pointer; pointer-events:auto; -webkit-tap-highlight-color:transparent; }   /* placed by music.js, photo px */
+.stv-g .kw, .stv-g .k, .stv-g .lit{ position:absolute; display:block; pointer-events:none; }
+/* pushed in: the key (cut from the photo) slides into its slot, darker, with the slot's shadow showing round it */
+.stv-g .kw{ border-radius:calc(var(--u) * 3); overflow:hidden; transition:background .12s, box-shadow .12s; }
+.stv-g .k{ inset:0; background:url("../img/p-music-tv.webp") no-repeat; background-size:calc(var(--ux) * 3618) calc(var(--uy) * 3249); opacity:0; transform-origin:0 50%; transition:transform .12s ease-out, filter .12s, opacity .12s; }
+.stv-g[aria-pressed="true"] .kw{ background:#141414; box-shadow:inset calc(var(--u) * 4) calc(var(--u) * 3) calc(var(--u) * 6) rgba(0,0,0,.85); }
+.stv-g[aria-pressed="true"] .k{ opacity:1; transform:translateX(calc(var(--u) * -10)) scale(.9, .82); filter:brightness(.62) contrast(1.05); }
+/* selected label: inverted — white tape, black letters (Chef's label cut from the photo, colour-inverted) */
+.stv-g .lit{ background:url("../img/p-music-tv.webp") no-repeat; background-size:calc(var(--ux) * 3618) calc(var(--uy) * 3249); filter:invert(1); border-radius:calc(var(--u) * 2); opacity:0; transition:opacity .12s; }
+.stv-g[aria-pressed="true"] .lit{ opacity:1; }
+.stv-g:focus-visible{ outline:2px solid #ffcf3f; outline-offset:2px; }
+.stv-power{ position:absolute; z-index:3; left:calc(var(--ux) * 3150); top:calc(var(--uy) * 1905); width:calc(var(--ux) * 122); height:calc(var(--uy) * 75); padding:0; border:0; background:none; cursor:pointer; }
+.stv-hint{ display:none; }
+/* phones / portrait (Chef, Oct 2026; Paper TV03 → TV04). Default = his crop with the screen centred and the channel buttons
+   peeking in at the right, "<< SWIPE FOR GENRES" on top of the TV, under the antennae. Swipe left = the TV grows and slides
+   to his second crop (whole right side: genres, CH, GUIDE; the left of the picture cut off) in one smooth move; swipe right
+   = back. Done as one transform on the TV (scale across/down + shift), so everything on it moves together. (music.js: .stv.side) */
+@media (max-aspect-ratio:1/1){
+  .stv{ --ux:calc(100vw * 579 / 402 / 3618); --uy:calc(100vw * 484 / 402 / 3249); touch-action:pan-y; }
+  .stv-tv{ left:calc(100vw * -38 / 402); top:calc(100vw * -63 / 402); transform-origin:0 0; transition:transform .7s cubic-bezier(.65,0,.25,1); will-change:transform; }
+  .stv.side .stv-tv{ transform:translate(calc(100vw * -350 / 402), calc(100vw * -121 / 402)) scale(calc(841 / 579), calc(740 / 484)); }
+  .stv-g, .stv-tv > .stv-tape, .stv-power{ pointer-events:none; }   /* the side panel only works once it's in view */
+  .stv.side .stv-g, .stv.side .stv-tv > .stv-tape, .stv.side .stv-power{ pointer-events:auto; }
+  .stv-hint{ display:block; position:absolute; z-index:3; right:calc(100vw * 18 / 402); top:calc(100vw * 13 / 402); margin:0; text-align:right;   /* top right, beside the antenna (Chef's Paper TV03) */
+    font:400 calc(100vw * 12 / 402)/1.25 var(--font-display); letter-spacing:.08em; color:rgba(255,255,255,.6); transition:opacity .3s; pointer-events:none; }
+  .stv.side .stv-hint, .stv.swiped .stv-hint{ opacity:0; }
+  .stv-logo{ display:block; position:absolute; left:calc(100vw * 16 / 402); top:calc(100vw * 18 / 402); width:calc(100vw * 112 / 402); height:auto; transition:opacity .3s; pointer-events:none; user-select:none; }   /* top left, above the TV, clear of the antennae */
+  .stv.side .stv-logo{ opacity:0; }
+  /* Chef's Paper: a thin inner frame */
+}
