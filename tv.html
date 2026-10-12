@@ -17,8 +17,10 @@
      The 8 channel buttons are genre filters (any number on at once); the green ◀ ▶ on the picture jump to a random set in
      those genres, and GUIDE opens an index of every set (by genre, DJ or YouTube channel). Sets + genres: assets/js/music-data.js. Behaviour: assets/js/music.js. -->
 <main class="stv" aria-label="Society TV: live sets recorded at Café Society">
+  <div class="stv-bgw" aria-hidden="true"><div class="stv-bg"></div></div>   <!-- phones: Chef's grain swirl behind the TV (parallax) -->
   <img class="stv-logo" src="assets/img/society-tv-logo.webp" alt="Society TV" draggable="false">   <!-- phones: top left, above the TV -->
   <div class="stv-tv">
+    <img class="stv-sil" src="assets/img/p-music-tv-sil.webp" alt="" aria-hidden="true" draggable="false">   <!-- phones: the backlight glow comes off this outline -->
     <div class="stv-screen"><div class="stv-glass">   <!-- .stv-glass carries the CRT curve (same map as Meet Me) -->
       <div class="stv-yt"><div id="stv-player"></div></div>
       <video class="stv-static" autoplay muted loop playsinline aria-hidden="true"><source src="assets/video/tv-static.webm" type="video/webm"><source src="assets/video/tv-static.mp4" type="video/mp4"></video>
@@ -39,10 +41,16 @@
     <div class="stv-genres" role="group" aria-label="Genres"></div>
     <button type="button" class="stv-tape stv-guide-b" aria-pressed="false">GUIDE</button>
     <button type="button" class="stv-power" aria-label="Play or pause"></button>
+    <a class="stv-edge stv-back" href="/">&larr; GO BACK TO WEBSITE</a>   <!-- desktop: on the TV's top edge, either corner, slightly askew (Chef) -->
+    <a class="stv-edge stv-ytlink" href="https://www.youtube.com/" target="_blank" rel="noopener">GO TO YOUTUBE &rarr;</a>
     <img class="stv-brand" src="assets/img/society-tv-logo.webp" alt="" aria-hidden="true" draggable="false">   <!-- Chef's Society TV logo, stuck on the brand plate like a sticker -->
   </div>
   <p class="stv-hint" aria-hidden="true">&lt;&lt; SWIPE<br>FOR<br>GENRES</p>   <!-- phones: top right, beside the antenna -->
-  <div class="stv-under"><button type="button" class="stv-tape stv-guide-b" aria-pressed="false">GUIDE</button></div>   <!-- phones: GUIDE under the TV (normal view) -->
+  <div class="stv-under">   <!-- phones: under the TV (normal view) -->
+    <a class="stv-pill stv-back" href="/" aria-label="Go back to the website"><span class="ar" aria-hidden="true">&larr;</span><span>GO BACK</span></a>
+    <button type="button" class="stv-pill stv-guide-b" aria-pressed="false">TV GUIDE</button>
+    <a class="stv-pill stv-ytlink" href="https://www.youtube.com/" target="_blank" rel="noopener" aria-label="Watch this set on YouTube"><span>YOUTUBE</span><span class="ar" aria-hidden="true">&rarr;</span></a>
+  </div>
 </main>
 <script src="assets/js/music-data.js"></script>
 <script src="assets/js/music.js"></script>
