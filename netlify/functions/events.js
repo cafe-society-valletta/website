@@ -122,6 +122,8 @@ function parseDescription(raw){
     const m = left.match(/^(.+?)\s*[:\-–—]\s*$/);            // "Denzel Sharkey: <url>"
     for (const url of urls){
       if (/\.(?:jpe?g|png|webp|gif)(?:\?\S*)?$/i.test(url) && !out.poster){ out.poster = url; continue; }
+      const dpdf = /\.pdf(?:\?\S*)?$/i.test(url) && !out.poster ? (url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:\S*&)?id=)([\w-]+)/) || [])[1] : null;
+      if (dpdf){ out.poster = `https://drive.google.com/thumbnail?id=${dpdf}&sz=w1000`; continue; }   // a Drive PDF link: its first page
       let u = null; try { u = new URL(url); } catch {}
       const s = u && !isVideo(u) ? social(url) : null;
       if (s){ if (m) s.artist = m[1].trim(); socials.push(s); continue; }
@@ -195,10 +197,11 @@ exports.handler = async () => {
         const item = { date: `${key.slice(0, 4)}-${key.slice(4, 6)}-${key.slice(6)}`, title: ev.title, time };
         if (ev.location) item.location = ev.location;
         if (ev.text) Object.assign(item, parseDescription(ev.text));
-        // an image attached to the event (e.g. a poster in Google Drive) becomes the poster.
-        // Drive files must be shared "Anyone with the link" for visitors to see them.
+        // an image or PDF attached to the event (e.g. a poster in Google Drive) becomes the poster — a PDF shows as
+        // Drive's picture of its first page (Chef, Oct 2026). Drive files must be shared "Anyone with the link".
         if (!item.poster && ev.attach){
-          const a = ev.attach.find(x => /^image\//i.test(x.type) || /\.(png|jpe?g|webp|gif)$/i.test(x.name));
+          const a = ev.attach.find(x => /^image\//i.test(x.type) || /\.(png|jpe?g|webp|gif)$/i.test(x.name))
+                 || ev.attach.find(x => /^application\/pdf/i.test(x.type) || /\.pdf$/i.test(x.name));
           if (a){
             const id = (a.url.match(/[?&]id=([\w-]+)/) || a.url.match(/\/d\/([\w-]+)/) || [])[1];
             item.poster = id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1000` : a.url;
