@@ -2239,7 +2239,7 @@ body.cc-on .cc-dim{ opacity:1; }
 .stv-g[aria-pressed="true"] .lit{ opacity:1; }
 .stv-g:focus-visible{ outline:2px solid #ffcf3f; outline-offset:2px; }
 .stv-power{ position:absolute; z-index:3; left:calc(var(--ux) * 3150); top:calc(var(--uy) * 1905); width:calc(var(--ux) * 122); height:calc(var(--uy) * 75); padding:0; border:0; background:none; cursor:pointer; }
-.stv-hint{ display:none; }
+.stv-hint, .stv-under{ display:none; }
 /* phones / portrait (Chef, Oct 2026; Paper TV03 → TV04). Default = his crop with the screen centred and the channel buttons
    peeking in at the right, "<< SWIPE FOR GENRES" on top of the TV, under the antennae. Swipe left = the TV grows and slides
    to his second crop (whole right side: genres, CH, GUIDE; the left of the picture cut off) in one smooth move; swipe right
@@ -2255,5 +2255,17 @@ body.cc-on .cc-dim{ opacity:1; }
   .stv.side .stv-hint, .stv.swiped .stv-hint{ opacity:0; }
   .stv-logo{ display:block; position:absolute; left:calc(100vw * 16 / 402); top:calc(100vw * 18 / 402); width:calc(100vw * 112 / 402); height:auto; transition:opacity .3s; pointer-events:none; user-select:none; }   /* top left, above the TV, clear of the antennae */
   .stv.side .stv-logo{ opacity:0; }
-  /* Chef's Paper: a thin inner frame */
+  .stv-hint, .stv-logo, .stv-under{ transition:opacity .3s; }
+  .stv.guide-view .stv-hint, .stv.guide-view .stv-logo{ opacity:0; }
+  /* GUIDE under the TV (Chef's Paper TV03): normal view only — a label-maker tape with a thin inner frame */
+  .stv-under{ display:flex; justify-content:center; position:absolute; left:0; right:0; top:calc(100vw * 407 / 402); }
+  .stv-under .stv-tape{ height:38px; font-size:13px; padding:0 14px; border-radius:1px; outline:1px solid rgba(255,255,255,.5); outline-offset:-5px; --u:.42px; }
+  .stv.side .stv-under, .stv.guide-view .stv-under{ opacity:0; pointer-events:none; }
+  /* GUIDE open (Chef, Oct 2026): the TV keeps its big swiped size but slides back to the screen, guide text on the left in full
+     view; the rest (CLOSE [X], the button panel) runs off the right — the page scrolls sideways to reach it. Picking a set or
+     closing the guide brings the TV back to the normal view. */
+  .stv.guide-view{ overflow-x:auto; overflow-y:hidden; touch-action:pan-x; overscroll-behavior-x:contain; scrollbar-width:none; }
+  .stv.guide-view::-webkit-scrollbar{ display:none; }
+  .stv.guide-view .stv-tv{ transform:translate(calc(100vw * -44 / 402), calc(100vw * -121 / 402)) scale(calc(841 / 579), calc(740 / 484)); }
+  .stv.guide-view .stv-g, .stv.guide-view .stv-tv > .stv-tape, .stv.guide-view .stv-power{ pointer-events:auto; }
 }
