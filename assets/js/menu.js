@@ -213,7 +213,7 @@
     const fs = document.createElement("div");
     fs.className = "mfs"; fs.hidden = true;
     fs.setAttribute("role", "dialog"); fs.setAttribute("aria-modal", "true"); fs.setAttribute("aria-label", "Menu, fullscreen");
-    fs.innerHTML = `<button type="button" class="mfs-back">← Go back</button>
+    fs.innerHTML = `<button type="button" class="mfs-back" aria-label="Go back">← Go<br>back</button>
       <div class="mfs-spread"></div>
       <div class="bk-nav mfs-nav"><button type="button" class="mfs-prev" aria-label="Previous pages">←</button><span class="bk-count" aria-live="polite"></span><button type="button" class="mfs-next" aria-label="Next pages">→</button></div>`;
     document.body.appendChild(fs);
@@ -250,7 +250,7 @@
         pageEl.animate(zoomKeys(a), { duration:DUR, easing:EASE, fill:"forwards" });
         fs.animate([{ backgroundColor:"rgba(10,10,10,0)" }, { backgroundColor:"rgba(10,10,10,0)", offset:.35 }, { backgroundColor:"rgba(10,10,10,1)" }], { duration:DUR, fill:"both" });
         sp.animate([{ transformOrigin:"0 0", transform:flip(a, b) }, { transformOrigin:"0 0", transform:"none" }], { duration:DUR, easing:EASE }).onfinish = done;
-        fs.querySelectorAll(".mfs-back, .mfs-nav").forEach(el => el.animate([{ opacity:0 }, { opacity:0, offset:.6 }, { opacity:1 }], { duration:DUR }));
+        fs.querySelectorAll(".mfs-back, .mfs-nav > *").forEach(el => el.animate([{ opacity:0 }, { opacity:0, offset:.6 }, { opacity:1 }], { duration:DUR }));
       };
       if (first && !first.complete) first.decode().then(go, go); else go();
       fs.querySelector(".mfs-back").focus({ preventScroll:true });
@@ -265,7 +265,7 @@
       pageEl.getAnimations().forEach(x => x.cancel());   // measure the booklet un-zoomed…
       const a = bookRect(), b = sp.getBoundingClientRect(), k = zoomKeys(a);
       pageEl.animate([k[1], k[0]], { duration:DUR, easing:EASE, fill:"forwards" });   // …then zoom back out to it
-      fs.querySelectorAll(".mfs-back, .mfs-nav").forEach(el => el.animate([{ opacity:1 }, { opacity:0, offset:.3 }, { opacity:0 }], { duration:DUR, fill:"forwards" }));
+      fs.querySelectorAll(".mfs-back, .mfs-nav > *").forEach(el => el.animate([{ opacity:1 }, { opacity:0, offset:.3 }, { opacity:0 }], { duration:DUR, fill:"forwards" }));
       fs.animate([{ backgroundColor:"rgba(10,10,10,1)" }, { backgroundColor:"rgba(10,10,10,0)", offset:.65 }, { backgroundColor:"rgba(10,10,10,0)" }], { duration:DUR, fill:"forwards" });
       sp.animate([{ transformOrigin:"0 0", transform:"none" }, { transformOrigin:"0 0", transform:flip(a, b) }], { duration:DUR, easing:EASE, fill:"forwards" }).onfinish = land;
     }
