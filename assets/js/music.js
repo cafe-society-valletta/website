@@ -8,6 +8,7 @@
    Sets + genre names: assets/js/music-data.js. The YouTube player loads only if a set has a video id. */
 (() => {
   const D = window.SOCIETY_TV || { genres:[], sets:[] };
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("mo");   // arrival animation (style.css)
   const $ = (s, el = document) => el.querySelector(s), $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const screen = $(".stv-screen"), osd = $(".stv-osd"), chEl = $(".stv-ch"), info = $(".stv-info");
   const guide = $(".stv-guide"), gList = $(".stv-guide-l"), gTabs = $$(".stv-guide-t [data-by]");
@@ -88,6 +89,7 @@
     chEl.textContent = "CH " + pad(cur + 1);
     info.textContent = `${s.dj || ""}${s.title ? " — " + s.title : ""}\n${fmtDate(s.date)}${gNames(s) ? "  " + gNames(s) : ""}`;
     showOsd();
+    ytLinks();
     screen.classList.toggle("nosig", !s.id);
     if (s.id){
       if (ready) playing ? player.loadVideoById(s.id) : player.cueVideoById(s.id);
@@ -96,6 +98,16 @@
     drawGuide();
   }
 
+  // GO TO YOUTUBE →: the set on now, on YouTube (new tab), from where it's got to; Society TV pauses so they don't play twice
+  function ytLinks(){
+    const s = D.sets[cur], id = s && s.id;
+    $$(".stv-ytlink").forEach(a => { a.href = id ? "https://www.youtube.com/watch?v=" + id : "https://www.youtube.com/"; a.toggleAttribute("aria-disabled", !id); if (!id) a.setAttribute("aria-disabled", "true"); });
+  }
+  $$(".stv-ytlink").forEach(a => a.addEventListener("click", e => {
+    const s = D.sets[cur];
+    if (!s || !s.id){ e.preventDefault(); return; }
+    if (ready){ const t = Math.floor(player.getCurrentTime() || 0); if (t > 5) a.href = `https://www.youtube.com/watch?v=${s.id}&t=${t}s`; player.pauseVideo(); playing = false; }
+  }));
   // GUIDE: every set (not just the chosen genres), grouped by genre (a set sits under each of its genres), DJ or channel.
   const chan = {};   // YouTube video id -> channel name (oEmbed)
   const chanOf = s => s.channel || chan[s.id] || (s.id ? "…" : "NO VIDEO YET");
@@ -185,6 +197,24 @@
     else if (/^[1-8]$/.test(e.key)) toggle(+e.key);
   });
 
+  // the TV's backlight on phones (Chef): a tight bright rim + a softer halo, both broken up by fine grain to match the
+  // background's texture. Drawn from .stv-sil (the TV's outline with the screen hole filled, behind the photo) so no glow
+  // shows inside the screen; style.css applies it on phones only.
+  (function glow(){
+    const d = document.createElement("div");
+    d.innerHTML = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="stv-glow" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="b1"/><feGaussianBlur in="SourceAlpha" stdDeviation="9" result="b2"/>
+      <feComponentTransfer in="b1" result="b1a"><feFuncA type="linear" slope="1.3"/></feComponentTransfer>
+      <feMerge result="halo"><feMergeNode in="b2"/><feMergeNode in="b1a"/></feMerge>
+      <feFlood flood-color="#fff"/><feComposite in2="halo" operator="in" result="lit"/>
+      <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="4" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.8 0 0 0 -.38" result="m"/>
+      <feComposite in="lit" in2="m" operator="in" result="grainy"/>
+      <feComponentTransfer in="grainy" result="glow"><feFuncA type="linear" slope=".85"/></feComponentTransfer>
+      <feMerge><feMergeNode in="glow"/></feMerge></filter></svg>`;
+    document.body.appendChild(d.firstChild);
+  })();
+
   // CRT curve + shadow, the same as Meet Me at Society (Chef): everything on the screen — the set, the static, the OSD and
   // the guide — is bent by Meet Me's desktop displacement map (assets/img/mm-warp-desk.png; R = x shift, G = y shift,
   // 0.5 = none) at the same strength (81 / 868 of the screen width), and Meet Me's glass shadow sits on top.
@@ -220,7 +250,7 @@
   // A tap on the peeking buttons at the right edge also slides it over.
   const stv = $(".stv"), portrait = matchMedia("(max-aspect-ratio: 1/1)");
   const side = on => { stv.classList.toggle("side", on); if (on) stv.classList.add("swiped"); };
-  // phones, guide open: the TV stays big and slides back to the screen (guide on the left); the page scrolls sideways for the rest.
+  // phones, guide open: the TV stays big and slides back to the screen; the guide window sits narrowed on the left, all on screen.
   // Guide closed (a set picked, CLOSE [X], GUIDE again) → back to the normal view.
   function guideView(on){
     if (!portrait.matches){ stv.classList.remove("guide-view"); return; }
