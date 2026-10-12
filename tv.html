@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Society TV — Café Society Valletta</title>
+<meta name="description" content="Live sets recorded at Café Society Valletta.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☕</text></svg>">
+<link rel="preload" as="image" href="assets/img/p-music-tv.webp" imagesrcset="assets/img/p-music-tv-s.webp 1200w, assets/img/p-music-tv.webp 2400w" imagesizes="(max-aspect-ratio: 1/1) 104vw, 154vh">
+<link rel="preload" as="image" href="assets/img/mm-warp-desk.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="stv-body">
+<!-- SOCIETY TV — unlisted (noindex, not in nav), served at /tv. Chef's vintage TV fills the window (antennae run off the
+     top); the screen plays the live sets recorded at Society (YouTube), with Chef's static clip faintly over the picture.
+     The 8 channel buttons are genre filters (any number on at once); the green ◀ ▶ on the picture jump to a random set in
+     those genres, and GUIDE opens an index of every set (by genre, DJ or YouTube channel). Sets + genres: assets/js/music-data.js. Behaviour: assets/js/music.js. -->
+<main class="stv" aria-label="Society TV: live sets recorded at Café Society">
+  <img class="stv-logo" src="assets/img/society-tv-logo.webp" alt="Society TV" draggable="false">   <!-- phones: top left, above the TV -->
+  <div class="stv-tv">
+    <div class="stv-screen"><div class="stv-glass">   <!-- .stv-glass carries the CRT curve (same map as Meet Me) -->
+      <div class="stv-yt"><div id="stv-player"></div></div>
+      <video class="stv-static" autoplay muted loop playsinline aria-hidden="true"><source src="assets/video/tv-static.webm" type="video/webm"><source src="assets/video/tv-static.mp4" type="video/mp4"></video>
+      <p class="stv-nosig" aria-hidden="true">NO SIGNAL</p>
+      <div class="stv-osd" aria-live="polite"><span class="stv-ch">CH 01</span><span class="stv-info"></span></div>
+      <button type="button" class="stv-arrow stv-prev" aria-label="Previous set">&#9664;</button>   <!-- white arrows on the picture: a random set in the chosen genres -->
+      <button type="button" class="stv-arrow stv-next" aria-label="Next set (random)">&#9654;</button>
+      <div class="stv-guide" hidden>
+        <p class="stv-guide-h"><span>SOCIETY TV GUIDE</span><button type="button" class="stv-guide-x" aria-label="Close the guide">CLOSE [X]</button></p>
+        <div class="stv-guide-t" role="tablist" aria-label="Sort the sets by">
+          <button type="button" role="tab" data-by="genre" aria-selected="true">GENRE</button><button type="button" role="tab" data-by="dj" aria-selected="false">DJ</button><button type="button" role="tab" data-by="channel" aria-selected="false">CHANNEL</button>
+        </div>
+        <div class="stv-guide-l"></div>
+      </div>
+    </div></div>
+    <img class="stv-shade" src="assets/img/mm-shade-desk.webp" alt="" aria-hidden="true">   <!-- Meet Me's glass shadow, over the picture -->
+    <img class="stv-img" src="assets/img/p-music-tv.webp" srcset="assets/img/p-music-tv-s.webp 1200w, assets/img/p-music-tv.webp 2400w" sizes="(max-aspect-ratio: 1/1) 104vw, 154vh" alt="" draggable="false">
+    <div class="stv-genres" role="group" aria-label="Genres"></div>
+    <button type="button" class="stv-tape stv-guide-b" aria-pressed="false">GUIDE</button>
+    <button type="button" class="stv-power" aria-label="Play or pause"></button>
+    <img class="stv-brand" src="assets/img/society-tv-logo.webp" alt="" aria-hidden="true" draggable="false">   <!-- Chef's Society TV logo, stuck on the brand plate like a sticker -->
+  </div>
+  <p class="stv-hint" aria-hidden="true">&lt;&lt; SWIPE<br>FOR<br>GENRES</p>   <!-- phones: top right, beside the antenna -->
+</main>
+<script src="assets/js/music-data.js"></script>
+<script src="assets/js/music.js"></script>
+</body>
+</html>
