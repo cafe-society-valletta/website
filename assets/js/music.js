@@ -139,7 +139,7 @@
       .catch(() => { chan[s.id] = "YOUTUBE"; });
   });
   function setGuide(on){
-    guide.hidden = !on; screen.classList.toggle("guide-on", on); $$(".stv-guide-b").forEach(b => b.setAttribute("aria-pressed", on ? "true" : "false"));
+    guide.hidden = !on; screen.classList.toggle("guide-on", on); guideView(on); $$(".stv-guide-b").forEach(b => b.setAttribute("aria-pressed", on ? "true" : "false"));
     if (on){ const c = $(".cur button", gList); if (c) c.scrollIntoView({ block:"nearest" }); }
   }
 
@@ -220,19 +220,26 @@
   // A tap on the peeking buttons at the right edge also slides it over.
   const stv = $(".stv"), portrait = matchMedia("(max-aspect-ratio: 1/1)");
   const side = on => { stv.classList.toggle("side", on); if (on) stv.classList.add("swiped"); };
+  // phones, guide open: the TV stays big and slides back to the screen (guide on the left); the page scrolls sideways for the rest.
+  // Guide closed (a set picked, CLOSE [X], GUIDE again) → back to the normal view.
+  function guideView(on){
+    if (!portrait.matches){ stv.classList.remove("guide-view"); return; }
+    stv.classList.toggle("guide-view", on); stv.classList.remove("side");
+    if (!on) stv.scrollTo({ left:0, behavior:"smooth" });
+  }
   let sx = 0, sy = 0, st = 0;
   stv.addEventListener("touchstart", e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; st = Date.now(); }, { passive:true });
   stv.addEventListener("touchend", e => {
-    if (!portrait.matches) return;
+    if (!portrait.matches || stv.classList.contains("guide-view")) return;
     const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
     if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.3 && Date.now() - st < 800) side(dx < 0);
   }, { passive:true });
   $(".stv-tv").addEventListener("click", e => {
-    if (!portrait.matches || stv.classList.contains("side")) return;
+    if (!portrait.matches || stv.classList.contains("side") || stv.classList.contains("guide-view")) return;
     const r = $(".stv-tv").getBoundingClientRect(), u = r.width / 3618;
     if (e.clientX > r.left + u * 2700) side(true);   // tapped the peeking button panel
   });
-  portrait.addEventListener("change", () => side(false));
+  portrait.addEventListener("change", () => { side(false); guideView(!guide.hidden); });
 
   filter(true);
 })();
