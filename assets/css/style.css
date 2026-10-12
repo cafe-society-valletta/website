@@ -2171,8 +2171,6 @@ body.cc-on .cc-dim{ opacity:1; }
    Phones / portrait (Paper TV03 → TV04): TV 579×484 at −38,−63 in a 402 frame; swipe left → 841×740 at −388,−184.
    ===================================================================================================================== */
 .stv-body{ margin:0; background:#000; color:#fff; overflow:hidden; }
-@property --ux{ syntax:"<length>"; inherits:true; initial-value:0px; }
-@property --uy{ syntax:"<length>"; inherits:true; initial-value:0px; }
 .stv{ --ux:calc(100vw * 1664 / 1440 / 3618); --uy:calc(100vh * 1402 / 900 / 3249); --u:min(var(--ux), var(--uy)); position:relative; width:100%; height:100vh; height:100svh; overflow:hidden; background:#000; }
 .stv-tv{ position:absolute; left:calc(100vw * -114 / 1440); top:calc(100vh * -381 / 900); width:calc(var(--ux) * 3618); height:calc(var(--uy) * 3249); }
 .stv-img{ position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; user-select:none; -webkit-user-select:none; z-index:2; }
