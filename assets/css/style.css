@@ -858,6 +858,14 @@ body.menu-body{ background:var(--black); }
 .bk-nav button{ width:36px; height:36px; display:flex; align-items:center; justify-content:center; padding:0; border:1px solid rgba(255,255,255,.6); border-radius:50%; background:transparent; color:#fff; font:400 16px/1 var(--font-display); cursor:pointer; }
 .bk-nav button:disabled{ opacity:.25; cursor:default; }
 .bk-count{ min-width:96px; text-align:center; font-size:11px; font-weight:700; letter-spacing:.2em; line-height:14px; white-space:pre; }
+/* phones: a small "double tap or pinch to zoom" beside the arrows + page count (Chef, Oct 2026) — the zoom is in menu.js */
+.bk-zoomhint{ display:none; }
+@media (max-width:899px){
+  .booklet > .bk-nav{ position:relative; }
+  .bk-zoomhint{ display:block; position:absolute; left:calc(100% + 12px); top:50%; transform:translateY(-50%); color:rgba(255,255,255,.7);
+    font:400 9.5px/12px var(--font-display); letter-spacing:.02em; white-space:nowrap; pointer-events:none; }
+  .booklet .bk-count{ min-width:84px; }   /* a little narrower so the hint fits beside it on small phones */
+}
 /* VIEW FULLSCREEN (desktop only): small button to the right of the page count; opens the full-window viewer (menu.js) */
 .bk-nav .bk-fs{ display:none; }
 @media (min-width:900px){
@@ -2220,6 +2228,15 @@ body.cc-on .cc-dim{ opacity:1; }
   text-shadow:0 1px 0 rgba(255,255,255,.18); box-shadow:0 calc(var(--u) * 3) calc(var(--u) * 6) rgba(0,0,0,.45); cursor:pointer; }
 .stv-tv > .stv-tape{ position:absolute; z-index:3; height:calc(var(--uy) * 51); transform:translate(-50%, -50%); }
 .stv-tv .stv-guide-b{ left:calc(var(--ux) * 3079); top:calc(var(--uy) * 1849); }   /* on the AFT strip above VOLUME (Chef, Paper TV02) */
+/* ← GO BACK TO WEBSITE / GO TO YOUTUBE → (Chef's Paper TV01): black letters printed straight on the TV's silver top edge,
+   one in each corner, each a touch askew */
+.stv-edge{ position:absolute; z-index:3; display:flex; align-items:center; justify-content:center; height:calc(var(--uy) * 51); padding:0 .3em; white-space:nowrap;
+  font:500 calc(var(--u) * 30)/1 var(--font-display); letter-spacing:.3em; color:#000; text-decoration:none; }
+.stv-edge:hover, .stv-edge:focus-visible{ text-decoration:underline; text-underline-offset:.25em; outline:none; }
+.stv-tv .stv-back{ left:calc(var(--ux) * 527); top:calc(var(--uy) * 929); transform:translate(-50%, -50%) rotate(-.95deg); }
+.stv-tv .stv-ytlink{ left:calc(var(--ux) * 3144); top:calc(var(--uy) * 930); transform:translate(-50%, -50%) rotate(1.33deg); }
+a.stv-tape{ text-decoration:none; }
+.stv-ytlink[aria-disabled="true"]{ opacity:.45; cursor:default; }
 /* Chef's Society TV logo on the brand plate (his Paper TV02): straight on the plate, no backing, a slight tilt, a touch see-through */
 .stv-tv .stv-brand{ position:absolute; z-index:3; left:calc(var(--ux) * 3016); top:calc(var(--uy) * 2773); width:calc(var(--ux) * 168); height:calc(var(--uy) * 46);
   transform:translate(-50%, -50%) rotate(-2deg); opacity:.88; pointer-events:none; user-select:none; }
@@ -2239,7 +2256,7 @@ body.cc-on .cc-dim{ opacity:1; }
 .stv-g[aria-pressed="true"] .lit{ opacity:1; }
 .stv-g:focus-visible{ outline:2px solid #ffcf3f; outline-offset:2px; }
 .stv-power{ position:absolute; z-index:3; left:calc(var(--ux) * 3150); top:calc(var(--uy) * 1905); width:calc(var(--ux) * 122); height:calc(var(--uy) * 75); padding:0; border:0; background:none; cursor:pointer; }
-.stv-hint, .stv-under{ display:none; }
+.stv-hint, .stv-under, .stv-bgw, .stv-sil{ display:none; }
 /* phones / portrait (Chef, Oct 2026; Paper TV03 → TV04). Default = his crop with the screen centred and the channel buttons
    peeking in at the right, "<< SWIPE FOR GENRES" on top of the TV, under the antennae. Swipe left = the TV grows and slides
    to his second crop (whole right side: genres, CH, GUIDE; the left of the picture cut off) in one smooth move; swipe right
@@ -2253,19 +2270,45 @@ body.cc-on .cc-dim{ opacity:1; }
   .stv-hint{ display:block; position:absolute; z-index:3; right:calc(100vw * 18 / 402); top:calc(100vw * 13 / 402); margin:0; text-align:right;   /* top right, beside the antenna (Chef's Paper TV03) */
     font:400 calc(100vw * 12 / 402)/1.25 var(--font-display); letter-spacing:.08em; color:rgba(255,255,255,.6); transition:opacity .3s; pointer-events:none; }
   .stv.side .stv-hint, .stv.swiped .stv-hint{ opacity:0; }
-  .stv-logo{ display:block; position:absolute; left:calc(100vw * 16 / 402); top:calc(100vw * 18 / 402); width:calc(100vw * 112 / 402); height:auto; transition:opacity .3s; pointer-events:none; user-select:none; }   /* top left, above the TV, clear of the antennae */
+  .stv-logo{ display:block; position:absolute; left:calc(100vw * 19 / 402); top:calc(100vw * 17 / 402); width:calc(100vw * 112 / 402); height:auto; transition:opacity .3s; pointer-events:none; user-select:none; }   /* top left, above the TV, clear of the antennae */
   .stv.side .stv-logo{ opacity:0; }
   .stv-hint, .stv-logo, .stv-under{ transition:opacity .3s; }
   .stv.guide-view .stv-hint, .stv.guide-view .stv-logo{ opacity:0; }
-  /* GUIDE under the TV (Chef's Paper TV03): normal view only — a label-maker tape with a thin inner frame */
-  .stv-under{ display:flex; justify-content:center; position:absolute; left:0; right:0; top:calc(100vw * 407 / 402); }
-  .stv-under .stv-tape{ height:38px; font-size:13px; padding:0 14px; border-radius:1px; outline:1px solid rgba(255,255,255,.5); outline-offset:-5px; --u:.42px; }
+  /* under the TV (Chef's Paper TV03): ← GO BACK · TV GUIDE · YOUTUBE → — clear rounded buttons with a thin inner frame */
+  .stv-under{ display:flex; justify-content:center; align-items:center; position:absolute; left:0; right:0; top:calc(100vw * 407 / 402); }
+  .stv-pill{ box-sizing:border-box; display:flex; align-items:center; justify-content:center; gap:7px; height:38px; padding:0; border:0; border-radius:10px; background:none;
+    outline:1px solid rgba(255,255,255,.5); outline-offset:-5px; color:#f2f2f2; font:300 13px/12px var(--font-display); letter-spacing:.14em; text-decoration:none; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .stv-pill.stv-back{ width:calc(100vw * 110 / 402); } .stv-pill.stv-guide-b{ width:calc(100vw * 119 / 402); letter-spacing:.3em; } .stv-pill.stv-ytlink{ width:calc(100vw * 114 / 402); }
+  .stv-pill .ar{ font:700 15px/18px "Courier New", Courier, monospace; letter-spacing:0; }
+  .stv-pill:active, .stv-pill[aria-pressed="true"]{ background:rgba(255,255,255,.12); }
   .stv.side .stv-under, .stv.guide-view .stv-under{ opacity:0; pointer-events:none; }
-  /* GUIDE open (Chef, Oct 2026): the TV keeps its big swiped size but slides back to the screen, guide text on the left in full
-     view; the rest (CLOSE [X], the button panel) runs off the right — the page scrolls sideways to reach it. Picking a set or
-     closing the guide brings the TV back to the normal view. */
-  .stv.guide-view{ overflow-x:auto; overflow-y:hidden; touch-action:pan-x; overscroll-behavior-x:contain; scrollbar-width:none; }
-  .stv.guide-view::-webkit-scrollbar{ display:none; }
+  /* GUIDE open (Chef, Oct 2026): the TV keeps its big swiped size but slides back to the screen; the guide window is narrowed
+     to the left part of the glass so it all fits on screen. Picking a set or closing the guide brings the TV back to normal. */
+  .stv.guide-view .stv-guide{ inset:7% 27% 7% 5%; }   /* narrowed + to the left so the whole guide (CLOSE [X] too) is on screen (Chef) */
   .stv.guide-view .stv-tv{ transform:translate(calc(100vw * -44 / 402), calc(100vw * -121 / 402)) scale(calc(841 / 579), calc(740 / 484)); }
   .stv.guide-view .stv-g, .stv.guide-view .stv-tv > .stv-tape, .stv.guide-view .stv-power{ pointer-events:auto; }
+  /* background (Chef's Paper TV03): his grain swirl, tilted 4.85°, under a dark wash + a blue→pink colour-dodge gradient.
+     Parallax: it moves with the TV but much less — a short slide when the TV swipes over, a slight push-in when the guide
+     zooms the TV — on the TV's own timing, so it reads as depth. */
+  .stv-bgw{ display:block; position:absolute; inset:0; overflow:hidden; pointer-events:none; transform-origin:50% 30%;
+    transition:translate .7s cubic-bezier(.65,0,.25,1), scale .7s cubic-bezier(.65,0,.25,1); }
+  .stv-bg{ position:absolute; left:calc(100vw * 8.42 / 402); top:calc(100vw * -252.04 / 402); width:calc(100vw * 517.7 / 402); height:calc(100vw * 1124.73 / 402);
+    transform-origin:0 0; rotate:4.85deg;
+    background:linear-gradient(#00000052, #00000052), linear-gradient(in oklab 266.23deg, oklab(50.5% -0.022 -0.184 / 45%) 4.51%, oklab(59.5% 0.156 0.087 / 45%) 98.25%), url("../img/p-tv-bg.webp") 50% / cover;
+    background-blend-mode:color-burn, color-dodge, normal; }
+  .stv-bgw::after{ content:""; position:absolute; inset:0; background:linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.3)); }   /* Chef's Paper: the whole swirl a shade darker, most at the top (logo + hint read) */
+  .stv.side .stv-bgw{ translate:calc(100vw * -30 / 402) calc(100vw * -10 / 402); scale:1.2; }
+  .stv.guide-view .stv-bgw{ translate:calc(100vw * -14 / 402) calc(100vw * -10 / 402); scale:1.08; }
+  /* backlit (Chef): a faint glow round the TV, the logo and the swipe hint */
+  .stv-tv > .stv-back, .stv-tv > .stv-ytlink{ display:none; }   /* phones: these sit under the TV instead */
+  .stv-sil{ display:block; position:absolute; inset:0; width:100%; height:100%; z-index:0; filter:url(#stv-glow); pointer-events:none; user-select:none; }   /* backlight: tight bright rim + soft halo, grainy like the background (svg filter in music.js), off the TV outline so none shows inside the screen; the thin light edge on the cut-out photo reads as rim light */
+  .stv-logo{ filter:drop-shadow(0 0 5px rgba(255,255,255,.45)); }
+  .stv-hint{ font-weight:300; color:#fff; text-shadow:0 0 6px rgba(255,255,255,.55), 16px 2px 80px #000; }
+  /* arrival (like the other pages): the swirl fades in and settles, the TV rises into place over it, then the logo, hint and buttons */
+  .mo .stv-bgw{ animation:bgArrive 2.2s cubic-bezier(.2,.7,.2,1) backwards, tvBgIn 2.6s cubic-bezier(.2,.7,.2,1) backwards; }
+  .mo .stv-tv{ animation:tvFgIn 1.4s .3s cubic-bezier(.16,.8,.24,1) backwards; }
+  .mo .stv-logo, .mo .stv-hint{ animation:riseIn .8s 1s cubic-bezier(.2,.75,.25,1) backwards; }
+  .mo .stv-under{ animation:riseIn .8s 1.2s cubic-bezier(.2,.75,.25,1) backwards; }
 }
+@keyframes tvBgIn{ from{ translate:0 -28px; } }
+@keyframes tvFgIn{ from{ opacity:0; translate:0 60px; } 40%{ opacity:1; } }
