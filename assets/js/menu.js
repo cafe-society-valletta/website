@@ -192,7 +192,92 @@
   nextB.addEventListener("click", () => pf.flipNext());
   prevB.addEventListener("click", () => pf.flipPrev());
   addEventListener("keydown", e => {
+    if (fsOpen) return;                                   // the fullscreen viewer has its own keys
     if (e.key === "ArrowRight") pf.flipNext();
     if (e.key === "ArrowLeft") pf.flipPrev();
   });
+
+  // ---- VIEW FULLSCREEN (desktop only, Chef Oct 2026): the page zooms in on the booklet (scales up around it and goes out
+  // of focus while a black veil fades in) and the current spread grows into a flat, full-window viewer: one spread at a time,
+  // arrows / ← → keys to turn, ← GO BACK top left (or Esc) zooms back out to the booklet on the same spread. Same feel as
+  // Meet Me's [FULLSCREEN]. Uses the 1240px page images already on the site.
+  const fsBtn = root.querySelector(".bk-fs"), pageEl = document.querySelector(".menu-page");
+  let fsOpen = false, fsBusy = false;
+  const spreads = [[1]];                                  // 1-based page numbers: cover, 2–3 … 18–19, back
+  for (let n = 2; n < N; n += 2) spreads.push(n + 1 < N ? [n, n + 1] : [n]);
+  spreads.push([N]);
+  const spreadOf = i => i <= 0 ? 0 : i >= N - 1 ? spreads.length - 1 : Math.floor((i % 2 ? i : i - 1) / 2) + 1;
+  const indexOf = s => s === 0 ? 0 : s === spreads.length - 1 ? N - 1 : spreads[s][0] - 1;
+  const label = s => s === 0 ? "COVER" : s === spreads.length - 1 ? "BACK" : `${spreads[s][0]}–${spreads[s][spreads[s].length - 1]} / ${N}`;
+  if (fsBtn && pageEl){
+    const fs = document.createElement("div");
+    fs.className = "mfs"; fs.hidden = true;
+    fs.setAttribute("role", "dialog"); fs.setAttribute("aria-modal", "true"); fs.setAttribute("aria-label", "Menu, fullscreen");
+    fs.innerHTML = `<button type="button" class="mfs-back">← Go back</button>
+      <div class="mfs-spread"></div>
+      <div class="bk-nav mfs-nav"><button type="button" class="mfs-prev" aria-label="Previous pages">←</button><span class="bk-count" aria-live="polite"></span><button type="button" class="mfs-next" aria-label="Next pages">→</button></div>`;
+    document.body.appendChild(fs);
+    const sp = fs.querySelector(".mfs-spread"), fcount = fs.querySelector(".bk-count"), fprev = fs.querySelector(".mfs-prev"), fnext = fs.querySelector(".mfs-next");
+    let cur = 0;
+    const src = n => `assets/img/menu/menu-${pad(n)}.jpg`;
+    function draw(s){
+      cur = Math.max(0, Math.min(spreads.length - 1, s));
+      const pgs = spreads[cur];
+      sp.classList.toggle("single", pgs.length === 1);
+      sp.innerHTML = pgs.map(n => `<img src="${src(n)}" alt="${n === 1 ? "Menu — cover" : n === N ? "Menu — back cover" : "Menu — page " + n}" draggable="false">`).join("");
+      fcount.textContent = label(cur); fprev.disabled = cur === 0; fnext.disabled = cur === spreads.length - 1;
+      [cur - 1, cur + 1].forEach(k => (spreads[k] || []).forEach(n => { new Image().src = src(n); }));   // the neighbours, ready to show
+    }
+    const DUR = 650, EASE = "cubic-bezier(.45,0,.55,1)";
+    const bookRect = () => {                              // the visible pages of the booklet right now (cover / back = one page)
+      const r = book.getBoundingClientRect(), i = pf.getCurrentPageIndex();
+      return i === 0 ? { left:r.left + r.width / 2, top:r.top, width:r.width / 2, height:r.height }
+        : i >= N - 1 ? { left:r.left, top:r.top, width:r.width / 2, height:r.height } : r;
+    };
+    const flip = (a, b) => `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`;
+    const zoomKeys = r => { const ox = r.left + r.width / 2, oy = r.top + r.height / 2 + scrollY;
+      return [{ transformOrigin:`${ox}px ${oy}px`, transform:"none", filter:"blur(0px)" },
+              { transformOrigin:`${ox}px ${oy}px`, transform:`translate(${innerWidth / 2 - ox}px, ${innerHeight / 2 - (oy - scrollY)}px) scale(1.6)`, filter:"blur(12px)" }]; };
+    function open(){
+      if (fsOpen || fsBusy) return; fsOpen = fsBusy = true;
+      unzoom(); draw(spreadOf(pf.getCurrentPageIndex()));
+      const a = bookRect(); fs.hidden = false; document.documentElement.classList.add("mfs-on");
+      const done = () => { fsBusy = false; };
+      const first = sp.querySelector("img");
+      const go = () => {
+        const b = sp.getBoundingClientRect();
+        if (reduce || !fs.animate){ done(); return; }
+        pageEl.animate(zoomKeys(a), { duration:DUR, easing:EASE, fill:"forwards" });
+        fs.animate([{ backgroundColor:"rgba(10,10,10,0)" }, { backgroundColor:"rgba(10,10,10,0)", offset:.35 }, { backgroundColor:"rgba(10,10,10,1)" }], { duration:DUR, fill:"both" });
+        sp.animate([{ transformOrigin:"0 0", transform:flip(a, b) }, { transformOrigin:"0 0", transform:"none" }], { duration:DUR, easing:EASE }).onfinish = done;
+        fs.querySelectorAll(".mfs-back, .mfs-nav").forEach(el => el.animate([{ opacity:0 }, { opacity:0, offset:.6 }, { opacity:1 }], { duration:DUR }));
+      };
+      if (first && !first.complete) first.decode().then(go, go); else go();
+      fs.querySelector(".mfs-back").focus({ preventScroll:true });
+    }
+    function close(){
+      if (!fsOpen || fsBusy) return; fsBusy = true;
+      const idx = indexOf(cur);
+      if (idx !== pf.getCurrentPageIndex()){ pf.turnToPage(idx); show(idx); }
+      const land = () => { pageEl.getAnimations().forEach(x => x.cancel()); fs.getAnimations().forEach(x => x.cancel());
+        fs.hidden = true; document.documentElement.classList.remove("mfs-on"); fsOpen = fsBusy = false; fsBtn.focus({ preventScroll:true }); };
+      if (reduce || !fs.animate){ land(); return; }
+      pageEl.getAnimations().forEach(x => x.cancel());   // measure the booklet un-zoomed…
+      const a = bookRect(), b = sp.getBoundingClientRect(), k = zoomKeys(a);
+      pageEl.animate([k[1], k[0]], { duration:DUR, easing:EASE, fill:"forwards" });   // …then zoom back out to it
+      fs.querySelectorAll(".mfs-back, .mfs-nav").forEach(el => el.animate([{ opacity:1 }, { opacity:0, offset:.3 }, { opacity:0 }], { duration:DUR, fill:"forwards" }));
+      fs.animate([{ backgroundColor:"rgba(10,10,10,1)" }, { backgroundColor:"rgba(10,10,10,0)", offset:.65 }, { backgroundColor:"rgba(10,10,10,0)" }], { duration:DUR, fill:"forwards" });
+      sp.animate([{ transformOrigin:"0 0", transform:"none" }, { transformOrigin:"0 0", transform:flip(a, b) }], { duration:DUR, easing:EASE, fill:"forwards" }).onfinish = land;
+    }
+    fsBtn.addEventListener("click", open);
+    fs.querySelector(".mfs-back").addEventListener("click", close);
+    fprev.addEventListener("click", () => draw(cur - 1));
+    fnext.addEventListener("click", () => draw(cur + 1));
+    addEventListener("keydown", e => {
+      if (!fsOpen) return;
+      if (e.key === "Escape"){ e.preventDefault(); close(); }
+      else if (e.key === "ArrowRight"){ e.preventDefault(); draw(cur + 1); }
+      else if (e.key === "ArrowLeft"){ e.preventDefault(); draw(cur - 1); }
+    });
+  }
 })();
