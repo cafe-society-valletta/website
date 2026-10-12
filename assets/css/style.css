@@ -867,16 +867,25 @@ body.menu-body{ background:var(--black); }
   .bk-nav .bk-fs:hover, .bk-nav .bk-fs:focus-visible{ color:#fff; }
   .bk-fs svg{ width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:1.6; }
 }
-.mfs{ position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; padding:72px 48px 28px; background:rgba(10,10,10,1); color:#fff; }
+.mfs{ position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center; background:rgba(10,10,10,1); color:#fff; }
 .mfs[hidden]{ display:none; }
 html.mfs-on, html.mfs-on body{ overflow:hidden; }
-.mfs-spread{ display:flex; height:calc(100vh - 160px); aspect-ratio:1240 / 877; max-width:100%; box-shadow:0 10px 40px rgba(0,0,0,.6); }
+/* the spread runs the full height of the window (Chef, Oct 12); arrows, page count and GO BACK sit in the free space at the
+   sides or float over the pages on small dark pills so they stay readable */
+.mfs-spread{ display:flex; width:min(100vw, calc(100vh * 1240 / 877)); width:min(100vw, calc(100dvh * 1240 / 877)); aspect-ratio:1240 / 877; }   /* full height unless the window is too narrow, never stretched */
 .mfs-spread img{ width:50%; height:100%; object-fit:cover; display:block; user-select:none; -webkit-user-select:none; }
-.mfs-spread.single{ aspect-ratio:620 / 877; }
+.mfs-spread.single{ width:min(100vw, calc(100vh * 620 / 877)); width:min(100vw, calc(100dvh * 620 / 877)); aspect-ratio:620 / 877; }
 .mfs-spread.single img{ width:100%; }
-.mfs-back{ position:absolute; top:22px; left:26px; padding:6px 0; border:0; background:none; color:#fff; font:700 13px/1 var(--font-display); letter-spacing:.2em; text-transform:uppercase; cursor:pointer; opacity:.85; }
-.mfs-back:hover, .mfs-back:focus-visible{ opacity:1; }
-.mfs-nav .bk-count{ font-size:13px; }
+.mfs-back{ position:fixed; z-index:2; top:16px; left:14px; padding:8px 10px; border:0; border-radius:10px; text-align:left; line-height:1.35 !important; background:rgba(10,10,10,.6); color:#fff;
+  font:700 12px/1 var(--font-display); letter-spacing:.2em; text-transform:uppercase; cursor:pointer; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+.mfs-back:hover, .mfs-back:focus-visible{ background:rgba(10,10,10,.85); }
+.mfs-nav{ display:contents; }
+.mfs-nav .mfs-prev, .mfs-nav .mfs-next{ position:fixed; z-index:2; top:50%; translate:0 -50%; width:44px; height:44px; background:rgba(10,10,10,.55); border-color:rgba(255,255,255,.7);
+  -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+.mfs-nav .mfs-prev{ left:20px; } .mfs-nav .mfs-next{ right:20px; }
+.mfs-nav .mfs-prev:not(:disabled):hover, .mfs-nav .mfs-next:not(:disabled):hover{ background:rgba(10,10,10,.85); }
+.mfs-nav .bk-count{ position:fixed; z-index:2; bottom:16px; left:50%; translate:-50% 0; min-width:0; padding:8px 14px; border-radius:999px; background:rgba(10,10,10,.6); font-size:12px;
+  -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
 
 /* =========================================================
    DESKTOP (≥900px) — Paper artboards D02–D06 ("Desktop 1440")
