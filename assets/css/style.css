@@ -2226,7 +2226,7 @@ body.cc-on .cc-dim{ opacity:1; }
   font:700 calc(var(--u) * 30)/1 "Courier New", Courier, monospace; letter-spacing:.3em; text-transform:uppercase; white-space:nowrap;
   text-shadow:0 1px 0 rgba(255,255,255,.18); box-shadow:0 calc(var(--u) * 3) calc(var(--u) * 6) rgba(0,0,0,.45); cursor:pointer; }
 .stv-tv > .stv-tape{ position:absolute; z-index:3; height:calc(var(--uy) * 51); transform:translate(-50%, -50%); }
-.stv-tv .stv-guide-b{ left:calc(var(--ux) * 3079); top:calc(var(--uy) * 1849); }   /* on the AFT strip above VOLUME (Chef, Paper TV02) */
+.stv-tv > .stv-tape.stv-guide-b{ display:none; }   /* "TV GUIDE" is printed on Chef's TV photo now (Oct 13); the label + AFT key are the button (music.js aftKey) */
 /* ← GO BACK TO WEBSITE / GO TO YOUTUBE → (Chef's Paper TV01): black letters printed straight on the TV's silver top edge,
    one in each corner, each a touch askew */
 .stv-edge{ position:absolute; z-index:3; display:flex; align-items:center; justify-content:center; height:calc(var(--uy) * 51); padding:0 .3em; white-space:nowrap;
@@ -2253,6 +2253,7 @@ a.stv-tape{ text-decoration:none; }
 /* selected label: inverted — white tape, black letters (Chef's label cut from the photo, colour-inverted) */
 .stv-g .lit{ background:url("../img/p-music-tv.webp") no-repeat; background-size:calc(var(--ux) * 3618) calc(var(--uy) * 3249); filter:invert(1); border-radius:calc(var(--u) * 2); opacity:0; transition:opacity .12s; }
 .stv-g[aria-pressed="true"] .lit{ opacity:1; }
+.stv-tv .stv-g.stv-guide-b{ transform:none; }   /* the AFT key: a genre-style key, not a tape */
 .stv-g:focus-visible{ outline:2px solid #ffcf3f; outline-offset:2px; }
 .stv-power{ position:absolute; z-index:3; left:calc(var(--ux) * 3150); top:calc(var(--uy) * 1905); width:calc(var(--ux) * 122); height:calc(var(--uy) * 75); padding:0; border:0; background:none; cursor:pointer; }
 .stv-hint, .stv-under, .stv-bgw, .stv-sil{ display:none; }
