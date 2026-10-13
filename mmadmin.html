@@ -73,7 +73,7 @@
       return `<span style="font-size:${({ SMALL:".78em", BIG:"1.45em", HUGE:"2em" })[z]}">${t.replace(/\[(SMALL|BIG|HUGE)\]([^\n]+?)\[\/\1\]/g, sz)}</span>`; }));
   const emo = h => window.MM_EMOJI ? window.MM_EMOJI.swap(h, "e") : h;   // :name: → 8-bit emoji
   const when = at => at.replace("T", " ");
-  const CAT = { general:"GENERAL INQUIRY OR ANNOUNCEMENT", meetup:"MEETUP / ACTIVITY BUDDY", staff:"LOOKING FOR STAFF", job:"LOOKING FOR A JOB", flat:"LOOKING FOR A FLAT",
+  const CAT = { general:"GENERAL INQUIRY OR ANNOUNCEMENT", lsc:"LOST SOULS CLUB", meetup:"MEETUP / ACTIVITY BUDDY", staff:"LOOKING FOR STAFF", job:"LOOKING FOR A JOB", flat:"LOOKING FOR A FLAT",
     rent:"FLAT FOR RENT", flatmate:"LOOKING FOR A FLATMATE", art:"ARTWORK/HOMEMADE PRODUCT FOR SALE", sale:"ITEM FOR SALE OR SWAP", free:"FREE / GIVEAWAY",
     service:"SERVICE FOR HIRE", classes:"CLASSES & LANGUAGE EXCHANGE", collab:"COLLABORATORS WANTED", club:"CLUB OR ORGANIZATION", cause:"VOLUNTEERS & CAUSES",
     lost:"LOST & FOUND", missed:"MISSED CONNECTIONS" };   // keep in step with assets/js/meetme.js
