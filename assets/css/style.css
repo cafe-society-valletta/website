@@ -1244,6 +1244,7 @@ body.bb-body{ background:var(--black); }
 .bb-card{ display:flex; flex-direction:column; gap:20px; padding:6px 0 22px; }
 .bb-meta{ margin:0; display:flex; gap:8px; align-items:baseline; font-size:20px; font-weight:500; }
 .bb-meta + .bb-meta{ margin-top:-12px; }
+.bb-det{ font-size:16px; line-height:1.3; } .bb-det span{ flex:0 0 74px; } .bb-meta + .bb-det, .bb-det + .bb-det{ margin-top:-14px; }
 .bb-meta span, .bb-lab{ font-size:11px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:rgba(10,10,10,.55); }
 .bb-ing{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:max-content 1fr; gap:10px 14px; align-items:baseline; }   /* qty column = widest qty in the recipe */
 .bb-ing li{ display:contents; }
@@ -1306,8 +1307,8 @@ textarea.bb-in{ resize:vertical; min-height:72px; }
 }
 /* type colours — black text on the paper sheet; colour = left accent, tag + filter fill/border:
    signature yellow · classic blue · prep red · food green */
-.bb{ --c-sig:242,206,75; --c-classic:111,168,224; --c-prep:229,102,95; --c-food:121,194,126; }
-[data-t="sig"]{ --c:var(--c-sig); } [data-t="classic"]{ --c:var(--c-classic); } [data-t="prep"]{ --c:var(--c-prep); } [data-t="food"]{ --c:var(--c-food); }
+.bb{ --c-sig:242,206,75; --c-classic:111,168,224; --c-prep:229,102,95; --c-food:121,194,126; --c-grotto:160,118,196; }
+[data-t="sig"]{ --c:var(--c-sig); } [data-t="classic"]{ --c:var(--c-classic); } [data-t="prep"]{ --c:var(--c-prep); } [data-t="food"]{ --c:var(--c-food); } [data-t="grotto"]{ --c:var(--c-grotto); }
 .bb-item{ border-left:4px solid rgb(var(--c)); padding:0 0 0 14px; }
 .bb-item.open{ background:rgba(var(--c),.13); padding-right:14px; }
 .bb-name small{ padding:3px 6px 2px; border:1px solid rgb(var(--c)); background:rgba(var(--c),.3); color:var(--black); }
