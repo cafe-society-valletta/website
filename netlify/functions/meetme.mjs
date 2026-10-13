@@ -45,7 +45,7 @@ const cleanBody = (s, n) => String(s || "").replace(/\r\n?/g, "\n").replace(/[\u
 const MAX_LIVE = 500, LIM = { subject: 44, author: 24, body: 5000, photos: 4, photoBytes: 1024 * 1024, comment: 1000 };
 const TYPES = ["image/jpeg", "image/png", "image/webp"];
 // post categories (keys; names + inbox tags live in assets/js/meetme.js). Posts from before categories count as "general".
-const CATS = ["general", "meetup", "staff", "job", "flat", "rent", "flatmate", "art", "sale", "free", "service", "classes", "collab", "club", "cause", "lost", "missed"];
+const CATS = ["general", "lsc", "meetup", "staff", "job", "flat", "rent", "flatmate", "art", "sale", "free", "service", "classes", "collab", "club", "cause", "lost", "missed"];
 const sha = k => crypto.createHash("sha256").update(String(k) + "|mm-owner").digest("hex");
 const maltaNow = () => new Date().toLocaleString("sv-SE", { timeZone: "Europe/Malta" }).slice(0, 16).replace(" ", "T");
 
