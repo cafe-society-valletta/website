@@ -3,7 +3,7 @@
    with a further "More" for notes and linked prep recipes. Deep link: barneybook.html#<slug>. */
 (function(){
   const R = window.BARNEY || [];
-  const TYPE = { sig:"Signature", classic:"Classic", prep:"Prep", food:"Food" };
+  const TYPE = { sig:"Signature", classic:"Classic", prep:"Prep", food:"Food", grotto:"Grotto" };
   const norm = s => (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim();
   const slug = s => norm(s).replace(/ /g,"-");
   const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -21,7 +21,7 @@
     if(r.p && r.p.includes("/") && r.p.split("/").length === r.n.split(" / ").length) r.pv = r.p.split("/");
     r.ing = (r.i||[]).map(s => s[0]==="#" ? {h:s.slice(1)} : (([q,it]) => ({q:q||"", it:it===undefined ? q : it}))(s.split("|")));
     r.nn = norm(r.n);
-    r.hay = norm([r.n, ...(r.a||[]), ...r.ing.map(x=>x.it||x.h)].join(" "));
+    r.hay = norm([r.n, ...(r.a||[]), ...r.ing.map(x=>x.it||x.h), ...(r.d||[]).map(x=>x[1])].join(" "));
   });
 
   // Prep recipes referenced by ingredient names (longest name first so "brown sugar syrup" beats "sugar syrup").
@@ -48,7 +48,8 @@
 
   function card(r){
     const meta = [r.y && ["Yield", r.y], r.g && ["Glass", r.g]].filter(Boolean)
-      .map(([l,v]) => `<p class="bb-meta"><span>${l}</span>${esc(v)}</p>`).join("");
+      .map(([l,v]) => `<p class="bb-meta"><span>${l}</span>${esc(v)}</p>`).join("")
+      + (r.d || []).map(([l,v]) => `<p class="bb-meta bb-det"><span>${esc(l)}</span>${esc(v)}</p>`).join("");   // Grotto reference cards (oysters, platter items)
     const ingList = r.ing.length ? `<ul class="bb-ing">${r.ing.map(x => x.h ? `<li class="h">${esc(x.h)}</li>`
       : `<li><b>${esc(x.q)}</b><span>${x.p ? `<a href="#${x.p.id}" data-go="${x.p.k}">${esc(x.it)}</a>` : esc(x.it)}</span></li>`).join("")}</ul>` : "";
     const steps = (r.m||[]).length ? `<ol class="bb-method">${r.m.map(s => `<li>${esc(s)}</li>`).join("")}</ol>` : "";
@@ -68,7 +69,7 @@
   const mediaFor = r => (media[r.id] || r.media || []).map(m => typeof m === "string" ? { src:m, video:/\.(mp4|webm|mov)$/i.test(m) } : m);
   function photo(r){
     const list = mediaFor(r), msg = upMsg ? `<p class="bb-upmsg" role="status">${esc(upMsg)}</p>` : "";
-    if(!list.length && (r.t === "prep" || r.t === "food")) return "";   // prep + food: thumbnail only once a photo exists
+    if(!list.length && (r.t === "prep" || r.t === "food" || r.t === "grotto")) return "";   // prep + food + grotto: thumbnail only once a photo exists
     if(!list.length) return `<div class="bb-ph"><div class="bb-sq bb-sq-empty"><span>No photo yet</span><button type="button" class="bb-up">Upload photo</button></div>${msg}</div>`;
     const i = ((shot % list.length) + list.length) % list.length, m = list[i];
     const pic = m.video ? `<a class="bb-vid" href="${esc(m.href || m.src)}" target="_blank" rel="noopener"><img src="${esc(m.thumb || "")}" alt="" loading="lazy"><i>▶</i></a>`
