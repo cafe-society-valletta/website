@@ -5,7 +5,7 @@
            g = the genre numbers the set belongs to (1–8), as many as fit. An empty id shows "NO SIGNAL" static.
            channel (optional) = the YouTube channel name for the GUIDE; leave it out and it is read from YouTube. */
 window.SOCIETY_TV = {
-  genres: ["GENRE 1", "GENRE 2", "GENRE 3", "GENRE 4", "GENRE 5", "GENRE 6", "GENRE 7", "GENRE 8"],
+  genres: ["GARAGE", "TECHNO", "ELECTRO", "HOUSE", "BOUNCE", "BREAKBEAT", "TRANCE", "DISCO/FUNK"],   // read off Chef's TV photo (Oct 13)
   sets: [
     // { id:"YOUTUBE_ID", dj:"DJ NAME", title:"SET TITLE", date:"2026-09-12", channel:"CHANNEL", g:[1, 3] },
     // Riddle Radio — Riddle Records' playlist "Riddle Radio Sets" (every Tuesday at Café Society), Oct 2026:

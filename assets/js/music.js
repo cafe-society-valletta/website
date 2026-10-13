@@ -17,7 +17,7 @@
   // genre buttons over Chef's own labels on the TV photo. The labels are part of the photo (Chef swaps in an identical TV with
   // new labels); D.genres holds the same names, read off it. Photo pixels per row: label box [x, y, w, h], push key [x, y, w, h].
   // Pressed (Chef, Oct 2026): the label inverts (white tape, black letters) and the key sits pushed in.
-  const LABELS = [[3064,1066],[3066,1159],[3070,1253],[3066,1339],[3065,1425],[3070,1521],[3060,1606],[3060,1704]];
+  const LABELS = [[3037,1061,176,51],[3026,1151,246,61],[3018,1256,203,61],[3023,1334,203,51],[3028,1418,245,67],[2990,1505,295,70],[3019,1588,252,70],[3034,1696,252,51]];   // Chef's final labels (Oct 13): x, y, w, h
   const KEYS = [[2901,1080,26],[2901,1167,27],[2901,1256,27],[2899,1346,25],[2898,1431,31],[2898,1523,28],[2895,1609,29],[2897,1701,26]];
   const sel = new Set();
   const groups = $$(".stv-genres");
@@ -26,15 +26,15 @@
     const b = document.createElement("button");
     b.type = "button"; b.className = "stv-g"; b.dataset.g = i + 1; b.setAttribute("aria-pressed", "false");
     if (gi === 0 && LABELS[i]){   // on the TV itself: an invisible row over the key and Chef's label
-      const [lx, ly] = LABELS[i], [kx, ky, kh] = KEYS[i];
-      const top = Math.min(ly, ky) - 14, bot = Math.max(ly + 51, ky + kh) + 14;
+      const [lx, ly, lw, lh] = LABELS[i], [kx, ky, kh] = KEYS[i];
+      const top = Math.min(ly, ky) - 6, bot = Math.max(ly + lh, ky + kh) + 6;
       b.setAttribute("aria-label", name);
       b.innerHTML = `<i class="kw" aria-hidden="true"><i class="k"></i></i><i class="lit" aria-hidden="true"></i>`;
-      box(b, 2735, top, 560, bot - top, 0, 0);
+      box(b, 2735, top, 600, bot - top, 0, 0);
       box(b.querySelector(".kw"), kx - 3, ky - 3, 82, kh + 6, 2735, top);
       const k = b.querySelector(".k");   // the key itself, cut from the photo, so it can sink into its slot
       k.style.backgroundPosition = `calc(var(--ux) * ${-(kx - 3)}) calc(var(--uy) * ${-(ky - 3)})`;
-      const lit = b.querySelector(".lit"); box(lit, lx, ly, 189, 51, 2735, top);
+      const lit = b.querySelector(".lit"); box(lit, lx, ly, lw, lh, 2735, top);
       lit.style.backgroundPosition = `calc(var(--ux) * ${-lx}) calc(var(--uy) * ${-ly})`;
     } else {                   // the tapes version (spare; phones now use the TV's own buttons)
       b.innerHTML = `<span class="stv-tape"></span>`;
@@ -43,6 +43,22 @@
     b.addEventListener("click", () => toggle(i + 1));
     grp.appendChild(b);
   }));
+  // the AFT key beside the GUIDE tape (Chef): pressable like the genre keys — it sits pushed in while the guide is open.
+  // Key in the photo: 3170,1828, 84 × 31 px.
+  (function aftKey(){
+    const grp = groups[0]; if (!grp) return;
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "stv-g stv-guide-b stv-aft"; b.setAttribute("aria-pressed", "false"); b.setAttribute("aria-label", "TV guide");
+    b.innerHTML = `<i class="kw" aria-hidden="true"><i class="k"></i></i><i class="lit" aria-hidden="true"></i>`;
+    // + Chef's "TV GUIDE" label on the photo (2894,1824, 278 × 51): the whole strip is one button; the label inverts when on
+    const KX = 3170, KY = 1828, KW = 84, KH = 31, LX = 2868, LY = 1817, LW = 278, LH = 51, OX = LX - 8, OY = LY - 8;
+    box(b, OX, OY, KX + KW + 8 - OX, LH + 16, 0, 0);
+    box(b.querySelector(".kw"), KX - 3, KY - 3, KW + 6, KH + 6, OX, OY);
+    b.querySelector(".k").style.backgroundPosition = `calc(var(--ux) * ${-(KX - 3)}) calc(var(--uy) * ${-(KY - 3)})`;
+    const lit = b.querySelector(".lit"); box(lit, LX, LY, LW, LH, OX, OY);
+    lit.style.backgroundPosition = `calc(var(--ux) * ${-LX}) calc(var(--uy) * ${-LY})`;
+    grp.appendChild(b);
+  })();
 
   // list = the sets in the chosen genres; cur = the one on now (index in D.sets, or -1). Next = random: a shuffled deck of
   // the matching sets, dealt one by one; hist = what was on before, for ◀.
