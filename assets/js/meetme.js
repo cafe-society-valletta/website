@@ -2,7 +2,7 @@
    Renders into whichever monitor is showing (.mm-phone < 900px, else .mm-computer). Two screens:
      HOME     [ WRITE A POST ]_   ← button (or just start typing) → the compose screen
               ===== M E S S A G E   I N B O X =====   DATE TIME AUTHOR SUBJECT, newest first; rows link to #p/<id>
-     COMPOSE  (#new)  NAME> (remembered)  CATEGORY> (required, 17 categories)  SUBJECT> (44 chars = one feed line)  POST> (up to 5000)
+     COMPOSE  (#new)  NAME> (remembered)  CATEGORY> (required, 18 categories)  SUBJECT> (44 chars = one feed line)  POST> (up to 5000)
               PHOTOS> up to 4, shrunk in the browser to JPEG ≤ 1600 px / ≤ 1 MB each     [SEND] [CANCEL]
    All screen copy is written the way the 8-bit terminal would print it (Chef): CAPS system lines, > prompts, terse.
    Only exception: the attached photos themselves (shown as normal photos).
@@ -72,7 +72,7 @@
   const API = "/.netlify/functions/meetme";
   // CATEGORIES (keys must match CATS in netlify/functions/meetme.mjs): [key, full name, short inbox tag]
   const CATS = [
-    ["general", "GENERAL INQUIRY OR ANNOUNCEMENT", "GENERAL"], ["meetup", "MEETUP / ACTIVITY BUDDY", "MEETUP"],
+    ["general", "GENERAL INQUIRY OR ANNOUNCEMENT", "GENERAL"], ["lsc", "LOST SOULS CLUB", "LOST SOULS"], ["meetup", "MEETUP / ACTIVITY BUDDY", "MEETUP"],
     ["staff", "LOOKING FOR STAFF", "STAFF WANTED"], ["job", "LOOKING FOR A JOB", "JOB WANTED"],
     ["flat", "LOOKING FOR A FLAT", "FLAT WANTED"], ["rent", "FLAT FOR RENT", "FOR RENT"], ["flatmate", "LOOKING FOR A FLATMATE", "FLATMATE"],
     ["art", "ARTWORK/HOMEMADE PRODUCT FOR SALE", "ART/HOMEMADE"], ["sale", "ITEM FOR SALE OR SWAP", "SALE/SWAP"], ["free", "FREE / GIVEAWAY", "FREE"],
